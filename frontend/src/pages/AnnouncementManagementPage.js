@@ -332,9 +332,9 @@ export default function AnnouncementManagementPage({
         onProfile={() => navigate("/admin/profile")}
         onLogout={handleLogout}
       />
-      <div className="flex-grow flex flex-col py-10 overflow-x-hidden pt-16">
+      <div className="flex-grow flex flex-col py-10 overflow-x-hidden pt-24">
         <div className="w-full dark:bg-gray-900 min-h-screen">
-          <h1 className="text-2xl font-bold mb-6 text-blue-600 dark:text-blue-300 text-center">
+          <h1 className="text-2xl font-bold mb-8 mt-8 text-blue-600 dark:text-blue-300 text-center">
             {t("announcementManagement")}
           </h1>
           <div className="flex flex-wrap gap-4 mb-6 items-center justify-center">

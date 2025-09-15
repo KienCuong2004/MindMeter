@@ -467,7 +467,7 @@ export default function QuestionManagementPage({
       />
       <div
         key="main-content-container"
-        className="flex-grow flex flex-col py-10 overflow-x-hidden pt-16"
+        className="flex-grow flex flex-col py-10 overflow-x-hidden pt-24"
       >
         <div
           key="questions-page-content"

@@ -367,7 +367,7 @@ export default function ExpertStudentsPage({ handleLogout: propHandleLogout }) {
           onProfile={() => navigate("/expert/profile")}
           onLogout={handleLogout}
         />
-        <div className="flex-grow flex flex-col py-10 overflow-x-hidden pt-16">
+        <div className="flex-grow flex flex-col py-10 overflow-x-hidden pt-24">
           <div className="p-8 w-full dark:bg-gray-900 min-h-screen">
             <div className="flex flex-col items-center justify-center py-20">
               {/* Loading Spinner */}
