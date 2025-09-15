@@ -1,0 +1,51 @@
+# MindMeter - Mental Health Assessment Platform
+# https://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Allow: /
+
+# Allow public pages
+Allow: /home
+Allow: /introduce
+Allow: /introduce-mindmeter
+Allow: /user-guide
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms-of-use
+Allow: /disclaimer
+Allow: /consult-therapy
+Allow: /pricing
+
+# Disallow private/admin areas
+Disallow: /admin/
+Disallow: /expert/
+Disallow: /student/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /auth/
+
+# Disallow API endpoints
+Disallow: /api/
+
+# Disallow test-related private pages
+Disallow: /student/test
+Disallow: /student/test-result
+Disallow: /student/test-history
+Disallow: /student/profile
+
+# Disallow authentication callback
+Disallow: /auth/callback
+
+# Allow static assets
+Allow: /static/
+Allow: /assets/
+Allow: /images/
+Allow: /favicon.ico
+Allow: /manifest.json
+
+# Sitemap (if you have one)
+# Sitemap: https://yourdomain.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

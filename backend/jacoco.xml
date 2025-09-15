@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jacoco:report xmlns:jacoco="http://www.jacoco.org/jacoco/trunk"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://www.jacoco.org/jacoco/trunk http://www.jacoco.org/jacoco/trunk/coverage-report.xsd">
+
+    <title>MindMeter Backend Test Coverage Report</title>
+    
+    <structure name="MindMeter Backend">
+        <classfiles>
+            <fileset dir="target/classes">
+                <include name="com/shop/backend/**/*.class"/>
+            </fileset>
+        </classfiles>
+        <sourcefiles>
+            <fileset dir="src/main/java">
+                <include name="com/shop/backend/**/*.java"/>
+            </fileset>
+        </sourcefiles>
+    </structure>
+
+    <html destdir="target/site/jacoco"/>
+    <csv destfile="target/site/jacoco/coverage.csv"/>
+    <xml destfile="target/site/jacoco/coverage.xml"/>
+
+</jacoco:report>

@@ -1,0 +1,98 @@
+/* Blog Post Dark Mode Styles */
+.dark .prose {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: #ffffff !important; /* text-white */
+}
+
+.dark .prose p {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+
+.dark .prose strong {
+  color: #ffffff !important; /* text-white */
+}
+
+.dark .prose ul,
+.dark .prose ol {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+
+.dark .prose li {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+
+.dark .prose a {
+  color: #60a5fa !important; /* text-blue-400 */
+}
+
+.dark .prose blockquote {
+  color: #9ca3af !important; /* text-gray-400 */
+  border-left-color: #374151 !important; /* border-gray-700 */
+}
+
+.dark .prose code {
+  color: #e5e7eb !important; /* text-gray-200 */
+  background-color: #1f2937 !important; /* bg-gray-800 */
+}
+
+.dark .prose pre {
+  background-color: #1f2937 !important; /* bg-gray-800 */
+  color: #e5e7eb !important; /* text-gray-200 */
+}
+
+.dark .prose pre code {
+  color: #e5e7eb !important; /* text-gray-200 */
+  background-color: transparent !important;
+}
+
+/* Override any inline styles that might be causing issues */
+.dark .prose * {
+  color: inherit !important;
+}
+
+.dark .prose p * {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+
+.dark .prose h1 *,
+.dark .prose h2 *,
+.dark .prose h3 *,
+.dark .prose h4 *,
+.dark .prose h5 *,
+.dark .prose h6 * {
+  color: #ffffff !important; /* text-white */
+}
+
+/* Additional blog-specific dark mode fixes */
+.dark .prose table {
+  color: #d1d5db !important; /* text-gray-300 */
+}
+
+.dark .prose th {
+  color: #ffffff !important; /* text-white */
+  background-color: #374151 !important; /* bg-gray-700 */
+}
+
+.dark .prose td {
+  color: #d1d5db !important; /* text-gray-300 */
+  border-color: #4b5563 !important; /* border-gray-600 */
+}
+
+.dark .prose hr {
+  border-color: #4b5563 !important; /* border-gray-600 */
+}
+
+/* Ensure all text elements inherit proper colors */
+.dark .prose span,
+.dark .prose div,
+.dark .prose section {
+  color: inherit !important;
+}

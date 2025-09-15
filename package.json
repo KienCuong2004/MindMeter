@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
+    "react-gauge-chart": "^0.5.1",
+    "react-quill": "^2.0.0",
+    "recharts": "^3.0.2"
+  }
+}

@@ -1,0 +1,393 @@
+b # MindMeter .gitignore
+# Created: 2025-01-19
+
+# ========================================
+# 1. BACKEND (Spring Boot)
+# ========================================
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# VS Code
+.vscode/
+
+# ========================================
+# 2. FRONTEND (React)
+# ========================================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Production builds
+build/
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# ========================================
+# 3. DATABASE & CONFIGURATION
+# ========================================
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Database folder
+database/
+
+# Configuration files with sensitive data
+application-prod.properties
+application-dev.properties
+application-local.properties
+
+# Backup files
+*.bak
+*.backup
+*.sql.bak
+
+# ========================================
+# 4. SECURITY & SENSITIVE DATA
+# ========================================
+
+# API Keys and Secrets
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.jks
+
+# JWT Secrets
+jwt-secret.txt
+jwt-key.txt
+
+# OAuth2 Credentials
+oauth2-config.json
+google-credentials.json
+
+# Database credentials
+database-config.json
+db-credentials.txt
+
+# Spring Boot Configuration Files (EXCEPT example files)
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-*.properties
+!backend/src/main/resources/application.properties.example
+backend/src/main/resources/application-*.yml
+backend/src/main/resources/application-*.yaml
+
+# Environment Files (EXCEPT example files)
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+!frontend/env.example
+
+# Secret Files
+secrets.json
+config.json
+credentials.json
+*.secret
+*.credential
+
+# SSL Certificates
+*.crt
+*.cert
+*.pem
+ssl/
+
+# ========================================
+# 5. LOGS & TEMPORARY FILES
+# ========================================
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# ========================================
+# 6. UPLOADS & MEDIA
+# ========================================
+
+# User uploads
+uploads/
+static/uploads/
+public/uploads/
+
+# Media files
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+
+# Large files
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# ========================================
+# 7. IDE & EDITOR FILES
+# ========================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ========================================
+# 8. OPERATING SYSTEM FILES
+# ========================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ========================================
+# 9. PROJECT SPECIFIC
+# ========================================
+
+# MindMeter specific
+mindmeter-config.json
+mindmeter-secrets.json
+
+# Test data
+test-data/
+sample-data/
+
+# Documentation builds
+docs/build/
+docs/_build/
+
+# ========================================
+# 10. DEPLOYMENT & CI/CD
+# ========================================
+
+# Deployment files
+deploy/
+deployment/
+*.war
+*.ear
+*.jar
+
+# CI/CD
+.github/workflows/local/
+.circleci/
+.travis.yml
+.gitlab-ci.yml
+
+# Docker
+Dockerfile.local
+docker-compose.override.yml
+.dockerignore
+
+# ========================================
+# 11. BACKUP & ARCHIVE
+# ========================================
+
+# Backup files
+backup/
+*.backup
+*.bak
+*.old
+
+# Archive files
+archive/
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ========================================
+# 12. MONITORING & ANALYTICS
+# ========================================
+
+# Analytics
+analytics/
+stats/
+*.csv
+*.xlsx
+
+# Monitoring
+monitoring/
+health-checks/
+
+# ========================================
+# NOTES
+# ========================================
+
+# Remember to:
+# 1. Never commit .env files with real credentials
+# 2. Use environment variables for sensitive data
+# 3. Keep database credentials secure
+# 4. Don't commit SSL certificates
+# 5. Use .env.example for template files 
+backend/spring.out
+backend/users.json 
+backend/src/main/resources/application.properties 
