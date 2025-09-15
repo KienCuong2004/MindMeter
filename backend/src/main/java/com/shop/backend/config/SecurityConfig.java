@@ -31,10 +31,6 @@ public class SecurityConfig {
         this.customOAuth2SuccessHandler = customOAuth2SuccessHandler;
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

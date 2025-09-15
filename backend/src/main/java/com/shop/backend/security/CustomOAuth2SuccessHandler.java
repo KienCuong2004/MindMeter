@@ -3,6 +3,9 @@ package com.shop.backend.security;
 import com.shop.backend.model.User;
 import com.shop.backend.model.Role;
 import com.shop.backend.repository.UserRepository;
+import com.shop.backend.service.PasswordGeneratorService;
+import com.shop.backend.service.PasswordEmailService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.ServletException;
@@ -26,6 +29,9 @@ import java.security.Key;
 public class CustomOAuth2SuccessHandler implements org.springframework.security.web.authentication.AuthenticationSuccessHandler {
 
     private final UserRepository userRepository;
+    private final PasswordGeneratorService passwordGeneratorService;
+    private final PasswordEmailService passwordEmailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -36,8 +42,14 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
-    public CustomOAuth2SuccessHandler(UserRepository userRepository) {
+    public CustomOAuth2SuccessHandler(UserRepository userRepository, 
+                                     PasswordGeneratorService passwordGeneratorService,
+                                     PasswordEmailService passwordEmailService,
+                                     PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordGeneratorService = passwordGeneratorService;
+        this.passwordEmailService = passwordEmailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -70,21 +82,34 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
             }
             // System.out.println("[OAuth2] Đã tồn tại user với email: " + email + ", id: " + user.getId());
         } else {
+            // Create new user for Google OAuth2
             user = new User();
             user.setEmail(email);
-            // Tách tên thành firstName và lastName
+            
+            // Split name into firstName and lastName
             String[] nameParts = name != null ? name.split(" ", 2) : new String[2];
             user.setFirstName(nameParts != null && nameParts.length > 0 ? nameParts[0] : "");
             user.setLastName(nameParts != null && nameParts.length > 1 ? nameParts[1] : "");
             user.setRole(Role.STUDENT);
             user.setStatus(User.Status.ACTIVE);
-            // Lưu avatar từ Google nếu có
+            user.setOauthProvider("GOOGLE");
+            
+            // Generate secure password for the user
+            String generatedPassword = passwordGeneratorService.generateSecurePassword();
+            user.setPassword(passwordEncoder.encode(generatedPassword));
+            
+            // Save avatar from Google if available
             if (picture != null) {
                 user.setAvatarUrl(picture);
-                // System.out.println("[OAuth2] Lưu avatar từ Google: " + picture);
             }
+            
+            // Save user to database
             userRepository.save(user);
-            // System.out.println("[OAuth2] Created new STUDENT user: " + email + ", id: " + user.getId());
+            
+            // Send password email to user
+            passwordEmailService.sendPasswordEmail(email, generatedPassword, user.getFirstName());
+            
+            System.out.println("[OAuth2] Created new STUDENT user with auto-generated password: " + email + ", id: " + user.getId());
         }
 
         // Sinh JWT với đầy đủ thông tin

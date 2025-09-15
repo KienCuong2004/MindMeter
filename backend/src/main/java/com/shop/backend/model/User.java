@@ -51,6 +51,9 @@ public class User {
     @Column(name = "plan_expiry_date")
     private LocalDateTime planExpiryDate;
 
+    @Column(name = "oauth_provider")
+    private String oauthProvider;
+
     @Column(name = "created_at")
     @JsonIgnore
     private LocalDateTime createdAt;
