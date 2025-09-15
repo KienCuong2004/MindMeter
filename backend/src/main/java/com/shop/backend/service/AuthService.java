@@ -20,6 +20,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Random;
 import com.shop.backend.dto.UserDTO;
+import com.shop.backend.service.PasswordValidationService;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class AuthService {
     private final JavaMailSender mailSender;
     private final Random random = new Random();
     private final OtpService otpService;
+    private final PasswordValidationService passwordValidationService;
 
     // Helper method để convert User entity thành UserDTO
     private UserDTO convertToUserDTO(User user) {
@@ -82,7 +84,7 @@ public class AuthService {
                 java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
             )
         );
-        return new AuthResponse(token, user.getEmail(), user.getRole(), convertToUserDTO(user));
+        return new AuthResponse(token, user.getEmail(), user.getRole(), convertToUserDTO(user), false, null);
     }
 
     @Transactional
@@ -116,7 +118,7 @@ public class AuthService {
             )
         );
 
-        return new AuthResponse(token, null, user.getRole(), convertToUserDTO(user));
+        return new AuthResponse(token, null, user.getRole(), convertToUserDTO(user), false, null);
     }
 
     @Transactional
@@ -166,7 +168,7 @@ public class AuthService {
             )
         );
 
-        return new AuthResponse(token, user.getEmail(), user.getRole(), convertToUserDTO(user));
+        return new AuthResponse(token, user.getEmail(), user.getRole(), convertToUserDTO(user), false, null);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -180,40 +182,29 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-        // Debug: Log user plan để kiểm tra
-        // System.out.println("[DEBUG] User from database - Email: " + user.getEmail() + ", Plan: " + user.getPlan());
-        // System.out.println("[DEBUG] User entity details:");
-        // System.out.println("  - ID: " + user.getId());
-        // System.out.println("  - Email: " + user.getEmail());
-        // System.out.println("  - FirstName: " + user.getFirstName());
-        // System.out.println("  - LastName: " + user.getLastName());
-        // System.out.println("  - Phone: " + user.getPhone());
-        // System.out.println("  - AvatarUrl: " + user.getAvatarUrl());
-        // System.out.println("  - Role: " + user.getRole());
-        // System.out.println("  - Status: " + user.getStatus());
-        // System.out.println("  - Plan: " + user.getPlan());
-        // System.out.println("  - Anonymous: " + user.isAnonymous());
+        // Check if user has unused temporary password (first time using temp password)
+        if (passwordValidationService.isTemporaryPassword(user)) {
+            // Mark temporary password as used
+            passwordValidationService.markTemporaryPasswordAsUsed(user);
+            
+            // Generate JWT token
+            String token = jwtService.generateTokenWithUserInfo(user);
+            UserDTO userDTO = convertToUserDTO(user);
+            
+            // Return response indicating password change is required
+            AuthResponse response = new AuthResponse(token, user.getEmail(), user.getRole(), userDTO, false, null);
+            response.setRequiresPasswordChange(true);
+            response.setMessage("Mật khẩu tạm thời đã được sử dụng. Vui lòng đổi mật khẩu mới.");
+            
+            System.out.println("[AuthService] Temporary password used for user: " + user.getEmail());
+            return response;
+        }
         
-        // Sử dụng JWT mới với thông tin user đầy đủ
+        // Normal login for permanent passwords
         String token = jwtService.generateTokenWithUserInfo(user);
-        
-        // Debug: Log JWT token để kiểm tra
-        // System.out.println("[DEBUG] Generated JWT token: " + token);
-        
-        // Convert User entity thành UserDTO
         UserDTO userDTO = convertToUserDTO(user);
         
-        // Debug: Log UserDTO để kiểm tra
-        // System.out.println("[DEBUG] UserDTO created:");
-        // System.out.println("  - firstName: " + userDTO.getFirstName());
-        // System.out.println("  - lastName: " + userDTO.getLastName());
-        // System.out.println("  - email: " + userDTO.getEmail());
-        // System.out.println("  - phone: " + userDTO.getPhone());
-        // System.out.println("  - role: " + userDTO.getRole());
-        // System.out.println("  - plan: " + userDTO.getPlan());
-        // System.out.println("  - avatarUrl: " + userDTO.getAvatarUrl());
-        
-        return new AuthResponse(token, user.getEmail(), user.getRole(), userDTO);
+        return new AuthResponse(token, user.getEmail(), user.getRole(), userDTO, false, null);
     }
 
     public String forgotPassword(String email) {

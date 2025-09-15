@@ -54,6 +54,12 @@ public class User {
     @Column(name = "oauth_provider")
     private String oauthProvider;
 
+    @Column(name = "is_temp_password")
+    private boolean isTemporaryPassword = false;
+
+    @Column(name = "temp_password_used")
+    private boolean tempPasswordUsed = false;
+
     @Column(name = "created_at")
     @JsonIgnore
     private LocalDateTime createdAt;

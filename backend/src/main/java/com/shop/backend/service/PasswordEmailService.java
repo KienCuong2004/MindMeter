@@ -24,7 +24,7 @@ public class PasswordEmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             
             helper.setTo(email);
-            helper.setSubject("[MindMeter] Thông tin đăng nhập tài khoản của bạn");
+            helper.setSubject("[MindMeter] Mật khẩu tạm thời - Chỉ sử dụng 1 lần");
             
             String userName = (firstName != null && !firstName.trim().isEmpty()) ? firstName : "Người dùng";
             String html = generatePasswordEmail(userName, email, password);
@@ -55,7 +55,7 @@ public class PasswordEmailService {
                 <h2 style='color:#1e293b;margin:0 0 16px 0;font-size:1.5rem;'>Xin chào %s,</h2>
                 <p style='margin:0;line-height:1.6;color:#475569;font-size:1rem;'>
                   Chúng tôi đã tạo tài khoản MindMeter cho bạn sau khi bạn đăng nhập bằng Google. 
-                  Dưới đây là thông tin đăng nhập của bạn:
+                  Dưới đây là <strong>mật khẩu tạm thời</strong> của bạn (chỉ sử dụng được 1 lần):
                 </p>
               </div>
               
@@ -68,8 +68,8 @@ public class PasswordEmailService {
                 </div>
                 
                 <div style='margin-bottom:16px;'>
-                  <div style='font-size:0.875rem;color:#64748b;margin-bottom:4px;'>Mật khẩu</div>
-                  <div style='font-size:1.125rem;font-weight:600;color:#1e293b;background:#fff;padding:12px;border-radius:8px;border:1px solid #e2e8f0;font-family:monospace;letter-spacing:1px;'>%s</div>
+                  <div style='font-size:0.875rem;color:#64748b;margin-bottom:4px;'>Mật khẩu tạm thời</div>
+                  <div style='font-size:1.125rem;font-weight:600;color:#dc2626;background:#fef2f2;padding:12px;border-radius:8px;border:2px solid #fecaca;font-family:monospace;letter-spacing:1px;'>%s</div>
                 </div>
                 
                 <div style='background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:16px;margin-top:16px;'>
@@ -78,8 +78,9 @@ public class PasswordEmailService {
                     <h4 style='color:#92400e;margin:0;font-size:1rem;'>Lưu ý bảo mật</h4>
                   </div>
                   <p style='margin:0;color:#92400e;font-size:0.875rem;line-height:1.5;'>
-                    Vui lòng không chia sẻ thông tin đăng nhập này với ai khác. 
-                    Chúng tôi khuyến nghị bạn đổi mật khẩu sau lần đăng nhập đầu tiên.
+                    <strong>QUAN TRỌNG:</strong> Mật khẩu này chỉ sử dụng được 1 lần duy nhất! 
+                    Sau khi đăng nhập lần đầu, bạn sẽ BẮT BUỘC phải đổi mật khẩu mới.
+                    Không chia sẻ thông tin này với ai khác.
                   </p>
                 </div>
               </div>
@@ -88,16 +89,17 @@ public class PasswordEmailService {
                 <h3 style='color:#0369a1;margin:0 0 8px 0;font-size:1.125rem;'>📱 Cách đăng nhập</h3>
                 <ol style='margin:0;padding-left:20px;color:#0c4a6e;line-height:1.6;'>
                   <li>Truy cập trang đăng nhập của MindMeter</li>
-                  <li>Sử dụng email và mật khẩu ở trên</li>
+                  <li>Sử dụng email và <strong>mật khẩu tạm thời</strong> ở trên</li>
+                  <li>Sau khi đăng nhập, hệ thống sẽ yêu cầu bạn đổi mật khẩu mới</li>
                   <li>Hoặc tiếp tục đăng nhập bằng Google như bình thường</li>
                 </ol>
               </div>
               
               <div style='background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin:16px 0;'>
-                <h3 style='color:#166534;margin:0 0 8px 0;font-size:1.125rem;'>🔒 Đổi mật khẩu (Khuyến nghị)</h3>
+                <h3 style='color:#166534;margin:0 0 8px 0;font-size:1.125rem;'>🔒 Đổi mật khẩu (BẮT BUỘC)</h3>
                 <ul style='margin:0;padding-left:20px;color:#166534;line-height:1.5;'>
-                  <li>Sau khi đăng nhập, vào phần "Cài đặt tài khoản"</li>
-                  <li>Chọn "Đổi mật khẩu"</li>
+                  <li><strong>BẮT BUỘC:</strong> Sau khi đăng nhập lần đầu với mật khẩu tạm thời</li>
+                  <li>Hệ thống sẽ tự động yêu cầu bạn đổi mật khẩu</li>
                   <li>Tạo mật khẩu mới an toàn và dễ nhớ</li>
                   <li>Lưu lại mật khẩu mới ở nơi an toàn</li>
                 </ul>
@@ -127,9 +129,9 @@ public class PasswordEmailService {
               
               <div style='margin-top:24px;padding:16px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;'>
                 <p style='margin:0;color:#991b1b;font-size:0.8rem;line-height:1.4;text-align:center;'>
-                  <strong>⚠️ BẢO MẬT:</strong> Email này chứa thông tin nhạy cảm. 
-                  Vui lòng không chuyển tiếp hoặc chia sẻ với bất kỳ ai. 
-                  Nếu bạn không tạo tài khoản này, vui lòng liên hệ hỗ trợ ngay lập tức.
+                        <strong>🚨 BẢO MẬT NGHIÊM NGẶT:</strong> Email này chứa mật khẩu tạm thời chỉ dùng 1 lần. 
+                        Vui lòng không chuyển tiếp hoặc chia sẻ với bất kỳ ai. 
+                        Nếu bạn không tạo tài khoản này, vui lòng liên hệ hỗ trợ ngay lập tức.
                 </p>
               </div>
             </div>

@@ -7,6 +7,7 @@ import ChatBotModal from "../components/ChatBotModal";
 import AnonymousTestModal from "../components/AnonymousTestModal";
 import UpgradeAnonymousModal from "../components/UpgradeAnonymousModal";
 import AnonymousChatbotNotice from "../components/AnonymousChatbotNotice";
+import ChangePasswordModal from "../components/ChangePasswordModal";
 import AppointmentList from "../components/AppointmentList";
 import DashboardHeader from "../components/DashboardHeader";
 import HeroSection from "../components/HeroSection";
@@ -50,6 +51,10 @@ const StudentHomePage = () => {
     onConfirm: null,
   });
 
+  // State for password change modal
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [passwordChangeMessage, setPasswordChangeMessage] = useState("");
+
   useEffect(() => {
     document.title =
       i18n.language === "vi" ? t("pageTitles.home") : "Home | MindMeter";
@@ -61,6 +66,29 @@ const StudentHomePage = () => {
       if (el) el.scrollIntoView({ behavior: "smooth" });
     }
   }, [location]);
+
+  // Check for password change requirement from OAuth callback
+  useEffect(() => {
+    const requiresPasswordChange = localStorage.getItem(
+      "requiresPasswordChange"
+    );
+    const message = localStorage.getItem("passwordChangeMessage");
+
+    if (requiresPasswordChange === "true") {
+      setPasswordChangeMessage(
+        message || "Vui lòng đặt mật khẩu mới cho tài khoản của bạn."
+      );
+      setShowChangePasswordModal(true);
+
+      // Clear the flags from localStorage
+      localStorage.removeItem("requiresPasswordChange");
+      localStorage.removeItem("passwordChangeMessage");
+
+      console.log(
+        "[StudentHomePage] Showing password change modal for new OAuth user"
+      );
+    }
+  }, []);
 
   // Lấy thông tin user từ token hoặc anonymous account
   let user = null;
@@ -403,6 +431,14 @@ const StudentHomePage = () => {
 
       {/* Home Page Tour */}
       <HomePageTour isOpen={tourOpen} onClose={() => setTourOpen(false)} />
+
+      {/* Change Password Modal for new OAuth users */}
+      <ChangePasswordModal
+        isOpen={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+        isTemporaryPassword={true}
+        message={passwordChangeMessage}
+      />
     </div>
   );
 };

@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authFetch } from "../authFetch";
 import { useTheme } from "../hooks/useTheme";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
   const { t } = useTranslation();
@@ -66,6 +67,7 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
         throw new Error(data.message || t("loginFailed"));
       }
       const data = await res.json();
+
       // Lưu user vào localStorage (giống logic LoginPage)
       let user = {
         email: data.email,
@@ -95,6 +97,7 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
         user.email ||
         "User";
       localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", data.token);
       onLogin(data);
     } catch (err) {
       setError(err.message);
@@ -299,4 +302,42 @@ function base64UrlDecode(str) {
   );
 }
 
-export default LoginForm;
+export default function LoginFormWrapper({
+  onLogin,
+  onSwitchForm,
+  onForgotPassword,
+}) {
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [tempPasswordUsed, setTempPasswordUsed] = useState(false);
+
+  const handleLogin = (data) => {
+    // Check if user needs to change temporary password
+    if (data.requiresPasswordChange) {
+      setTempPasswordUsed(true);
+      setShowChangePasswordModal(true);
+      return; // Don't proceed with normal login flow
+    }
+    onLogin(data);
+  };
+
+  const handleCloseModal = () => {
+    setShowChangePasswordModal(false);
+    setTempPasswordUsed(false);
+  };
+
+  return (
+    <>
+      <LoginForm
+        onLogin={handleLogin}
+        onSwitchForm={onSwitchForm}
+        onForgotPassword={onForgotPassword}
+      />
+
+      <ChangePasswordModal
+        isOpen={showChangePasswordModal}
+        onClose={handleCloseModal}
+        isTemporaryPassword={tempPasswordUsed}
+      />
+    </>
+  );
+}

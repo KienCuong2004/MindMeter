@@ -9,6 +9,9 @@ export default function AuthCallback() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
+    const requiresPasswordChange =
+      params.get("requiresPasswordChange") === "true";
+    const message = params.get("message");
 
     if (token) {
       localStorage.setItem("token", token);
@@ -28,13 +31,28 @@ export default function AuthCallback() {
         };
         localStorage.setItem("user", JSON.stringify(user));
         role = decoded.role;
-      } catch {}
+
+        // Nếu user mới cần đổi mật khẩu, lưu thông tin vào localStorage
+        if (requiresPasswordChange) {
+          localStorage.setItem("requiresPasswordChange", "true");
+          if (message) {
+            localStorage.setItem("passwordChangeMessage", message);
+          }
+          console.log(
+            "[AuthCallback] New user with temporary password - redirecting to home with password change modal"
+          );
+        }
+      } catch (error) {
+        console.error("[AuthCallback] Error decoding token:", error);
+      }
+
+      // Redirect dựa trên role
       if (role === "EXPERT") {
         navigate("/expert/dashboard");
       } else if (role === "ADMIN") {
         navigate("/admin/dashboard");
       } else {
-        navigate("/");
+        navigate("/home"); // Redirect to home instead of "/"
       }
     } else {
       navigate("/login");

@@ -9,8 +9,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -42,11 +40,11 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf
                 .csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/api/payment/**", "/api/depression-test/**", "/api/admin/**", "/api/expert/**", "/api/auth/**", "/api/blog/**", "/api/chatbot", "/api/auto-booking")
+                .ignoringRequestMatchers("/api/payment/**", "/api/depression-test/**", "/api/admin/**", "/api/expert/**", "/api/auth/**", "/api/blog/**", "/api/chatbot", "/api/auto-booking", "/api/password/**")
             )
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login**", "/error", "/api/depression-test/**", "/api/auth/**").permitAll()
+                .requestMatchers("/", "/login**", "/error", "/api/depression-test/**", "/api/auth/**", "/api/password/**").permitAll()
                 .requestMatchers("/api/feedback").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/api/payment/**").permitAll() // Tất cả payment endpoints

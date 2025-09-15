@@ -14,4 +14,6 @@ public class AuthResponse {
     private String email;
     private Role role;
     private UserDTO user; // Sử dụng UserDTO thay vì User entity
+    private boolean requiresPasswordChange = false;
+    private String message;
 } 

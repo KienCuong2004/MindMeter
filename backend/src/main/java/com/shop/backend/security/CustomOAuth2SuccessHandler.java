@@ -74,13 +74,25 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
         User user;
         if (userOpt.isPresent()) {
             user = userOpt.get();
+
+            // Nếu user đã tồn tại nhưng chưa có OAuth provider, cập nhật thông tin
+            if (user.getOauthProvider() == null || user.getOauthProvider().isEmpty()) {
+                user.setOauthProvider("GOOGLE");
+                if (picture != null) {
+                    user.setAvatarUrl(picture);
+                }
+                userRepository.save(user);
+                System.out.println("[OAuth2] Updated existing user with OAuth provider: " + email);
+            }
+            
             // Cập nhật avatar nếu user chưa có hoặc muốn cập nhật từ Google
             if (picture != null && (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty())) {
                 user.setAvatarUrl(picture);
                 userRepository.save(user);
-                // System.out.println("[OAuth2] Cập nhật avatar cho user: " + email);
+                System.out.println("[OAuth2] Updated avatar for existing user: " + email);
             }
-            // System.out.println("[OAuth2] Đã tồn tại user với email: " + email + ", id: " + user.getId());
+            
+            System.out.println("[OAuth2] Existing user found: " + email + ", id: " + user.getId() + ", oauth: " + user.getOauthProvider());
         } else {
             // Create new user for Google OAuth2
             user = new User();
@@ -94,9 +106,11 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
             user.setStatus(User.Status.ACTIVE);
             user.setOauthProvider("GOOGLE");
             
-            // Generate secure password for the user
+            // Generate secure temporary password for the user
             String generatedPassword = passwordGeneratorService.generateSecurePassword();
             user.setPassword(passwordEncoder.encode(generatedPassword));
+            user.setTemporaryPassword(true);
+            user.setTempPasswordUsed(false);
             
             // Save avatar from Google if available
             if (picture != null) {
@@ -106,10 +120,11 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
             // Save user to database
             userRepository.save(user);
             
-            // Send password email to user
-            passwordEmailService.sendPasswordEmail(email, generatedPassword, user.getFirstName());
+            // Send password email to user (commented out for Option 3 - auto-login with modal)
+            // passwordEmailService.sendPasswordEmail(email, generatedPassword, user.getFirstName());
+            System.out.println("[OAuth2] Password email skipped for Option 3 - user will see modal instead");
             
-            System.out.println("[OAuth2] Created new STUDENT user with auto-generated password: " + email + ", id: " + user.getId());
+            System.out.println("[OAuth2] Created new STUDENT user with temporary password: " + email + ", id: " + user.getId());
         }
 
         // Sinh JWT với đầy đủ thông tin
@@ -129,10 +144,20 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        // Redirect về frontend kèm token
-        String redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl)
-                .queryParam("token", token)
-                .build().toUriString();
+        // Redirect về frontend kèm token và thông tin về temporary password
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(frontendUrl)
+                .queryParam("token", token);
+        
+        // Nếu là user mới với temporary password, thêm flag để frontend hiển thị modal
+        if (user.isTemporaryPassword() && !user.isTempPasswordUsed()) {
+            builder.queryParam("requiresPasswordChange", "true");
+            builder.queryParam("message", "Chao mung! Vui long dat mat khau moi cho tai khoan cua ban.");
+            System.out.println("[OAuth2] New user with temporary password - redirecting with password change flag");
+        } else {
+            System.out.println("[OAuth2] Existing user - normal login redirect");
+        }
+        
+        String redirectUrl = builder.build().toUriString();
         response.sendRedirect(redirectUrl);
     }
 } 
