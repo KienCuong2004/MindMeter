@@ -11,6 +11,7 @@ import {
   FaClock,
   FaHeart,
   FaBrain,
+  FaTimes,
 } from "react-icons/fa";
 import BlogPostCard from "../components/BlogPostCard";
 import DashboardHeader from "../components/DashboardHeader";
@@ -37,6 +38,12 @@ const BlogListPage = () => {
   const [tags, setTags] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+
+  // Share modal state
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   // Load user information
   useEffect(() => {
@@ -222,12 +229,99 @@ const BlogListPage = () => {
     );
   };
 
-  const handleShare = (postId, platform) => {
-    setPosts((prev) =>
-      prev.map((post) =>
-        post.id === postId ? { ...post, shareCount: post.shareCount + 1 } : post
-      )
-    );
+  const handleShare = (postId) => {
+    const post = posts.find((p) => p.id === postId);
+    if (post) {
+      setSelectedPost(post);
+      setShowShareModal(true);
+    }
+  };
+
+  const handleSocialShare = async (platform) => {
+    if (!selectedPost) return;
+
+    const url = `${window.location.origin}/blog/post/${selectedPost.id}`;
+    const title = selectedPost.title;
+    const description =
+      selectedPost.excerpt || selectedPost.content.substring(0, 200) + "...";
+
+    let shareUrl = "";
+
+    switch (platform) {
+      case "facebook":
+        // Chỉ hiển thị nội dung cho người dùng nhập
+        shareUrl = `https://www.facebook.com/sharer/sharer.php`;
+        break;
+      case "twitter":
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+          url
+        )}&text=${encodeURIComponent(title)}&hashtags=${encodeURIComponent(
+          "MindMeter,SứcKhỏeTâmThần"
+        )}`;
+        break;
+      case "linkedin":
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+          url
+        )}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(
+          description
+        )}`;
+        break;
+      case "whatsapp":
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(
+          title + " - " + url
+        )}`;
+        break;
+      case "telegram":
+        shareUrl = `https://t.me/share/url?url=${encodeURIComponent(
+          url
+        )}&text=${encodeURIComponent(title + " - " + description)}`;
+        break;
+      case "copy":
+        try {
+          await navigator.clipboard.writeText(url);
+          setToastMessage("Đã sao chép liên kết vào clipboard!");
+          setShowToast(true);
+          setShowShareModal(false);
+          setTimeout(() => setShowToast(false), 3000);
+          return;
+        } catch (err) {
+          console.error("Failed to copy: ", err);
+          setToastMessage("Không thể sao chép liên kết");
+          setShowToast(true);
+          setTimeout(() => setShowToast(false), 3000);
+          return;
+        }
+      default:
+        return;
+    }
+
+    // Open sharing window
+    window.open(shareUrl, "_blank", "width=600,height=400");
+
+    // Close modal after opening share window
+    setShowShareModal(false);
+
+    // Record share in backend if user is logged in
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        await blogService.createShare(selectedPost.id, {
+          platform,
+          sharedUrl: url,
+        });
+
+        // Update share count in local state
+        setPosts((prev) =>
+          prev.map((post) =>
+            post.id === selectedPost.id
+              ? { ...post, shareCount: post.shareCount + 1 }
+              : post
+          )
+        );
+      } catch (error) {
+        console.error("Error recording share:", error);
+      }
+    }
   };
 
   const handleComment = (postId) => {
@@ -477,6 +571,108 @@ const BlogListPage = () => {
           )}
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && selectedPost && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Chia sẻ bài viết
+              </h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <FaTimes className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => handleSocialShare("facebook")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">f</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  Facebook
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("twitter")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">𝕏</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  Twitter
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("linkedin")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-xs">in</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  LinkedIn
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("whatsapp")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">W</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  WhatsApp
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("telegram")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">T</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  Telegram
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("copy")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+              >
+                <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">📋</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  Sao chép link
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in">
+          <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+            {toastMessage}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <FooterSection />

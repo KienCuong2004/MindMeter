@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import blogService from "../services/blogService";
 import CommentSection from "../components/CommentSection";
+import BlogPostMeta from "../components/BlogPostMeta";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 import "../styles/blog.css";
@@ -190,35 +191,39 @@ const BlogPostPage = () => {
 
     const url = window.location.href;
     const title = post.title;
-    const text = post.excerpt || post.content.substring(0, 200) + "...";
+    const description = post.excerpt || post.content.substring(0, 200) + "...";
+    const text = description;
 
     let shareUrl = "";
 
     switch (platform) {
       case "facebook":
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-          url
-        )}`;
+        // Chỉ hiển thị nội dung cho người dùng nhập
+        shareUrl = `https://www.facebook.com/sharer/sharer.php`;
         break;
       case "twitter":
         shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
           url
-        )}&text=${encodeURIComponent(title)}`;
+        )}&text=${encodeURIComponent(title)}&hashtags=${encodeURIComponent(
+          "MindMeter,SứcKhỏeTâmThần"
+        )}`;
         break;
       case "linkedin":
         shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
           url
+        )}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(
+          description
         )}`;
         break;
       case "whatsapp":
         shareUrl = `https://wa.me/?text=${encodeURIComponent(
-          title + " " + url
+          title + " - " + url
         )}`;
         break;
       case "telegram":
         shareUrl = `https://t.me/share/url?url=${encodeURIComponent(
           url
-        )}&text=${encodeURIComponent(title)}`;
+        )}&text=${encodeURIComponent(title + " - " + description)}`;
         break;
       case "copy":
         try {
@@ -241,6 +246,9 @@ const BlogPostPage = () => {
 
     // Open sharing window
     window.open(shareUrl, "_blank", "width=600,height=400");
+
+    // Close modal after opening share window
+    setShowShareModal(false);
 
     // Record share in backend if user is logged in
     const token = localStorage.getItem("token");
@@ -306,6 +314,7 @@ const BlogPostPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <BlogPostMeta post={post} />
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-4xl mx-auto px-4 py-4">

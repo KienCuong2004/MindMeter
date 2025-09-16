@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import AppRoutes from "./AppRoutes";
 import ScrollToTop from "./ScrollToTop";
 import "./App.css";
@@ -25,12 +26,14 @@ function App() {
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      <Router>
-        <ScrollToTop />
-        <AppRoutes />
-      </Router>
-    </ThemeContext.Provider>
+    <HelmetProvider>
+      <ThemeContext.Provider value={{ theme, setTheme }}>
+        <Router>
+          <ScrollToTop />
+          <AppRoutes />
+        </Router>
+      </ThemeContext.Provider>
+    </HelmetProvider>
   );
 }
 
