@@ -39,6 +39,8 @@ const BlogPostPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const currentLocale = i18n.language === "vi" ? vi : enUS;
 
@@ -130,7 +132,9 @@ const BlogPostPage = () => {
     // Check if user is logged in
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Vui lòng đăng nhập để thực hiện chức năng này");
+      setToastMessage("Vui lòng đăng nhập để thực hiện chức năng này");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
       return;
     }
 
@@ -143,7 +147,9 @@ const BlogPostPage = () => {
       setLikeCount(updatedPost.likeCount);
     } catch (error) {
       console.error("Error toggling like:", error);
-      alert("Có lỗi xảy ra khi thực hiện chức năng like");
+      setToastMessage("Có lỗi xảy ra khi thực hiện chức năng like");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     } finally {
       setIsLoading(false);
     }
@@ -155,7 +161,9 @@ const BlogPostPage = () => {
     // Check if user is logged in
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Vui lòng đăng nhập để thực hiện chức năng này");
+      setToastMessage("Vui lòng đăng nhập để thực hiện chức năng này");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
       return;
     }
 
@@ -165,7 +173,9 @@ const BlogPostPage = () => {
       setIsBookmarked(result);
     } catch (error) {
       console.error("Error toggling bookmark:", error);
-      alert("Có lỗi xảy ra khi thực hiện chức năng bookmark");
+      setToastMessage("Có lỗi xảy ra khi thực hiện chức năng bookmark");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     } finally {
       setIsLoading(false);
     }
@@ -213,12 +223,16 @@ const BlogPostPage = () => {
       case "copy":
         try {
           await navigator.clipboard.writeText(url);
-          alert("Đã sao chép liên kết vào clipboard!");
+          setToastMessage("Đã sao chép liên kết vào clipboard!");
+          setShowToast(true);
           setShowShareModal(false);
+          setTimeout(() => setShowToast(false), 3000);
           return;
         } catch (err) {
           console.error("Failed to copy: ", err);
-          alert("Không thể sao chép liên kết");
+          setToastMessage("Không thể sao chép liên kết");
+          setShowToast(true);
+          setTimeout(() => setShowToast(false), 3000);
           return;
         }
       default:
@@ -510,13 +524,13 @@ const BlogPostPage = () => {
               </h3>
               <button
                 onClick={() => setShowShareModal(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <FaTimes className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => handleSocialShare("facebook")}
                 className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
@@ -581,14 +595,32 @@ const BlogPostPage = () => {
                 onClick={() => handleSocialShare("copy")}
                 className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
               >
-                <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
                   <FaCopy className="text-white text-sm" />
                 </div>
                 <span className="text-gray-900 dark:text-white font-medium">
-                  Sao chép
+                  Sao chép link
                 </span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in">
+          <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3">
+            <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center">
+              <span className="text-green-500 text-xs">✓</span>
+            </div>
+            <span className="font-medium">{toastMessage}</span>
+            <button
+              onClick={() => setShowToast(false)}
+              className="text-white hover:text-gray-200 ml-2"
+            >
+              <FaTimes className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}
