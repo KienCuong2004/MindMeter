@@ -14,6 +14,8 @@ import {
   FaEdit,
   FaTrash,
   FaEllipsisH,
+  FaTimes,
+  FaCopy,
 } from "react-icons/fa";
 import blogService from "../services/blogService";
 import CommentSection from "../components/CommentSection";
@@ -36,6 +38,7 @@ const BlogPostPage = () => {
   const [shareCount, setShareCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const currentLocale = i18n.language === "vi" ? vi : enUS;
 
@@ -124,6 +127,13 @@ const BlogPostPage = () => {
   const handleLike = async () => {
     if (isLoading || !post) return;
 
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Vui lòng đăng nhập để thực hiện chức năng này");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const result = await blogService.toggleLike(post.id);
@@ -133,6 +143,7 @@ const BlogPostPage = () => {
       setLikeCount(updatedPost.likeCount);
     } catch (error) {
       console.error("Error toggling like:", error);
+      alert("Có lỗi xảy ra khi thực hiện chức năng like");
     } finally {
       setIsLoading(false);
     }
@@ -141,32 +152,97 @@ const BlogPostPage = () => {
   const handleBookmark = async () => {
     if (isLoading || !post) return;
 
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Vui lòng đăng nhập để thực hiện chức năng này");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const result = await blogService.toggleBookmark(post.id);
       setIsBookmarked(result);
     } catch (error) {
       console.error("Error toggling bookmark:", error);
+      alert("Có lỗi xảy ra khi thực hiện chức năng bookmark");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleShare = async (platform) => {
-    if (isLoading || !post) return;
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
 
-    setIsLoading(true);
-    try {
-      await blogService.createShare(post.id, {
-        platform,
-        sharedUrl: window.location.href,
-      });
-      setShareCount((prev) => prev + 1);
-    } catch (error) {
-      console.error("Error sharing:", error);
-    } finally {
-      setIsLoading(false);
+  const handleSocialShare = async (platform) => {
+    if (!post) return;
+
+    const url = window.location.href;
+    const title = post.title;
+    const text = post.excerpt || post.content.substring(0, 200) + "...";
+
+    let shareUrl = "";
+
+    switch (platform) {
+      case "facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+          url
+        )}`;
+        break;
+      case "twitter":
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+          url
+        )}&text=${encodeURIComponent(title)}`;
+        break;
+      case "linkedin":
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+          url
+        )}`;
+        break;
+      case "whatsapp":
+        shareUrl = `https://wa.me/?text=${encodeURIComponent(
+          title + " " + url
+        )}`;
+        break;
+      case "telegram":
+        shareUrl = `https://t.me/share/url?url=${encodeURIComponent(
+          url
+        )}&text=${encodeURIComponent(title)}`;
+        break;
+      case "copy":
+        try {
+          await navigator.clipboard.writeText(url);
+          alert("Đã sao chép liên kết vào clipboard!");
+          setShowShareModal(false);
+          return;
+        } catch (err) {
+          console.error("Failed to copy: ", err);
+          alert("Không thể sao chép liên kết");
+          return;
+        }
+      default:
+        return;
     }
+
+    // Open sharing window
+    window.open(shareUrl, "_blank", "width=600,height=400");
+
+    // Record share in backend if user is logged in
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        await blogService.createShare(post.id, {
+          platform,
+          sharedUrl: url,
+        });
+        setShareCount((prev) => prev + 1);
+      } catch (error) {
+        console.error("Error recording share:", error);
+      }
+    }
+
+    setShowShareModal(false);
   };
 
   const formatDate = (dateString) => {
@@ -391,7 +467,7 @@ const BlogPostPage = () => {
                 </button>
 
                 <button
-                  onClick={() => handleShare("facebook")}
+                  onClick={handleShare}
                   disabled={isLoading}
                   className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
                 >
@@ -423,6 +499,99 @@ const BlogPostPage = () => {
           />
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Chia sẻ bài viết
+              </h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <FaTimes className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => handleSocialShare("facebook")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">f</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  Facebook
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("twitter")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">𝕏</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  Twitter
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("linkedin")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">in</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  LinkedIn
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("whatsapp")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">W</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  WhatsApp
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("telegram")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">T</span>
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  Telegram
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSocialShare("copy")}
+                className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+              >
+                <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                  <FaCopy className="text-white text-sm" />
+                </div>
+                <span className="text-gray-900 dark:text-white font-medium">
+                  Sao chép
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
