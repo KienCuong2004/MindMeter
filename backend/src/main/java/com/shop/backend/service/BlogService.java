@@ -98,7 +98,7 @@ public class BlogService {
         Optional<BlogPost> post = blogPostRepository.findById(id);
         if (post.isPresent()) {
             // Debug comment count
-            long actualCommentCount = blogCommentRepository.countByPostIdAndStatus(id, BlogComment.CommentStatus.APPROVED);
+            long actualCommentCount = blogCommentRepository.countByPostIdAndStatus(id, BlogComment.CommentStatus.approved);
             System.out.println("Post ID: " + id + ", Database comment count: " + post.get().getCommentCount() + ", Actual comment count: " + actualCommentCount);
             
             // Force update comment count before returning
@@ -260,7 +260,7 @@ public class BlogService {
     
     public Page<BlogCommentDTO> getComments(Long postId, Pageable pageable) {
         Page<BlogComment> comments = blogCommentRepository.findByPostIdAndStatusOrderByCreatedAtDesc(
-            postId, BlogComment.CommentStatus.APPROVED, pageable);
+            postId, BlogComment.CommentStatus.approved, pageable);
         return comments.map(this::convertCommentToDTO);
     }
     
@@ -388,7 +388,7 @@ public class BlogService {
     }
     
     private void updateCommentCount(Long postId) {
-        long count = blogCommentRepository.countByPostIdAndStatus(postId, BlogComment.CommentStatus.APPROVED);
+        long count = blogCommentRepository.countByPostIdAndStatus(postId, BlogComment.CommentStatus.approved);
         BlogPost post = blogPostRepository.findById(postId).orElse(null);
         if (post != null) {
             post.setCommentCount((int) count);
@@ -400,7 +400,7 @@ public class BlogService {
     public void updateAllCommentCounts() {
         List<BlogPost> allPosts = blogPostRepository.findAll();
         for (BlogPost post : allPosts) {
-            long count = blogCommentRepository.countByPostIdAndStatus(post.getId(), BlogComment.CommentStatus.APPROVED);
+            long count = blogCommentRepository.countByPostIdAndStatus(post.getId(), BlogComment.CommentStatus.approved);
             post.setCommentCount((int) count);
             blogPostRepository.save(post);
         }

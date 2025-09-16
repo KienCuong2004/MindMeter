@@ -38,7 +38,7 @@ public class BlogComment {
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CommentStatus status = CommentStatus.PENDING;
+    private CommentStatus status = CommentStatus.pending;
     
     @Column(name = "like_count")
     private Integer likeCount = 0;
@@ -59,6 +59,6 @@ public class BlogComment {
     private List<BlogCommentLike> likes;
     
     public enum CommentStatus {
-        PENDING, APPROVED, REJECTED, SPAM
+        pending, approved, rejected, spam
     }
 }

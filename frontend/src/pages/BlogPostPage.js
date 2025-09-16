@@ -16,7 +16,7 @@ import {
   FaEllipsisH,
 } from "react-icons/fa";
 import blogService from "../services/blogService";
-// import CommentSection from "../components/CommentSection";
+import CommentSection from "../components/CommentSection";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 import "../styles/blog.css";
@@ -32,6 +32,7 @@ const BlogPostPage = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
+  const [actualCommentCount, setActualCommentCount] = useState(0);
   const [shareCount, setShareCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
@@ -386,7 +387,7 @@ const BlogPostPage = () => {
                   className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                 >
                   <FaComment />
-                  <span className="font-medium">{commentCount}</span>
+                  <span className="font-medium">{actualCommentCount}</span>
                 </button>
 
                 <button
@@ -416,65 +417,10 @@ const BlogPostPage = () => {
 
         {/* Comments Section */}
         <div id="comments-section" className="mt-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Bình luận ({commentCount})
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                    <FaUser className="text-gray-600 dark:text-gray-400 text-sm" />
-                  </div>
-                  <div className="flex-1">
-                    <textarea
-                      placeholder="Viết bình luận..."
-                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                      rows="3"
-                    />
-                    <div className="flex justify-end mt-2">
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                        Bình luận
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sample comments */}
-                <div className="space-y-3">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">A</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="font-medium text-gray-900 dark:text-white text-sm">
-                            Anonymous User
-                          </span>
-                          <span className="text-gray-500 dark:text-gray-400 text-xs">
-                            2 giờ trước
-                          </span>
-                        </div>
-                        <p className="text-gray-700 dark:text-gray-300 text-sm">
-                          Bài viết rất hay và hữu ích! Cảm ơn tác giả đã chia
-                          sẻ.
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-4 mt-2 ml-2">
-                        <button className="text-gray-500 hover:text-blue-500 text-xs">
-                          Thích
-                        </button>
-                        <button className="text-gray-500 hover:text-blue-500 text-xs">
-                          Trả lời
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <CommentSection
+            postId={id}
+            onCommentCountChange={setActualCommentCount}
+          />
         </div>
       </div>
     </div>

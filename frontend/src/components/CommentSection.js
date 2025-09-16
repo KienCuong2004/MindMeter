@@ -12,7 +12,7 @@ import blogService from "../services/blogService";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 
-const CommentSection = ({ postId }) => {
+const CommentSection = ({ postId, onCommentCountChange }) => {
   const { t, i18n } = useTranslation();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +41,13 @@ const CommentSection = ({ postId }) => {
   useEffect(() => {
     loadComments();
   }, [loadComments]);
+
+  // Notify parent component when comment count changes
+  useEffect(() => {
+    if (onCommentCountChange) {
+      onCommentCountChange(comments.length);
+    }
+  }, [comments.length, onCommentCountChange]);
 
   const loadMoreComments = async () => {
     if (loading || !hasMore) return;
@@ -232,7 +239,7 @@ const CommentSection = ({ postId }) => {
       {/* Comment Form */}
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          {t("blog.comment.title")}
+          {t("blog.comment.title")} ({comments.length})
         </h3>
 
         <form onSubmit={handleSubmitComment}>
