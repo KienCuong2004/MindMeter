@@ -67,7 +67,6 @@ const BlogListPage = () => {
         };
 
         setUser(userObject);
-        console.log("User loaded in BlogListPage:", userObject);
       } catch (error) {
         console.error("Error decoding token:", error);
         localStorage.removeItem("token");
@@ -269,12 +268,10 @@ const BlogListPage = () => {
 
   const handleNotificationClick = () => {
     // Handle notification click
-    console.log("Notification clicked");
   };
 
   const handleStartTour = () => {
     // Handle start tour
-    console.log("Start tour clicked");
   };
 
   if (loading) {

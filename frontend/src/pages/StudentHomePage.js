@@ -83,10 +83,6 @@ const StudentHomePage = () => {
       // Clear the flags from localStorage
       localStorage.removeItem("requiresPasswordChange");
       localStorage.removeItem("passwordChangeMessage");
-
-      console.log(
-        "[StudentHomePage] Showing password change modal for new OAuth user"
-      );
     }
   }, []);
 

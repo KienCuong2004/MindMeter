@@ -38,9 +38,6 @@ export default function AuthCallback() {
           if (message) {
             localStorage.setItem("passwordChangeMessage", message);
           }
-          console.log(
-            "[AuthCallback] New user with temporary password - redirecting to home with password change modal"
-          );
         }
       } catch (error) {
         console.error("[AuthCallback] Error decoding token:", error);

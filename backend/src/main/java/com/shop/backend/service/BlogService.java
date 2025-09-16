@@ -440,7 +440,15 @@ public class BlogService {
         dto.setAuthorName(post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName());
         dto.setAuthorAvatar(post.getAuthor().getAvatarUrl());
         dto.setStatus(post.getStatus());
-        dto.setFeaturedImage(post.getFeaturedImage());
+        
+        // Fix featured image URL to include base URL
+        String featuredImage = post.getFeaturedImage();
+        if (featuredImage != null && !featuredImage.startsWith("http")) {
+            // Add base URL for relative paths
+            featuredImage = "http://localhost:8080" + featuredImage;
+        }
+        dto.setFeaturedImage(featuredImage);
+        
         dto.setViewCount(post.getViewCount());
         dto.setLikeCount(post.getLikeCount());
         dto.setCommentCount(post.getCommentCount());
