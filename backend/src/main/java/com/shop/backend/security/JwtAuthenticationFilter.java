@@ -59,8 +59,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Luôn set lại authentication context nếu có JWT
         if (username != null) {
             try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                logger.info("[JwtAuthFilter] User {} authorities: {}", username, userDetails.getAuthorities());
+                UserDetails userDetails;
+                
+                // Kiểm tra nếu là anonymous session
+                if (username.startsWith("anon_")) {
+                    // Tạo UserDetails ảo cho anonymous session
+                    userDetails = new org.springframework.security.core.userdetails.User(
+                        username, // sessionId
+                        "", // password rỗng
+                        java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT"))
+                    );
+                    logger.info("[JwtAuthFilter] Anonymous session detected: {}", username);
+                } else {
+                    // Load user thật từ database
+                    userDetails = userDetailsService.loadUserByUsername(username);
+                    logger.info("[JwtAuthFilter] User {} authorities: {}", username, userDetails.getAuthorities());
+                }
                 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

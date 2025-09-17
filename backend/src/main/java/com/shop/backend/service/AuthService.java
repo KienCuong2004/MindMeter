@@ -87,88 +87,94 @@ public class AuthService {
         return new AuthResponse(token, user.getEmail(), user.getRole(), convertToUserDTO(user), false, null);
     }
 
-    @Transactional
     public AuthResponse createAnonymousUser() {
-        // Tạo tài khoản ẩn danh với thông tin tạm thời
-        User user = new User();
-        user.setEmail(null); // Email null cho user ẩn danh
-        user.setPassword(null); // Password null cho user ẩn danh
-        user.setFirstName("Người dùng");
-        user.setLastName("Ẩn danh");
-        user.setRole(Role.STUDENT);
-        user.setStatus(User.Status.ACTIVE);
-        user.setAnonymous(true);
+        try {
+            // Tạo session ID duy nhất cho anonymous user
+            String sessionId = "anon_" + System.currentTimeMillis() + "_" + random.nextInt(10000);
+            
+            // Tạo JWT token cho anonymous session (không lưu vào database)
+            java.util.Map<String, Object> claims = new java.util.HashMap<>();
+            claims.put("role", "STUDENT");
+            claims.put("firstName", "Anonymous");
+            claims.put("lastName", "User");
+            claims.put("anonymous", true);
+            claims.put("sessionId", sessionId);
+            claims.put("userId", null); // Không có user ID thật
 
-        userRepository.save(user);
+            String token = jwtService.generateToken(
+                claims,
+                new org.springframework.security.core.userdetails.User(
+                    sessionId, // Username = sessionId
+                    "", // Password rỗng
+                    java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT"))
+                )
+            );
 
-        // Tạo JWT token cho user ẩn danh
-        java.util.Map<String, Object> claims = new java.util.HashMap<>();
-        claims.put("role", user.getRole().name().toUpperCase());
-        claims.put("firstName", user.getFirstName());
-        claims.put("lastName", user.getLastName());
-        claims.put("anonymous", true);
-        claims.put("userId", user.getId());
+            // Tạo UserDTO ảo cho frontend (không lưu vào database)
+            UserDTO anonymousUserDTO = new UserDTO();
+            anonymousUserDTO.setId(null); // Không có ID thật
+            anonymousUserDTO.setEmail(null); // Không có email
+            anonymousUserDTO.setFirstName("Anonymous");
+            anonymousUserDTO.setLastName("User");
+            anonymousUserDTO.setRole("STUDENT");
+            anonymousUserDTO.setStatus("ACTIVE");
+            anonymousUserDTO.setPlan("FREE");
 
-        String token = jwtService.generateToken(
-            claims,
-            new org.springframework.security.core.userdetails.User(
-                "anonymous_" + user.getId(), // Username tạm thời
-                "", // Password rỗng
-                java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-            )
-        );
-
-        return new AuthResponse(token, null, user.getRole(), convertToUserDTO(user), false, null);
+            return new AuthResponse(token, null, Role.STUDENT, anonymousUserDTO, true, null);
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể tạo session ẩn danh: " + e.getMessage());
+        }
     }
 
     @Transactional
     public AuthResponse upgradeAnonymousUser(Long userId, UpgradeAnonymousRequest request) {
-        // Tìm user ẩn danh
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản ẩn danh"));
-
-        if (!user.isAnonymous()) {
-            throw new RuntimeException("Tài khoản này không phải là tài khoản ẩn danh");
-        }
+        // Với session-based anonymous, không có user ID thật
+        // Tạo user mới từ thông tin upgrade request
 
         // Kiểm tra email đã tồn tại chưa
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email đã tồn tại");
         }
 
-        // Cập nhật thông tin user
+        // Tạo user mới từ thông tin upgrade
+        User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setPhone(request.getPhone());
+        user.setRole(Role.STUDENT);
+        user.setStatus(User.Status.ACTIVE);
+        user.setPlan("FREE");
         user.setAnonymous(false);
-        user.setAvatarUrl("/src/assets/images/User-avatar.png"); // Avatar mặc định cho user upgrade từ anonymous
+        user.setAvatarUrl("/src/assets/images/User-avatar.png"); // Avatar mặc định
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         // Gửi email chào mừng
-        sendRegisterSuccessEmail(user.getEmail(), user.getFirstName());
+        sendRegisterSuccessEmail(savedUser.getEmail(), savedUser.getFirstName());
 
         // Tạo JWT token mới
         java.util.Map<String, Object> claims = new java.util.HashMap<>();
-        claims.put("role", user.getRole().name().toUpperCase());
-        claims.put("firstName", user.getFirstName());
-        claims.put("lastName", user.getLastName());
+        claims.put("role", savedUser.getRole().name().toUpperCase());
+        claims.put("firstName", savedUser.getFirstName());
+        claims.put("lastName", savedUser.getLastName());
         claims.put("anonymous", false);
-        claims.put("avatarUrl", user.getAvatarUrl()); // Thêm thông tin avatar
-        claims.put("plan", user.getPlan()); // Thêm thông tin plan
+        claims.put("avatarUrl", savedUser.getAvatarUrl());
+        claims.put("plan", savedUser.getPlan());
+        claims.put("userId", savedUser.getId());
 
         String token = jwtService.generateToken(
             claims,
             new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                savedUser.getEmail(),
+                savedUser.getPassword(),
+                java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + savedUser.getRole().name()))
             )
         );
 
-        return new AuthResponse(token, user.getEmail(), user.getRole(), convertToUserDTO(user), false, null);
+        return new AuthResponse(token, savedUser.getEmail(), savedUser.getRole(), convertToUserDTO(savedUser), false, null);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -338,4 +344,5 @@ public class AuthService {
             // Có thể log lỗi gửi mail nhưng không throw để không ảnh hưởng flow đổi mật khẩu
         }
     }
+
 } 

@@ -59,42 +59,53 @@ public class DepressionTestController {
             @RequestBody DepressionTestRequest request,
             Authentication authentication) {
         User user;
+        Long userId;
         
         if (authentication == null || !authentication.isAuthenticated()) {
             // Handle anonymous user case - create a temporary anonymous user
             user = new User();
-            user.setId(0L); // Temporary ID for anonymous users
+            user.setId(null); // No real ID for anonymous users
             user.setEmail("anonymous@temp.com");
             user.setFirstName("Anonymous");
             user.setLastName("User");
             user.setRole(Role.STUDENT);
             user.setStatus(User.Status.ACTIVE);
+            userId = null; // Anonymous users don't have real user ID
         } else {
             String userName = authentication.getName();
-            if (userName.startsWith("anonymous_")) {
-                Long userId = Long.parseLong(userName.substring("anonymous_".length()));
-                user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("Anonymous user not found"));
+            if (userName.startsWith("anon_")) {
+                // Session-based anonymous user - no database record
+                user = new User();
+                user.setId(null);
+                user.setEmail(null);
+                user.setFirstName("Anonymous");
+                user.setLastName("User");
+                user.setRole(Role.STUDENT);
+                user.setStatus(User.Status.ACTIVE);
+                userId = null; // Anonymous users don't have real user ID
             } else {
                 user = userRepository.findByEmail(userName)
                     .orElseThrow(() -> new RuntimeException("User not found"));
+                userId = user.getId();
             }
         }
-        DepressionTestResponse response = depressionTestService.submitTest(user.getId(), request);
+        DepressionTestResponse response = depressionTestService.submitTest(userId, request);
         
-        // Send real-time notification
-        String testType = request.getTestKey() != null ? request.getTestKey() : "DASS-21";
-        String severity = response.getSeverity() != null ? response.getSeverity() : "UNKNOWN";
-        String message = String.format("Người dùng %s vừa hoàn thành test %s với mức độ %s", 
-            user.getFullName(), testType, severity);
-        
-        notificationService.sendTestResultNotification(user.getId(), testType, severity, message);
-        
-        // Send severe alert if needed
-        if ("SEVERE".equals(severity)) {
-            String severeMessage = String.format("⚠️ CẢNH BÁO: Người dùng %s có kết quả test %s ở mức NGHIÊM TRỌNG", 
-                user.getFullName(), testType);
-            notificationService.sendSevereTestAlert(user.getId(), testType, severeMessage);
+        // Send real-time notification (only for authenticated users)
+        if (userId != null) {
+            String testType = request.getTestKey() != null ? request.getTestKey() : "DASS-21";
+            String severity = response.getSeverity() != null ? response.getSeverity() : "UNKNOWN";
+            String message = String.format("Người dùng %s vừa hoàn thành test %s với mức độ %s", 
+                user.getFullName(), testType, severity);
+            
+            notificationService.sendTestResultNotification(userId, testType, severity, message);
+            
+            // Send severe alert if needed
+            if ("SEVERE".equals(severity)) {
+                String severeMessage = String.format("⚠️ CẢNH BÁO: Người dùng %s có kết quả test %s ở mức NGHIÊM TRỌNG", 
+                    user.getFullName(), testType);
+                notificationService.sendSevereTestAlert(userId, testType, severeMessage);
+            }
         }
         
         return ResponseEntity.ok(response);

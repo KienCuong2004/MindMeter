@@ -296,49 +296,56 @@ public class DepressionTestService {
             severityLevel = determineSeverityLevel(totalScore);
         }
         
-        // Save test result
-        DepressionTestResult testResult = new DepressionTestResult();
-        testResult.setTotalScore(totalScore);
-        testResult.setDiagnosis(diagnosis);
-        testResult.setSeverityLevel(severityLevel);
-        testResult.setUser(new User()); // Set user by ID
-        testResult.getUser().setId(userId);
-        testResult.setRecommendation(recommendation);
-        testResult.setTestType(request.getTestType());
-        testResult.setLanguage(DepressionTestResult.Language.valueOf(language.toUpperCase()));
+        // Save test result (only for authenticated users)
+        DepressionTestResult testResult = null;
+        if (userId != null) {
+            testResult = new DepressionTestResult();
+            testResult.setTotalScore(totalScore);
+            testResult.setDiagnosis(diagnosis);
+            testResult.setSeverityLevel(severityLevel);
+            testResult.setUser(new User()); // Set user by ID
+            testResult.getUser().setId(userId);
+            testResult.setRecommendation(recommendation);
+            testResult.setTestType(request.getTestType());
+            testResult.setLanguage(DepressionTestResult.Language.valueOf(language.toUpperCase()));
+            
+            testResult = testResultRepository.save(testResult);
+        }
         
-        testResult = testResultRepository.save(testResult);
-        
-        // Save individual answers
-        for (DepressionTestRequest.QuestionAnswer answer : request.getAnswers()) {
-            DepressionTestAnswer testAnswer = new DepressionTestAnswer();
-            testAnswer.setTestResult(testResult);
-            testAnswer.setQuestionId(answer.getQuestionId());
-            testAnswer.setAnswerValue(answer.getAnswerValue());
-            testAnswer.setLanguage(DepressionTestAnswer.Language.valueOf(language.toUpperCase()));
-            testAnswer.setQuestionTable("en".equals(language) ? 
-                DepressionTestAnswer.QuestionTable.DEPRESSION_QUESTIONS_EN : 
-                DepressionTestAnswer.QuestionTable.DEPRESSION_QUESTIONS_VI);
-            testAnswerRepository.save(testAnswer);
+        // Save individual answers (only for authenticated users)
+        if (userId != null && testResult != null) {
+            for (DepressionTestRequest.QuestionAnswer answer : request.getAnswers()) {
+                DepressionTestAnswer testAnswer = new DepressionTestAnswer();
+                testAnswer.setTestResult(testResult);
+                testAnswer.setQuestionId(answer.getQuestionId());
+                testAnswer.setAnswerValue(answer.getAnswerValue());
+                testAnswer.setLanguage(DepressionTestAnswer.Language.valueOf(language.toUpperCase()));
+                testAnswer.setQuestionTable("en".equals(language) ? 
+                    DepressionTestAnswer.QuestionTable.DEPRESSION_QUESTIONS_EN : 
+                    DepressionTestAnswer.QuestionTable.DEPRESSION_QUESTIONS_VI);
+                testAnswerRepository.save(testAnswer);
+            }
         }
         
         // Create response
         DepressionTestResponse response = new DepressionTestResponse();
-        response.setTestResultId(testResult.getId());
+        response.setTestResultId(testResult != null ? testResult.getId() : null);
         response.setTotalScore(totalScore);
         response.setDiagnosis(diagnosis);
         response.setSeverityLevel(severityLevel.name());
         response.setSeverity(severityLevel.name()); // Thêm setSeverity
         response.setRecommendation(recommendation);
-        response.setTestedAt(testResult.getTestedAt());
+        response.setTestedAt(testResult != null ? testResult.getTestedAt() : java.time.LocalDateTime.now());
         response.setShouldContactExpert(severityLevel == DepressionTestResult.SeverityLevel.SEVERE);
         
-        // Gửi email kết quả test
-        try {
-            emailService.sendTestResultEmail(userId, response, request.getTestType());
-        } catch (Exception e) {
-            // Log error nhưng không ảnh hưởng đến việc submit test
-            System.err.println("Failed to send test result email: " + e.getMessage());
+        // Gửi email kết quả test (chỉ cho user đã đăng ký)
+        if (userId != null) {
+            try {
+                emailService.sendTestResultEmail(userId, response, request.getTestType());
+            } catch (Exception e) {
+                // Log error nhưng không ảnh hưởng đến việc submit test
+                System.err.println("Failed to send test result email: " + e.getMessage());
+            }
         }
         
         return response;
