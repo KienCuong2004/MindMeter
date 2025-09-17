@@ -544,13 +544,16 @@ export default function ExpertStudentsPage({ handleLogout: propHandleLogout }) {
         )}
         <div className="flex justify-center w-full">
           <div className="max-w-7xl w-full mx-auto rounded-2xl shadow-lg border border-blue-200 dark:border-gray-600 bg-white dark:bg-gray-800 overflow-hidden">
-            <div className="overflow-x-auto w-full">
+            <div
+              className="overflow-x-auto w-full"
+              style={{ overflowX: "hidden" }}
+            >
               {filtered.length === 0 ? (
                 <div className="text-center py-10 text-gray-500 dark:text-gray-300 text-lg">
                   {t("noStudentTestFound")}
                 </div>
               ) : (
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-2xl shadow-xl">
+                <table className="w-full divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-2xl shadow-xl">
                   <colgroup>
                     <col style={{ width: "22%" }} />
                     <col style={{ width: "12%" }} />
@@ -562,25 +565,25 @@ export default function ExpertStudentsPage({ handleLogout: propHandleLogout }) {
                   </colgroup>
                   <thead className="bg-blue-50 dark:bg-blue-900">
                     <tr>
-                      <th className="px-4 py-4 text-left text-base font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700">
+                      <th className="px-2 py-4 text-left text-sm font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700 w-1/6 min-w-[120px]">
                         {t("studentNameSurveyHeader")}
                       </th>
-                      <th className="px-4 py-4 text-left text-base font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700">
+                      <th className="px-2 py-4 text-left text-sm font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700 w-1/6 min-w-[100px]">
                         {t("emailHeader")}
                       </th>
-                      <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700">
+                      <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700 w-1/6 min-w-[60px]">
                         {t("scoreHeader")}
                       </th>
-                      <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700">
+                      <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700 w-1/6 min-w-[120px] hidden lg:table-cell">
                         {t("diagnosisHeader")}
                       </th>
-                      <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700">
+                      <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700 w-1/6 min-w-[80px]">
                         {t("severityHeader")}
                       </th>
-                      <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700">
+                      <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700 w-1/6 min-w-[100px] hidden md:table-cell">
                         {t("surveyedAtHeader")}
                       </th>
-                      <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700">
+                      <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-blue-200 uppercase tracking-wider border-b-2 border-blue-200 dark:border-blue-700 w-1/6 min-w-[120px]">
                         {t("actionHeader")}
                       </th>
                     </tr>
@@ -588,23 +591,32 @@ export default function ExpertStudentsPage({ handleLogout: propHandleLogout }) {
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {paginated.map((test) => (
                       <tr key={test.id}>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <td className="px-2 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                          <div
+                            className="truncate"
+                            title={formatStudentName(test.studentName)}
+                          >
                             {formatStudentName(test.studentName)}
                           </div>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                          {test.email}
+                        <td className="px-2 py-4 text-sm text-gray-900 dark:text-white">
+                          <div className="truncate" title={test.email}>
+                            {test.email}
+                          </div>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-900 dark:text-white">
-                          {test.totalScore}
+                        <td className="px-2 py-4 text-center text-sm text-gray-900 dark:text-white">
+                          <div className="font-bold text-lg">
+                            {test.totalScore}
+                          </div>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-900 dark:text-white">
-                          {test.diagnosis}
+                        <td className="px-2 py-4 text-center text-sm text-gray-900 dark:text-white hidden lg:table-cell">
+                          <div className="truncate" title={test.diagnosis}>
+                            {test.diagnosis}
+                          </div>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-center">
+                        <td className="px-2 py-4 text-center">
                           <span
-                            className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap ${
                               test.severityLevel === "SEVERE"
                                 ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                                 : test.severityLevel === "MODERATE"
@@ -619,40 +631,59 @@ export default function ExpertStudentsPage({ handleLogout: propHandleLogout }) {
                             {getSeverityLabel(test.severityLevel, t)}
                           </span>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-900 dark:text-white">
-                          {test.testedAt
-                            ? new Date(test.testedAt).toLocaleDateString(
-                                "vi-VN"
-                              )
-                            : ""}
+                        <td className="px-2 py-4 text-center text-sm text-gray-900 dark:text-white hidden md:table-cell">
+                          <div
+                            className="truncate"
+                            title={
+                              test.testedAt
+                                ? new Date(test.testedAt).toLocaleDateString(
+                                    "vi-VN"
+                                  )
+                                : ""
+                            }
+                          >
+                            {test.testedAt
+                              ? new Date(test.testedAt).toLocaleDateString(
+                                  "vi-VN"
+                                )
+                              : ""}
+                          </div>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium">
-                          <button
-                            className="text-indigo-600 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-400 mr-3"
-                            onClick={() => {
-                              setSelectedTest(test);
-                              setOpenModal(true);
-                            }}
-                          >
-                            {t("viewDetails")}
-                          </button>
-                          <button
-                            className="text-green-600 dark:text-green-300 hover:text-green-900 dark:hover:text-green-400"
-                            onClick={() => {
-                              setAdviceStudent({
-                                id: test.userId, // Sử dụng trực tiếp userId từ backend
-                                name: formatStudentName(test.studentName),
-                                email: test.email,
-                                totalScore: test.totalScore,
-                                severityLevel: test.severityLevel,
-                                diagnosis: test.diagnosis,
-                              });
-                              setAdviceTestId(test.id);
-                              setOpenAdviceModal(true);
-                            }}
-                          >
-                            {t("sendAdvice")}
-                          </button>
+                        <td className="px-2 py-4 text-center text-sm font-medium">
+                          <div className="flex gap-1 justify-center items-center flex-wrap">
+                            <button
+                              className="text-indigo-600 dark:text-indigo-300 hover:text-indigo-900 dark:hover:text-indigo-400 text-xs px-2 py-1 rounded"
+                              onClick={() => {
+                                setSelectedTest(test);
+                                setOpenModal(true);
+                              }}
+                            >
+                              <span className="hidden sm:inline">
+                                {t("viewDetails")}
+                              </span>
+                              <span className="sm:hidden">View</span>
+                            </button>
+                            <button
+                              className="text-green-600 dark:text-green-300 hover:text-green-900 dark:hover:text-green-400 text-xs px-2 py-1 rounded"
+                              onClick={() => {
+                                setAdviceStudent({
+                                  id: test.userId, // Sử dụng trực tiếp userId từ backend
+                                  name: formatStudentName(test.studentName),
+                                  email: test.email,
+                                  totalScore: test.totalScore,
+                                  severityLevel: test.severityLevel,
+                                  diagnosis: test.diagnosis,
+                                });
+                                setAdviceTestId(test.id);
+                                setOpenAdviceModal(true);
+                              }}
+                            >
+                              <span className="hidden sm:inline">
+                                {t("sendAdvice")}
+                              </span>
+                              <span className="sm:hidden">Advice</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
