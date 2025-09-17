@@ -7,6 +7,7 @@
   "navAbout": "About",
   "navTestList": "Test List",
   "navBlog": "Blog",
+  "navSavedArticles": "Saved Articles",
   "navContact": "Contact",
   "navPrivacyPolicy": "Privacy Policy",
   "navSecurityPolicy": "Security Policy",
@@ -448,6 +449,7 @@
   "common": {
     "notification": "Notification",
     "error": "Error",
+    "cancel": "Cancel",
     "firstName": "First Name",
     "lastName": "Last Name",
     "fullName": "Full Name",
@@ -1723,6 +1725,35 @@
       "error": {
         "title": "Failed to load comments",
         "retry": "Try Again"
+      }
+    },
+    "savedArticles": {
+      "title": "Saved Articles",
+      "subtitle": "{{count}} saved articles",
+      "search": {
+        "placeholder": "Search saved articles..."
+      },
+      "sort": {
+        "recent": "Most Recent",
+        "title": "Title A-Z",
+        "author": "Author A-Z"
+      },
+      "empty": {
+        "title": "No saved articles yet",
+        "description": "Save articles you want to read later by clicking the bookmark icon.",
+        "browseArticles": "Browse Articles"
+      },
+      "noResults": {
+        "title": "No articles found",
+        "description": "Try adjusting your search terms or filters.",
+        "clearSearch": "Clear Search"
+      },
+      "unsave": "Remove from saved",
+      "viewArticle": "View Article",
+      "clearAll": "Clear All",
+      "clearConfirm": {
+        "title": "Clear All Saved Articles",
+        "description": "Are you sure you want to remove all saved articles? This action cannot be undone."
       }
     }
   }

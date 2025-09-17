@@ -7,6 +7,7 @@
   "navAbout": "Giới thiệu",
   "navTestList": "Danh sách bài test",
   "navBlog": "Bài viết",
+  "navSavedArticles": "Bài viết đã lưu",
   "navContact": "Liên hệ",
   "navPrivacyPolicy": "Chính sách quyền riêng tư",
   "navSecurityPolicy": "Chính sách bảo mật",
@@ -446,6 +447,7 @@
   "common": {
     "notification": "Thông báo",
     "error": "Lỗi",
+    "cancel": "Hủy",
     "firstName": "Họ",
     "lastName": "Tên",
     "fullName": "Họ tên",
@@ -1721,6 +1723,35 @@
       "error": {
         "title": "Không thể tải bình luận",
         "retry": "Thử lại"
+      }
+    },
+    "savedArticles": {
+      "title": "Bài viết đã lưu",
+      "subtitle": "{{count}} bài viết đã lưu",
+      "search": {
+        "placeholder": "Tìm kiếm bài viết đã lưu..."
+      },
+      "sort": {
+        "recent": "Mới nhất",
+        "title": "Tiêu đề A-Z",
+        "author": "Tác giả A-Z"
+      },
+      "empty": {
+        "title": "Chưa có bài viết nào được lưu",
+        "description": "Lưu các bài viết bạn muốn đọc sau bằng cách nhấp vào biểu tượng bookmark.",
+        "browseArticles": "Duyệt Bài Viết"
+      },
+      "noResults": {
+        "title": "Không tìm thấy bài viết nào",
+        "description": "Hãy thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc.",
+        "clearSearch": "Xóa Tìm Kiếm"
+      },
+      "unsave": "Bỏ lưu",
+      "viewArticle": "Xem Bài Viết",
+      "clearAll": "Xóa Tất Cả",
+      "clearConfirm": {
+        "title": "Xóa Tất Cả Bài Viết Đã Lưu",
+        "description": "Bạn có chắc chắn muốn xóa tất cả bài viết đã lưu? Hành động này không thể hoàn tác."
       }
     }
   }

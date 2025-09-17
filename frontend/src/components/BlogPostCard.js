@@ -14,6 +14,7 @@ import {
 import blogService from "../services/blogService";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
+import { useSavedArticles } from "../contexts/SavedArticlesContext";
 
 const BlogPostCard = ({
   post,
@@ -24,8 +25,9 @@ const BlogPostCard = ({
   currentUser,
 }) => {
   const { t, i18n } = useTranslation();
+  const { toggleSaveArticle, isArticleSaved } = useSavedArticles();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
-  const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
+  const [isBookmarked, setIsBookmarked] = useState(isArticleSaved(post.id));
   const [likeCount, setLikeCount] = useState(post.likeCount || 0);
   const [commentCount] = useState(post.commentCount || 0);
   const [shareCount, setShareCount] = useState(post.shareCount || 0);
@@ -56,9 +58,12 @@ const BlogPostCard = ({
 
     setIsLoading(true);
     try {
-      const result = await blogService.toggleBookmark(post.id);
-      setIsBookmarked(result);
-      if (onBookmark) onBookmark(post.id, result);
+      // Use the context to toggle save state
+      const newSavedState = toggleSaveArticle(post);
+      setIsBookmarked(newSavedState);
+
+      // Also call the original onBookmark callback if provided
+      if (onBookmark) onBookmark(post.id, newSavedState);
     } catch (error) {
       console.error("Error toggling bookmark:", error);
     } finally {

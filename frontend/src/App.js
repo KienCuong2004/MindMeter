@@ -6,6 +6,7 @@ import ScrollToTop from "./ScrollToTop";
 import "./App.css";
 import { THEME_CONSTANTS } from "./constants/theme";
 import "./utils/cleanupAllData"; // Tự động cleanup dữ liệu cũ
+import { SavedArticlesProvider } from "./contexts/SavedArticlesContext";
 
 export const ThemeContext = createContext();
 
@@ -28,10 +29,12 @@ function App() {
   return (
     <HelmetProvider>
       <ThemeContext.Provider value={{ theme, setTheme }}>
-        <Router>
-          <ScrollToTop />
-          <AppRoutes />
-        </Router>
+        <SavedArticlesProvider>
+          <Router>
+            <ScrollToTop />
+            <AppRoutes />
+          </Router>
+        </SavedArticlesProvider>
       </ThemeContext.Provider>
     </HelmetProvider>
   );

@@ -12,6 +12,7 @@ import {
   FaClock,
   FaRocket,
   FaBullseye,
+  FaBookmark,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -20,6 +21,7 @@ import { useEffect } from "react";
 import { authFetch } from "../authFetch";
 import { isAnonymousUser } from "../services/anonymousService";
 import { THEME_CONSTANTS } from "../constants/theme";
+import SavedArticlesBadge from "./SavedArticlesBadge";
 
 // Utility function to handle Google Profile Image URLs
 function getOptimizedAvatarUrl(avatarUrl, timestamp = null) {
@@ -919,6 +921,19 @@ export default function DashboardHeader({
                     <span>{t("history")}</span>
                   </div>
                 )}
+                {/* Bài viết đã lưu - cho tất cả users */}
+                <div
+                  className="px-4 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer relative"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/saved-articles");
+                    setShowMenu(false);
+                  }}
+                >
+                  <FaBookmark className="text-yellow-500 dark:text-yellow-400" />
+                  <span>{t("navSavedArticles")}</span>
+                  <SavedArticlesBadge className="ml-auto" />
+                </div>
                 {/* Lịch làm việc - chỉ cho EXPERT */}
                 {user.role === "EXPERT" && !isAnonymousUser(user) && (
                   <div

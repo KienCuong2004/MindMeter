@@ -30,6 +30,7 @@ import UserGuidePage from "./pages/UserGuidePage";
 import TermsOfUse from "./pages/TermsOfUse";
 import BlogListPage from "./pages/BlogListPage";
 import BlogPostPage from "./pages/BlogPostPage";
+import SavedArticlesPage from "./pages/SavedArticlesPage";
 import BlogErrorBoundary from "./components/BlogErrorBoundary";
 import Disclaimer from "./pages/Disclaimer";
 import SecurityPolicy from "./pages/SecurityPolicy";
@@ -158,6 +159,7 @@ export default function AppRoutes() {
       "/contact",
       "/pricing",
       "/blog",
+      "/saved-articles",
       "/login",
       "/register",
       "/forgot-password",
@@ -165,6 +167,9 @@ export default function AppRoutes() {
 
     // Check if current path is a blog post detail page
     const isBlogPostPath = window.location.pathname.startsWith("/blog/post/");
+
+    // Check if current path is saved articles page
+    const isSavedArticlesPath = window.location.pathname === "/saved-articles";
 
     if (token) {
       try {
@@ -203,7 +208,8 @@ export default function AppRoutes() {
           if (
             !window.location.pathname.startsWith("/admin") &&
             !publicPaths.includes(window.location.pathname) &&
-            !isBlogPostPath
+            !isBlogPostPath &&
+            !isSavedArticlesPath
           ) {
             navigate("/admin/dashboard", { replace: true });
           }
@@ -212,7 +218,8 @@ export default function AppRoutes() {
           if (
             !window.location.pathname.startsWith("/expert") &&
             !publicPaths.includes(window.location.pathname) &&
-            !isBlogPostPath
+            !isBlogPostPath &&
+            !isSavedArticlesPath
           ) {
             navigate("/expert/dashboard", { replace: true });
           }
@@ -224,7 +231,8 @@ export default function AppRoutes() {
               window.location.pathname !== "/home" &&
               window.location.pathname !== "/appointments" &&
               !publicPaths.includes(window.location.pathname) &&
-              !isBlogPostPath)
+              !isBlogPostPath &&
+              !isSavedArticlesPath)
           ) {
             navigate("/home", { replace: true });
           }
@@ -282,6 +290,7 @@ export default function AppRoutes() {
         window.location.pathname !== "/" &&
         !publicPaths.includes(window.location.pathname) &&
         !isBlogPostPath &&
+        !isSavedArticlesPath &&
         !window.location.pathname.startsWith("/login") &&
         !window.location.pathname.startsWith("/register") &&
         !window.location.pathname.startsWith("/forgot-password")
@@ -416,6 +425,14 @@ export default function AppRoutes() {
         }
       />
       <Route
+        path="/saved-articles"
+        element={
+          <BlogErrorBoundary>
+            <SavedArticlesPage />
+          </BlogErrorBoundary>
+        }
+      />
+      <Route
         path="/login"
         element={
           <LoginForm
@@ -467,6 +484,14 @@ export default function AppRoutes() {
               </BlogErrorBoundary>
             }
           />
+          <Route
+            path="/saved-articles"
+            element={
+              <BlogErrorBoundary>
+                <SavedArticlesPage />
+              </BlogErrorBoundary>
+            }
+          />
           <Route path="/student/test" element={<StudentTestPage />} />
           <Route
             path="/student/test-result"
@@ -508,6 +533,14 @@ export default function AppRoutes() {
             element={
               <BlogErrorBoundary>
                 <BlogPostPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
+            path="/saved-articles"
+            element={
+              <BlogErrorBoundary>
+                <SavedArticlesPage />
               </BlogErrorBoundary>
             }
           />
@@ -603,6 +636,14 @@ export default function AppRoutes() {
             }
           />
           <Route
+            path="/saved-articles"
+            element={
+              <BlogErrorBoundary>
+                <SavedArticlesPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
             path="/login"
             element={
               <LoginForm
@@ -680,6 +721,14 @@ export default function AppRoutes() {
             }
           />
           <Route
+            path="/saved-articles"
+            element={
+              <BlogErrorBoundary>
+                <SavedArticlesPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
             path="/login"
             element={
               <LoginForm
@@ -750,6 +799,14 @@ export default function AppRoutes() {
             element={
               <BlogErrorBoundary>
                 <BlogPostPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
+            path="/saved-articles"
+            element={
+              <BlogErrorBoundary>
+                <SavedArticlesPage />
               </BlogErrorBoundary>
             }
           />
