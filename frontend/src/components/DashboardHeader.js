@@ -490,12 +490,15 @@ export default function DashboardHeader({
               {t("navTestList")}
             </span>
           )}
-          <span
-            className="cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-gray-700 dark:text-gray-200 transition-colors whitespace-nowrap"
-            onClick={() => navigate("/blog")}
-          >
-            {t("navBlog")}
-          </span>
+          {/* Blog link - chỉ hiển thị cho user đã đăng nhập (không phải anonymous) */}
+          {user && !user.anonymous && (
+            <span
+              className="cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-gray-700 dark:text-gray-200 transition-colors whitespace-nowrap"
+              onClick={() => navigate("/blog")}
+            >
+              {t("navBlog")}
+            </span>
+          )}
           <span
             className="cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-gray-700 dark:text-gray-200 transition-colors whitespace-nowrap"
             onClick={() => navigate("/contact")}
@@ -644,15 +647,18 @@ export default function DashboardHeader({
             {t("navTestList")}
           </span>
           <div className="w-full border-t border-gray-200 dark:border-gray-700 my-1" />
-          <span
-            className="py-2 sm:py-3 w-full text-center font-semibold text-base sm:text-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors"
-            onClick={() => {
-              navigate("/blog");
-              setShowMobileMenu(false);
-            }}
-          >
-            {t("navBlog")}
-          </span>
+          {/* Blog link - chỉ hiển thị cho user đã đăng nhập (không phải anonymous) */}
+          {user && !user.anonymous && (
+            <span
+              className="py-2 sm:py-3 w-full text-center font-semibold text-base sm:text-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors"
+              onClick={() => {
+                navigate("/blog");
+                setShowMobileMenu(false);
+              }}
+            >
+              {t("navBlog")}
+            </span>
+          )}
           <span
             className="py-2 sm:py-3 w-full text-center font-semibold text-base sm:text-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors"
             onClick={() => {

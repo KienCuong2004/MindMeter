@@ -409,22 +409,6 @@ export default function AppRoutes() {
       <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route
-        path="/blog"
-        element={
-          <BlogErrorBoundary>
-            <BlogListPage />
-          </BlogErrorBoundary>
-        }
-      />
-      <Route
-        path="/blog/post/:id"
-        element={
-          <BlogErrorBoundary>
-            <BlogPostPage />
-          </BlogErrorBoundary>
-        }
-      />
-      <Route
         path="/saved-articles"
         element={
           <BlogErrorBoundary>
@@ -468,22 +452,6 @@ export default function AppRoutes() {
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route
-            path="/blog"
-            element={
-              <BlogErrorBoundary>
-                <BlogListPage />
-              </BlogErrorBoundary>
-            }
-          />
-          <Route
-            path="/blog/post/:id"
-            element={
-              <BlogErrorBoundary>
-                <BlogPostPage />
-              </BlogErrorBoundary>
-            }
-          />
           <Route
             path="/saved-articles"
             element={
@@ -689,7 +657,7 @@ export default function AppRoutes() {
             element={<ExpertSchedulePage handleLogout={handleLogout} />}
           />
         </>
-      ) : user.role === "ANONYMOUS" || user.role === "STUDENT" ? (
+      ) : user.role === "STUDENT" ? (
         <>
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/home" element={<StudentHomePage />} />
@@ -704,22 +672,6 @@ export default function AppRoutes() {
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route
-            path="/blog"
-            element={
-              <BlogErrorBoundary>
-                <BlogListPage />
-              </BlogErrorBoundary>
-            }
-          />
-          <Route
-            path="/blog/post/:id"
-            element={
-              <BlogErrorBoundary>
-                <BlogPostPage />
-              </BlogErrorBoundary>
-            }
-          />
           <Route
             path="/saved-articles"
             element={
@@ -786,22 +738,6 @@ export default function AppRoutes() {
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route
-            path="/blog"
-            element={
-              <BlogErrorBoundary>
-                <BlogListPage />
-              </BlogErrorBoundary>
-            }
-          />
-          <Route
-            path="/blog/post/:id"
-            element={
-              <BlogErrorBoundary>
-                <BlogPostPage />
-              </BlogErrorBoundary>
-            }
-          />
           <Route
             path="/saved-articles"
             element={
