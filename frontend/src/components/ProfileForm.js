@@ -480,7 +480,7 @@ export default function ProfileForm({
               onClick={onCancel}
               disabled={saving}
             >
-              {t("cancel") || "Hủy"}
+              {t("common.cancel")}
             </button>
             <button
               type="submit"

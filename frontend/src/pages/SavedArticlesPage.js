@@ -213,7 +213,9 @@ const SavedArticlesPage = () => {
                     {t("blog.savedArticles.title")}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 mt-2">
-                    {`${getSavedArticlesCount() || 0} bài viết đã lưu`}
+                    {`${getSavedArticlesCount() || 0} ${t(
+                      "blog.savedArticles.articleText"
+                    )}`}
                   </p>
                 </div>
               </div>

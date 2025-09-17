@@ -1728,6 +1728,7 @@
     "savedArticles": {
       "title": "Bài viết đã lưu",
       "subtitle": "{{count}} bài viết đã lưu",
+      "articleText": "bài viết đã lưu",
       "search": {
         "placeholder": "Tìm kiếm bài viết đã lưu..."
       },

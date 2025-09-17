@@ -1730,6 +1730,7 @@
     "savedArticles": {
       "title": "Saved Articles",
       "subtitle": "{{count}} saved articles",
+      "articleText": "saved articles",
       "search": {
         "placeholder": "Search saved articles..."
       },
