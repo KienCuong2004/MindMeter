@@ -502,11 +502,12 @@ export default function DashboardHeader({
           >
             {t("navContact")}
           </span>
-          {/* Nút bắt đầu tour - chỉ hiển thị cho STUDENT (không phải anonymous) */}
+          {/* Nút bắt đầu tour - chỉ hiển thị cho STUDENT (không phải anonymous) và chỉ trên trang Home */}
           {user &&
             user.role === "STUDENT" &&
             !isAnonymousUser(user) &&
-            onStartTour && (
+            onStartTour &&
+            window.location.pathname === "/home" && (
               <button
                 className="px-3 py-1.5 xl:px-4 xl:py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-xs xl:text-sm whitespace-nowrap"
                 onClick={(e) => {
@@ -682,11 +683,12 @@ export default function DashboardHeader({
             </>
           )}
 
-          {/* Nút Bắt đầu hướng dẫn cho STUDENT trong mobile menu (không phải anonymous) */}
+          {/* Nút Bắt đầu hướng dẫn cho STUDENT trong mobile menu (không phải anonymous) và chỉ trên trang Home */}
           {user &&
             user.role === "STUDENT" &&
             !isAnonymousUser(user) &&
-            onStartTour && (
+            onStartTour &&
+            window.location.pathname === "/home" && (
               <>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700 my-1" />
                 <button
