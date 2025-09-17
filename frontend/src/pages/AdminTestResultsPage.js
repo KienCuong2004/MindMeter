@@ -407,7 +407,10 @@ export default function AdminTestResultsPage() {
         )}
         <div className="flex justify-center w-full">
           <div className="max-w-7xl w-full mx-auto rounded-2xl shadow-lg border border-blue-200 bg-white overflow-hidden">
-            <div className="overflow-x-auto w-full">
+            <div
+              className="overflow-x-auto w-full"
+              style={{ overflowX: "hidden" }}
+            >
               {loading ? (
                 <div className="text-center py-10 text-gray-500 text-lg">
                   {t("loading")}
@@ -418,28 +421,28 @@ export default function AdminTestResultsPage() {
                 </div>
               ) : (
                 <>
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl">
+                  <table className="w-full divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl">
                     <thead className="bg-blue-50 dark:bg-gray-900">
                       <tr>
-                        <th className="px-4 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                        <th className="px-2 py-4 text-left text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700 w-1/6 min-w-[120px]">
                           {t("emailHeader")}
                         </th>
-                        <th className="px-4 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                        <th className="px-2 py-4 text-left text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700 w-1/6 min-w-[100px]">
                           {t("studentNameHeader")}
                         </th>
-                        <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                        <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700 w-1/6 min-w-[100px] hidden md:table-cell">
                           {t("testedAtHeader")}
                         </th>
-                        <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                        <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700 w-1/6 min-w-[80px]">
                           {t("severityHeader")}
                         </th>
-                        <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                        <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700 w-1/6 min-w-[60px]">
                           {t("scoreHeader")}
                         </th>
-                        <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                        <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700 w-1/6 min-w-[120px] hidden lg:table-cell">
                           {t("diagnosisHeader")}
                         </th>
-                        <th className="px-4 py-4 text-center text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                        <th className="px-2 py-4 text-center text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700 w-1/6 min-w-[100px]">
                           {t("actionHeader")}
                         </th>
                       </tr>
@@ -450,60 +453,92 @@ export default function AdminTestResultsPage() {
                           key={r.id}
                           className="bg-white even:bg-blue-50 dark:bg-gray-800 dark:even:bg-gray-900 align-middle hover:bg-blue-50 transition-colors"
                         >
-                          <td className="px-4 py-4 text-sm align-middle break-words max-w-[180px] truncate whitespace-nowrap overflow-hidden dark:text-white">
-                            {r.email}
+                          <td className="px-2 py-4 text-sm align-middle break-words dark:text-white">
+                            <div className="truncate" title={r.email}>
+                              {r.email}
+                            </div>
                           </td>
-                          <td className="px-4 py-4 text-sm align-middle max-w-[120px] truncate whitespace-nowrap overflow-hidden dark:text-white">
-                            {r.studentName}
+                          <td className="px-2 py-4 text-sm align-middle dark:text-white">
+                            <div className="truncate" title={r.studentName}>
+                              {r.studentName}
+                            </div>
                           </td>
-                          <td className="px-4 py-4 text-center align-middle max-w-[120px] truncate whitespace-nowrap overflow-hidden dark:text-white">
-                            {r.testedAt
-                              ? new Date(r.testedAt).toLocaleString(
-                                  i18n.language === "vi" ? "vi-VN" : "en-US"
-                                )
-                              : ""}
+                          <td className="px-2 py-4 text-center align-middle dark:text-white hidden md:table-cell">
+                            <div
+                              className="truncate"
+                              title={
+                                r.testedAt
+                                  ? new Date(r.testedAt).toLocaleString(
+                                      i18n.language === "vi" ? "vi-VN" : "en-US"
+                                    )
+                                  : ""
+                              }
+                            >
+                              {r.testedAt
+                                ? new Date(r.testedAt).toLocaleString(
+                                    i18n.language === "vi" ? "vi-VN" : "en-US"
+                                  )
+                                : ""}
+                            </div>
                           </td>
-                          <td className="px-4 py-4 text-center align-middle max-w-[140px] overflow-hidden dark:text-white">
+                          <td className="px-2 py-4 text-center align-middle dark:text-white">
                             <span
-                              className={`inline-block px-3 py-1 rounded-full text-sm font-bold shadow-sm border whitespace-normal break-words w-full
+                              className={`inline-block px-2 py-1 rounded-full text-xs font-bold shadow-sm border whitespace-nowrap
                               ${
                                 r.severityLevel === "SEVERE"
-                                  ? "bg-red-100 text-red-700 border-red-200"
+                                  ? "bg-red-100 text-red-700 border-red-200 dark:bg-red-800 dark:text-red-100"
                                   : r.severityLevel === "MILD"
-                                  ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                                  ? "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-800 dark:text-yellow-100"
                                   : r.severityLevel === "MINIMAL"
-                                  ? "bg-green-100 text-green-700 border-green-200"
-                                  : "bg-blue-100 text-blue-700 border-blue-200"
+                                  ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-800 dark:text-green-100"
+                                  : "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-800 dark:text-blue-100"
                               }
                             `}
                             >
                               {t(r.severityLevel?.toLowerCase() || "")}
                             </span>
                           </td>
-                          <td className="px-4 py-4 text-center align-middle max-w-[60px] truncate whitespace-nowrap overflow-hidden dark:text-white">
-                            {r.totalScore}
+                          <td className="px-2 py-4 text-center align-middle dark:text-white">
+                            <div className="font-bold text-lg">
+                              {r.totalScore}
+                            </div>
                           </td>
-                          <td className="px-4 py-4 text-center align-middle max-w-[180px] truncate whitespace-nowrap overflow-hidden dark:text-white">
-                            {t(
-                              `studentTestResultPage.diagnosisKeys.${r.diagnosis}`
-                            ) || r.diagnosis}
+                          <td className="px-2 py-4 text-center align-middle dark:text-white hidden lg:table-cell">
+                            <div
+                              className="truncate"
+                              title={
+                                t(
+                                  `studentTestResultPage.diagnosisKeys.${r.diagnosis}`
+                                ) || r.diagnosis
+                              }
+                            >
+                              {t(
+                                `studentTestResultPage.diagnosisKeys.${r.diagnosis}`
+                              ) || r.diagnosis}
+                            </div>
                           </td>
-                          <td className="px-4 py-4 text-center align-middle">
-                            <div className="flex gap-2 justify-center items-center h-full">
+                          <td className="px-2 py-4 text-center align-middle">
+                            <div className="flex gap-1 justify-center items-center h-full flex-wrap">
                               <button
-                                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-full flex items-center gap-2 font-bold shadow-sm transition-all text-base"
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded-full flex items-center gap-1 font-bold shadow-sm transition-all text-xs"
                                 title={t("viewDetails")}
                                 onClick={() => setViewTest(r)}
                               >
-                                <FaEye />
+                                <FaEye className="text-xs" />
+                                <span className="hidden sm:inline">
+                                  {t("view")}
+                                </span>
                               </button>
                               <button
-                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-full flex items-center gap-2 font-bold shadow-sm transition-all text-base disabled:opacity-60"
+                                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-full flex items-center gap-1 font-bold shadow-sm transition-all text-xs disabled:opacity-60"
                                 title={t("delete")}
                                 onClick={() => handleDelete(r.id)}
                                 disabled={deletingId === r.id}
                               >
-                                <FaTrash />
+                                <FaTrash className="text-xs" />
+                                <span className="hidden sm:inline">
+                                  {t("delete")}
+                                </span>
                               </button>
                             </div>
                           </td>
