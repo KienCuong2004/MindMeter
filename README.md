@@ -107,6 +107,14 @@
 - **Vietnamese & English**: Full bilingual support
 - **Dynamic Language Switching**: Seamless language changes
 - **Locale-specific Formatting**: Date, time, and number formatting
+
+### 🧪 Testing & Quality Assurance
+
+- **Comprehensive Unit Tests**: 37+ unit tests covering core services
+- **Integration Testing**: End-to-end API and authentication testing
+- **Service Layer Testing**: OtpService, PasswordGeneratorService, CurrencyService
+- **Test Coverage**: Automated testing with JUnit 5 and Mockito
+- **Quality Gates**: Automated testing in CI/CD pipeline
 - **Smart Fallbacks**: Automatic language fallback handling
 
 ## 🚀 Technology Stack
@@ -140,11 +148,18 @@
 - **Spring Mail**: Email service integration
 - **Google OAuth2**: Social authentication
 - **Micrometer**: Application metrics and monitoring
+- **JUnit 5**: Unit testing framework
+- **Mockito**: Mocking framework for testing
+- **Spring Boot Test**: Integration testing support
 
 ### DevOps & Tools
 
 - **Maven**: Java dependency management
 - **npm**: Frontend package management
+- **JUnit 5**: Unit testing framework
+- **Mockito**: Mocking framework for testing
+- **Spring Boot Test**: Integration testing support
+- **Jacoco**: Code coverage reporting
 - **Git**: Version control
 - **VS Code**: Development IDE
 - **Ngrok**: Local development tunneling
@@ -199,6 +214,13 @@ MindMeter/
 │   │   │   ├── ConnectionPoolMonitorService.java
 │   │   │   ├── AdminService.java
 │   │   │   ├── AuthService.java
+│   │   ├── test/java/com/shop/backend/
+│   │   │   ├── service/        # Unit tests for services
+│   │   │   │   ├── OtpServiceTest.java
+│   │   │   │   ├── PasswordGeneratorServiceTest.java
+│   │   │   │   └── CurrencyServiceTest.java
+│   │   │   ├── controller/     # Unit tests for controllers
+│   │   │   └── integration/    # Integration tests
 │   │   │   ├── ChatBotService.java
 │   │   │   ├── DepressionTestService.java
 │   │   │   └── ... (15+ more services)
@@ -503,11 +525,31 @@ cd backend
 mvn test
 ```
 
+**Test Coverage:**
+
+- **Unit Tests**: 37+ comprehensive unit tests
+- **Integration Tests**: Authentication and API endpoints
+- **Service Tests**: OtpService, PasswordGeneratorService, CurrencyService
+- **Test Framework**: JUnit 5, Mockito, Spring Boot Test
+
 ### Frontend Testing
 
 ```bash
 cd frontend
 npm test
+```
+
+### Running Specific Tests
+
+```bash
+# Run all tests
+mvn test
+
+# Run specific test class
+mvn test -Dtest=OtpServiceTest
+
+# Run tests with coverage report
+mvn test jacoco:report
 ```
 
 ### API Testing
@@ -599,6 +641,15 @@ spring.datasource.hikari.connection-timeout=60000
 - **Response Times**: 20-40% faster application response
 - **Database Throughput**: Significantly improved query performance
 - **Scalability**: Better handling of traffic spikes and load variations
+
+### **Testing & Quality Assurance**
+
+- **Unit Test Coverage**: 37+ comprehensive unit tests
+- **Service Layer Testing**: Core business logic validation
+- **Integration Testing**: End-to-end API testing
+- **Test Automation**: Automated testing in CI/CD pipeline
+- **Code Quality**: Mockito and JUnit 5 for robust testing
+- **Performance Testing**: Load testing and optimization validation
 
 ## 🤝 Contributing
 
