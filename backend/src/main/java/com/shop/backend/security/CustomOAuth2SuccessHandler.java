@@ -4,7 +4,6 @@ import com.shop.backend.model.User;
 import com.shop.backend.model.Role;
 import com.shop.backend.repository.UserRepository;
 import com.shop.backend.service.PasswordGeneratorService;
-import com.shop.backend.service.PasswordEmailService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -30,7 +29,6 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
 
     private final UserRepository userRepository;
     private final PasswordGeneratorService passwordGeneratorService;
-    private final PasswordEmailService passwordEmailService;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${jwt.secret}")
@@ -44,11 +42,9 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
 
     public CustomOAuth2SuccessHandler(UserRepository userRepository, 
                                      PasswordGeneratorService passwordGeneratorService,
-                                     PasswordEmailService passwordEmailService,
                                      PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordGeneratorService = passwordGeneratorService;
-        this.passwordEmailService = passwordEmailService;
         this.passwordEncoder = passwordEncoder;
     }
 

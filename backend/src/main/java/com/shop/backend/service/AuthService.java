@@ -20,7 +20,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Random;
 import com.shop.backend.dto.UserDTO;
-import com.shop.backend.service.PasswordValidationService;
 
 @Service
 @RequiredArgsConstructor
