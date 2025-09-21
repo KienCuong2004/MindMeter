@@ -1,8 +1,8 @@
 package com.shop.backend.service;
 
-import com.shop.backend.dto.appointment.AutoBookingRequest;
-import com.shop.backend.dto.appointment.AutoBookingResponse;
-import com.shop.backend.dto.appointment.AppointmentRequest;
+import com.shop.backend.dto.auth.appointment.AppointmentRequest;
+import com.shop.backend.dto.auth.appointment.AutoBookingRequest;
+import com.shop.backend.dto.auth.appointment.AutoBookingResponse;
 import com.shop.backend.model.Appointment;
 import com.shop.backend.model.User;
 import com.shop.backend.model.Role;

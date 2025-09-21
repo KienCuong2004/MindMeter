@@ -1,4 +1,4 @@
-package com.shop.backend.dto.appointment;
+package com.shop.backend.dto.auth.appointment;
 
 import com.shop.backend.model.Appointment;
 import com.fasterxml.jackson.annotation.JsonFormat;

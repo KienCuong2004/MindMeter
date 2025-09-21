@@ -38,13 +38,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf
-                .csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/api/payment/**", "/api/depression-test/**", "/api/admin/**", "/api/expert/**", "/api/auth/**", "/api/blog/**", "/api/chatbot", "/api/auto-booking", "/api/password/**")
-            )
+            .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login**", "/error", "/api/depression-test/**", "/api/auth/**", "/api/password/**").permitAll()
+                .requestMatchers("/", "/login**", "/error", "/api/depression-test/**", "/api/auth/**", "/api/password/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/api/feedback").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/api/payment/**").permitAll() // Tất cả payment endpoints
@@ -56,8 +53,16 @@ public class SecurityConfig {
                 .requestMatchers("/api/expert/**").hasAnyRole("ADMIN", "EXPERT")
                 .anyRequest().authenticated()
             )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
+                .maximumSessions(10)
+                .maxSessionsPreventsLogin(false)
+            )
             .oauth2Login(oauth2 -> oauth2
                 .successHandler(customOAuth2SuccessHandler)
+                .failureHandler((request, response, exception) -> {
+                    response.sendRedirect("http://localhost:3000/login?error=oauth_failed");
+                })
             )
             .exceptionHandling(exceptionHandling ->
                 exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
@@ -67,7 +72,6 @@ public class SecurityConfig {
                 })
             );
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterAfter(new com.shop.backend.config.CsrfCookieFilter(), org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class);
         return http.build();
     }
 

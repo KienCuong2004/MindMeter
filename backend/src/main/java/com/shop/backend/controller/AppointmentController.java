@@ -1,11 +1,11 @@
 package com.shop.backend.controller;
 
-import com.shop.backend.dto.appointment.AppointmentRequest;
-import com.shop.backend.dto.appointment.AppointmentResponse;
-import com.shop.backend.dto.appointment.AvailableSlotRequest;
-import com.shop.backend.dto.appointment.AvailableSlotResponse;
 import com.shop.backend.service.AppointmentService;
 import com.shop.backend.repository.UserRepository;
+import com.shop.backend.dto.auth.appointment.AppointmentRequest;
+import com.shop.backend.dto.auth.appointment.AppointmentResponse;
+import com.shop.backend.dto.auth.appointment.AvailableSlotRequest;
+import com.shop.backend.dto.auth.appointment.AvailableSlotResponse;
 import com.shop.backend.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

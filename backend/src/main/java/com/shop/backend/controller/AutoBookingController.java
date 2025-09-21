@@ -1,9 +1,9 @@
 package com.shop.backend.controller;
 
-import com.shop.backend.dto.appointment.AutoBookingRequest;
-import com.shop.backend.dto.appointment.AutoBookingResponse;
 import com.shop.backend.service.AutoBookingService;
 import com.shop.backend.repository.UserRepository;
+import com.shop.backend.dto.auth.appointment.AutoBookingRequest;
+import com.shop.backend.dto.auth.appointment.AutoBookingResponse;
 import com.shop.backend.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

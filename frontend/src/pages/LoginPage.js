@@ -69,7 +69,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google";
+    window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
 
   useEffect(() => {
@@ -164,7 +164,7 @@ export default function LoginPage() {
             Quên mật khẩu?
           </Link>
           <p className="mt-3 text-base text-gray-600">
-                          {t("common.noAccount")}{" "}
+            {t("common.noAccount")}{" "}
             <Link
               to="/register"
               className="text-blue-600 hover:underline font-semibold"

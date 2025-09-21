@@ -78,17 +78,14 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
                     user.setAvatarUrl(picture);
                 }
                 userRepository.save(user);
-                System.out.println("[OAuth2] Updated existing user with OAuth provider: " + email);
             }
             
             // Cập nhật avatar nếu user chưa có hoặc muốn cập nhật từ Google
             if (picture != null && (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty())) {
                 user.setAvatarUrl(picture);
                 userRepository.save(user);
-                System.out.println("[OAuth2] Updated avatar for existing user: " + email);
             }
             
-            System.out.println("[OAuth2] Existing user found: " + email + ", id: " + user.getId() + ", oauth: " + user.getOauthProvider());
         } else {
             // Create new user for Google OAuth2
             user = new User();
@@ -118,9 +115,7 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
             
             // Send password email to user (commented out for Option 3 - auto-login with modal)
             // passwordEmailService.sendPasswordEmail(email, generatedPassword, user.getFirstName());
-            System.out.println("[OAuth2] Password email skipped for Option 3 - user will see modal instead");
             
-            System.out.println("[OAuth2] Created new STUDENT user with temporary password: " + email + ", id: " + user.getId());
         }
 
         // Sinh JWT với đầy đủ thông tin
@@ -148,9 +143,7 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
         if (user.isTemporaryPassword() && !user.isTempPasswordUsed()) {
             builder.queryParam("requiresPasswordChange", "true");
             builder.queryParam("message", "Chao mung! Vui long dat mat khau moi cho tai khoan cua ban.");
-            System.out.println("[OAuth2] New user with temporary password - redirecting with password change flag");
         } else {
-            System.out.println("[OAuth2] Existing user - normal login redirect");
         }
         
         String redirectUrl = builder.build().toUriString();

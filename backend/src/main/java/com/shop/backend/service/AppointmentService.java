@@ -1,9 +1,9 @@
 package com.shop.backend.service;
 
-import com.shop.backend.dto.appointment.AppointmentRequest;
-import com.shop.backend.dto.appointment.AppointmentResponse;
-import com.shop.backend.dto.appointment.AvailableSlotRequest;
-import com.shop.backend.dto.appointment.AvailableSlotResponse;
+import com.shop.backend.dto.auth.appointment.AppointmentRequest;
+import com.shop.backend.dto.auth.appointment.AppointmentResponse;
+import com.shop.backend.dto.auth.appointment.AvailableSlotRequest;
+import com.shop.backend.dto.auth.appointment.AvailableSlotResponse;
 import com.shop.backend.model.Appointment;
 import com.shop.backend.model.ExpertBreak;
 import com.shop.backend.model.ExpertSchedule;
