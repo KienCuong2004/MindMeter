@@ -673,6 +673,22 @@ export default function AppRoutes() {
           <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route
+            path="/blog"
+            element={
+              <BlogErrorBoundary>
+                <BlogListPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
+            path="/blog/post/:id"
+            element={
+              <BlogErrorBoundary>
+                <BlogPostPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
             path="/saved-articles"
             element={
               <BlogErrorBoundary>
