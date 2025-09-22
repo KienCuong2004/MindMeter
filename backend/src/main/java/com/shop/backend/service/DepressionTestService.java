@@ -54,30 +54,31 @@ public class DepressionTestService {
 	}
     
     	@org.springframework.cache.annotation.Cacheable(value = "testQuestions", key = "'dto-vi'")
-	public List<DepressionQuestionDTO> getActiveQuestionDTOsVi() {
-		List<DepressionQuestionVi> questions = questionViRepository.findByIsActiveTrue();
-		return questions.stream().map(q -> {
-			DepressionQuestionDTO dto = new DepressionQuestionDTO();
-			dto.setId(q.getId());
-			dto.setQuestionText(q.getQuestionText());
-			dto.setWeight(q.getWeight());
-			dto.setCategory(q.getCategory());
-			dto.setOrder(q.getOrder());
-			// Convert options sang DTO để tránh circular reference
-			List<DepressionQuestionOptionVi> optionsVi = optionViRepository.findByQuestionIdOrderByOrderAsc(q.getId());
-			List<DepressionQuestionOptionDTO> optionsViDTO = optionsVi.stream()
-				.map(opt -> {
-					DepressionQuestionOptionDTO optDTO = new DepressionQuestionOptionDTO();
-					optDTO.setId(opt.getId());
-					optDTO.setOptionText(opt.getOptionText());
-					optDTO.setOptionValue(opt.getOptionValue());
-					optDTO.setOrder(opt.getOrder());
-					return optDTO;
-				})
-				.collect(Collectors.toList());
-			dto.setOptionsVi(optionsViDTO);
-			return dto;
-		}).toList();
+    public List<DepressionQuestionDTO> getActiveQuestionDTOsVi() {
+        List<DepressionQuestionVi> questions = questionViRepository.findByIsActiveTrue();
+        return questions.stream().map(q -> {
+            DepressionQuestionDTO dto = new DepressionQuestionDTO();
+            dto.setId(q.getId());
+            dto.setQuestionText(q.getQuestionText());
+            dto.setQuestionTextVi(q.getQuestionText()); // Set Vietnamese question text
+            dto.setWeight(q.getWeight());
+            dto.setCategory(q.getCategory());
+            dto.setOrder(q.getOrder());
+            // Convert options sang DTO để tránh circular reference
+            List<DepressionQuestionOptionVi> optionsVi = optionViRepository.findByQuestionIdOrderByOrderAsc(q.getId());
+            List<DepressionQuestionOptionDTO> optionsViDTO = optionsVi.stream()
+                .map(opt -> {
+                    DepressionQuestionOptionDTO optDTO = new DepressionQuestionOptionDTO();
+                    optDTO.setId(opt.getId());
+                    optDTO.setOptionText(opt.getOptionText());
+                    optDTO.setOptionValue(opt.getOptionValue());
+                    optDTO.setOrder(opt.getOrder());
+                    return optDTO;
+                })
+                .collect(Collectors.toList());
+            dto.setOptionsVi(optionsViDTO);
+            return dto;
+        }).toList();
 	}
 	
 	@org.springframework.cache.annotation.Cacheable(value = "testQuestions", key = "'dto-en'")
@@ -87,6 +88,7 @@ public class DepressionTestService {
 			DepressionQuestionDTO dto = new DepressionQuestionDTO();
 			dto.setId(q.getId());
 			dto.setQuestionText(q.getQuestionText());
+			dto.setQuestionTextEn(q.getQuestionText()); // Set English question text
 			dto.setWeight(q.getWeight());
 			dto.setCategory(q.getCategory());
 			dto.setOrder(q.getOrder());
@@ -113,6 +115,7 @@ public class DepressionTestService {
             DepressionQuestionDTO dto = new DepressionQuestionDTO();
             dto.setId(q.getId());
             dto.setQuestionText(q.getQuestionText());
+            dto.setQuestionTextVi(q.getQuestionText()); // Set Vietnamese question text
             dto.setWeight(q.getWeight());
             dto.setCategory(q.getCategory());
             dto.setOrder(q.getOrder());
@@ -139,6 +142,7 @@ public class DepressionTestService {
             DepressionQuestionDTO dto = new DepressionQuestionDTO();
             dto.setId(q.getId());
             dto.setQuestionText(q.getQuestionText());
+            dto.setQuestionTextEn(q.getQuestionText()); // Set English question text
             dto.setWeight(q.getWeight());
             dto.setCategory(q.getCategory());
             dto.setOrder(q.getOrder());
@@ -194,6 +198,7 @@ public class DepressionTestService {
                 DepressionQuestionDTO dto = new DepressionQuestionDTO();
                 dto.setId(q.getId());
                 dto.setQuestionText(q.getQuestionText());
+                dto.setQuestionTextEn(q.getQuestionText()); // Set English question text
                 dto.setWeight(q.getWeight());
                 dto.setCategory(q.getCategory());
                 dto.setOrder(q.getOrder());
@@ -218,6 +223,7 @@ public class DepressionTestService {
                 DepressionQuestionDTO dto = new DepressionQuestionDTO();
                 dto.setId(q.getId());
                 dto.setQuestionText(q.getQuestionText());
+                dto.setQuestionTextVi(q.getQuestionText()); // Set Vietnamese question text
                 dto.setWeight(q.getWeight());
                 dto.setCategory(q.getCategory());
                 dto.setOrder(q.getOrder());

@@ -398,16 +398,42 @@ const StudentTestPage = () => {
             {currentQuestion && (
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 leading-relaxed">
-                  {currentQuestion.questionText}
+                  {(() => {
+                    const currentLanguage = i18n.language;
+                    if (currentLanguage === "en") {
+                      return (
+                        currentQuestion.questionTextEn ||
+                        currentQuestion.questionText
+                      );
+                    } else {
+                      return (
+                        currentQuestion.questionTextVi ||
+                        currentQuestion.questionText
+                      );
+                    }
+                  })()}
                 </h2>
                 <div className="space-y-2">
                   {(() => {
                     // Lấy options dựa trên ngôn ngữ hiện tại
                     const currentLanguage = i18n.language;
-                    const options =
-                      currentLanguage === "en"
-                        ? currentQuestion.optionsEn || currentQuestion.options
-                        : currentQuestion.optionsVi || currentQuestion.options;
+                    let options;
+
+                    if (currentLanguage === "en") {
+                      // Ưu tiên optionsEn, fallback về options
+                      options =
+                        currentQuestion.optionsEn &&
+                        currentQuestion.optionsEn.length > 0
+                          ? currentQuestion.optionsEn
+                          : currentQuestion.options;
+                    } else {
+                      // Ưu tiên optionsVi, fallback về options
+                      options =
+                        currentQuestion.optionsVi &&
+                        currentQuestion.optionsVi.length > 0
+                          ? currentQuestion.optionsVi
+                          : currentQuestion.options;
+                    }
 
                     return (
                       options &&
