@@ -125,8 +125,20 @@ temp/
 *.sqlite
 *.sqlite3
 
-# Database folder
-database/
+# Database files (but keep essential schema)
+database/*.backup
+database/*.bak
+database/*_backup.sql
+database/backups/
+database/temp/
+database/logs/
+database/dumps/
+database/*.dump
+database/test-data/
+
+# Keep these database files (essential):
+# ✅ database/MindMeter.sql - Main schema
+# ✅ database/README.md - Documentation
 
 # Configuration files with sensitive data
 application-prod.properties
