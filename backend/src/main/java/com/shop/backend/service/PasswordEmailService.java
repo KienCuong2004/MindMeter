@@ -74,7 +74,7 @@ public class PasswordEmailService {
                 
                 <div style='background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:16px;margin-top:16px;'>
                   <div style='display:flex;align-items:center;margin-bottom:8px;'>
-                    <span style='font-size:1.25rem;margin-right:8px;'>⚠️</span>
+                    <span style='font-size:1.25rem;margin-right:8px;'>!</span>
                     <h4 style='color:#92400e;margin:0;font-size:1rem;'>Lưu ý bảo mật</h4>
                   </div>
                   <p style='margin:0;color:#92400e;font-size:0.875rem;line-height:1.5;'>
@@ -111,10 +111,10 @@ public class PasswordEmailService {
                 </p>
                 <div style='display:flex;justify-content:center;gap:16px;flex-wrap:wrap;'>
                   <a href='tel:0369702376' style='display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-weight:500;'>
-                    📞 0369 702 376
+                    0369 702 376
                   </a>
                   <a href='mailto:trankiencuong30072003@gmail.com' style='display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#10b981;color:#fff;text-decoration:none;border-radius:8px;font-weight:500;'>
-                    ✉️ Email hỗ trợ
+                    Email hỗ trợ
                   </a>
                 </div>
               </div>
@@ -129,7 +129,7 @@ public class PasswordEmailService {
               
               <div style='margin-top:24px;padding:16px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;'>
                 <p style='margin:0;color:#991b1b;font-size:0.8rem;line-height:1.4;text-align:center;'>
-                        <strong>🚨 BẢO MẬT NGHIÊM NGẶT:</strong> Email này chứa mật khẩu tạm thời chỉ dùng 1 lần. 
+                        <strong>BẢO MẬT NGHIÊM NGẶT:</strong> Email này chứa mật khẩu tạm thời chỉ dùng 1 lần. 
                         Vui lòng không chuyển tiếp hoặc chia sẻ với bất kỳ ai. 
                         Nếu bạn không tạo tài khoản này, vui lòng liên hệ hỗ trợ ngay lập tức.
                 </p>

@@ -102,7 +102,7 @@ public class DepressionTestController {
             
             // Send severe alert if needed
             if ("SEVERE".equals(severity)) {
-                String severeMessage = String.format("⚠️ CẢNH BÁO: Người dùng %s có kết quả test %s ở mức NGHIÊM TRỌNG", 
+                String severeMessage = String.format("CẢNH BÁO: Người dùng %s có kết quả test %s ở mức NGHIÊM TRỌNG", 
                     user.getFullName(), testType);
                 notificationService.sendSevereTestAlert(userId, testType, severeMessage);
             }

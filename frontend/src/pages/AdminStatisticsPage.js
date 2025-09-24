@@ -22,6 +22,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import TestDetailModal from "../components/TestDetailModal";
+import AIInsightsPanel from "../components/AIInsightsPanel";
+import ErrorBoundary from "../components/ErrorBoundary";
 import { authFetch } from "../authFetch";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
@@ -230,7 +232,7 @@ const AdminStatisticsPage = ({ handleLogout: propHandleLogout }) => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-blue-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       {/* Add CSS to prevent text overlap */}
-      <style jsx>{`
+      <style jsx="true">{`
         .recharts-legend-wrapper {
           overflow: visible !important;
         }
@@ -457,6 +459,33 @@ const AdminStatisticsPage = ({ handleLogout: propHandleLogout }) => {
             </div>
           </div>
         </div>
+
+        {/* AI Insights Panel */}
+        <div className="mt-8">
+          <ErrorBoundary>
+            <AIInsightsPanel
+              statisticsData={{
+                totalTests: stats?.totalTests || 0,
+                depressionRatio: {
+                  severe: stats?.severeTests || 0,
+                  moderate: stats?.moderateTests || 0,
+                  mild: stats?.mildTests || 0,
+                  minimal: stats?.minimalTests || 0,
+                },
+                userCountByRole: {
+                  student: stats?.studentCount || 0,
+                  expert: stats?.expertCount || 0,
+                  admin: stats?.adminCount || 0,
+                },
+                testCountByLevel: pieData,
+                historicalData: [], // TODO: Add historical data from backend
+                weeklyGrowth: 5.2, // TODO: Get real weekly growth
+              }}
+              className="max-w-7xl mx-auto"
+            />
+          </ErrorBoundary>
+        </div>
+
         <TestDetailModal
           open={openTestDetail}
           onClose={() => setOpenTestDetail(false)}

@@ -1673,6 +1673,31 @@
       }
     }
   },
+  "aiInsights": {
+    "title": "Phân tích AI về Sức khỏe Tâm thần",
+    "subtitle": "Phân tích thông minh được hỗ trợ bởi GPT-4o-mini",
+    "refreshAI": "Làm mới AI",
+    "analyzing": "Đang phân tích...",
+    "keyInsights": "Những hiểu biết chính",
+    "smartAlerts": "Cảnh báo thông minh",
+    "aiRecommendations": "Khuyến nghị AI",
+    "trendPredictions": "Dự đoán xu hướng AI",
+    "next7DaysForecast": "Dự báo 7 ngày tới",
+    "trend": "Xu hướng",
+    "expectedChange": "Thay đổi dự kiến",
+    "period": "Khoảng thời gian",
+    "peakRiskPeriods": "Thời kỳ rủi ro cao",
+    "expectedCaseDistribution": "Phân bố ca dự kiến",
+    "totalCases": "Tổng số ca",
+    "distribution": "Phân bố",
+    "recommendedInterventions": "Can thiệp được khuyến nghị",
+    "lastAnalysis": "Phân tích AI cuối",
+    "confidence": "độ tin cậy",
+    "aiAnalysisError": "Lỗi phân tích AI",
+    "generatingRecommendations": "Đang tạo khuyến nghị AI...",
+    "noAlerts": "Không có cảnh báo nào hiện tại",
+    "generatingTrends": "Đang tạo dự đoán xu hướng AI..."
+  },
   "blog": {
     "title": "Bài viết",
     "subtitle": "Chia sẻ hành trình sức khỏe tâm thần và kết nối với cộng đồng",

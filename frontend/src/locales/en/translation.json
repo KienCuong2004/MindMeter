@@ -1675,6 +1675,31 @@
       }
     }
   },
+  "aiInsights": {
+    "title": "AI Mental Health Insights",
+    "subtitle": "Intelligent analysis powered by GPT-4o-mini",
+    "refreshAI": "Refresh AI",
+    "analyzing": "Analyzing...",
+    "keyInsights": "Key Insights",
+    "smartAlerts": "Smart Alerts",
+    "aiRecommendations": "AI Recommendations",
+    "trendPredictions": "AI Trend Predictions",
+    "next7DaysForecast": "Next 7 Days Forecast",
+    "trend": "Trend",
+    "expectedChange": "Expected Change",
+    "period": "Period",
+    "peakRiskPeriods": "Peak Risk Periods",
+    "expectedCaseDistribution": "Expected Case Distribution",
+    "totalCases": "Total Cases",
+    "distribution": "Distribution",
+    "recommendedInterventions": "Recommended Interventions",
+    "lastAnalysis": "Last AI analysis",
+    "confidence": "confidence",
+    "aiAnalysisError": "AI Analysis Error",
+    "generatingRecommendations": "AI recommendations are being generated...",
+    "noAlerts": "No alerts at this time",
+    "generatingTrends": "Generating AI trend predictions..."
+  },
   "blog": {
     "title": "Blog",
     "subtitle": "Share your mental health journey and connect with others",

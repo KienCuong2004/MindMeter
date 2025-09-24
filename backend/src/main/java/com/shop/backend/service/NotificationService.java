@@ -35,7 +35,7 @@ public class NotificationService {
     public void sendSevereTestAlert(Long userId, String testType, String message) {
         NotificationMessage notification = new NotificationMessage();
         notification.setType("SEVERE_ALERT");
-        notification.setTitle("⚠️ Cảnh báo: Test trầm cảm nặng");
+        notification.setTitle("Cảnh báo: Test trầm cảm nặng");
         notification.setMessage(message);
         notification.setUserId(userId);
         notification.setTestType(testType);
