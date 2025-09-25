@@ -101,12 +101,10 @@ Keep responses professional but accessible. Focus on student mental health impac
     }
 
     const aiResponse = await response.json();
-    console.log("DEBUG: AI Response from backend:", aiResponse);
 
     // Parse GPT response and structure it
     try {
       const insights = JSON.parse(aiResponse.content);
-      console.log("DEBUG: Parsed insights:", insights);
       return {
         success: true,
         insights: insights.insights?.keyObservations || insights.insights || [],
@@ -163,20 +161,29 @@ ${historicalData
 
 CURRENT TREND: ${recentTrend.direction} (${recentTrend.percentage}% change)
 
-Predict:
-1. Next 7 days trend
-2. Peak risk periods
-3. Expected case distribution
-4. Early warning indicators
+CRITICAL: You MUST respond with a valid JSON object in this exact format:
+{
+  "predictions": {
+    "next_7_days_trend": "trend description",
+    "expected_change_percentage": 5,
+    "trend_start_date": "${currentYear}-${currentMonth}-${currentDay}",
+    "trend_end_date": "2025-10-02",
+    "peak_risk_periods": [
+      {
+        "date": "2025-10-15",
+        "reason": "specific reason based on data analysis",
+        "priority": "high"
+      }
+    ]
+  }
+}
 
-IMPORTANT: All dates must be in ${currentYear}, not 2023. Use format ${currentYear}-${currentMonth}-${currentDay} for current date.
-IMPORTANT: Respond in ${
-      i18n.language === "vi" ? "Vietnamese" : "English"
-    } language. All content must be in ${
-      i18n.language === "vi" ? "Vietnamese" : "English"
-    }.
-Provide specific numbers and dates. Consider academic calendar (exams, holidays, semester start).
-Format as JSON with predictions, risks, and recommendations.
+IMPORTANT: 
+- All dates must be in ${currentYear}
+- peak_risk_periods MUST be an array, even if empty []
+- Provide specific dates and reasons based on the historical data
+- Respond in ${i18n.language === "vi" ? "Vietnamese" : "English"} language
+- Analyze the actual historical data patterns to predict real risk periods
 `;
 
     const response = await fetch(
@@ -196,14 +203,11 @@ Format as JSON with predictions, risks, and recommendations.
     );
 
     const aiResponse = await response.json();
-    console.log("DEBUG: Trend Response from backend:", aiResponse);
     try {
       const result = JSON.parse(aiResponse.content);
-      console.log("DEBUG: Parsed trend predictions:", result);
       return result;
     } catch (parseError) {
       console.error("JSON Parse Error:", parseError);
-      console.log("Raw response content:", aiResponse.content);
       return generateFallbackPredictions(historicalData);
     }
   } catch (error) {
@@ -261,14 +265,11 @@ Format as JSON array.
     );
 
     const aiResponse = await response.json();
-    console.log("DEBUG: Recommendations Response from backend:", aiResponse);
     try {
       const result = JSON.parse(aiResponse.content);
-      console.log("DEBUG: Parsed recommendations:", result);
       return result;
     } catch (parseError) {
       console.error("JSON Parse Error:", parseError);
-      console.log("Raw response content:", aiResponse.content);
       return generateFallbackRecommendations(currentStats);
     }
   } catch (error) {
@@ -384,9 +385,15 @@ const generateFallbackInsights = (data) => [
 ];
 
 const generateFallbackPredictions = (data) => ({
-  nextWeek: "Trend analysis requires more historical data",
-  risks: ["Monitor severe cases carefully"],
-  recommendations: ["Continue regular monitoring"],
+  predictions: {
+    next_7_days_trend: "Trend analysis requires more historical data",
+    expected_change_percentage: 0,
+    trend_start_date: new Date().toISOString().split("T")[0],
+    trend_end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
+    peak_risk_periods: [],
+  },
 });
 
 const generateFallbackRecommendations = (stats) => [

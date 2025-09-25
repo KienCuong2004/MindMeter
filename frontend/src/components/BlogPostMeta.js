@@ -27,15 +27,6 @@ const BlogPostMeta = ({ post }) => {
     ? featuredImage
     : `${window.location.origin}${featuredImage}`;
 
-  // Debug log
-  console.log("BlogPostMeta Debug:", {
-    title,
-    description,
-    imageUrl,
-    postUrl,
-    featuredImage,
-  });
-
   // Tạo structured data cho SEO
   const structuredData = {
     "@context": "https://schema.org",
