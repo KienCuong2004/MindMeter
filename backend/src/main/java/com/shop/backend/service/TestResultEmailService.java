@@ -70,7 +70,7 @@ public class TestResultEmailService {
               </div>
               
               <div style='background:#f8fafc;border-radius:12px;padding:24px;margin:24px 0;'>
-                <h3 style='color:#1e293b;margin:0 0 16px 0;font-size:1.25rem;'>📊 Kết quả test</h3>
+                <h3 style='color:#1e293b;margin:0 0 16px 0;font-size:1.25rem;'>Kết quả test</h3>
                 
                 <div style='display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;'>
                   <div style='text-align:center;padding:16px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;'>
@@ -112,7 +112,7 @@ public class TestResultEmailService {
                 </p>
                 <div style='display:flex;justify-content:center;gap:16px;flex-wrap:wrap;'>
                   <a href='tel:0369702376' style='display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-weight:500;'>
-                    📞 0369 702 376
+                    0369 702 376
                   </a>
                   <a href='mailto:trankiencuong30072003@gmail.com' style='display:inline-flex;align-items:center;gap:8px;padding:12px 20px;background:#10b981;color:#fff;text-decoration:none;border-radius:8px;font-weight:500;'>
                     [EMAIL] Email hỗ trợ
