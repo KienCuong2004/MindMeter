@@ -18,7 +18,7 @@ public class RateLimitService {
     private static final int MAX_REQUESTS_PER_WINDOW = 100; // 100 requests per minute per IP
     
     // Specific endpoint limits
-    private static final int MAX_AUTH_REQUESTS = 10; // 10 auth requests per minute
+    private static final int MAX_AUTH_REQUESTS = 30; // 30 auth requests per minute
     private static final int MAX_API_REQUESTS = 50; // 50 API requests per minute
     private static final int MAX_PAYMENT_REQUESTS = 3; // 3 payment requests per minute
     

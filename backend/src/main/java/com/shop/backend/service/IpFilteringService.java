@@ -425,4 +425,11 @@ public class IpFilteringService {
         suspiciousIps.clear();
         ipToCountry.clear();
     }
+
+    /**
+     * Check if IP filtering is enabled
+     */
+    public boolean isIpFilteringEnabled() {
+        return ipFilteringEnabled;
+    }
 }
