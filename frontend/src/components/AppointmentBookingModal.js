@@ -238,6 +238,9 @@ const AppointmentBookingModal = ({
 
   if (!isOpen) return null;
 
+  // Debug log để kiểm tra expertName
+  console.log("AppointmentBookingModal - expertName:", expertName);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -248,7 +251,8 @@ const AppointmentBookingModal = ({
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
               {expertName &&
               expertName.trim() !== "" &&
-              !expertName.includes("{{")
+              !expertName.includes("{{") &&
+              !expertName.includes("expertName")
                 ? t("appointmentWith", { expertName })
                 : t("bookAppointment")}
             </h2>
@@ -328,9 +332,9 @@ const AppointmentBookingModal = ({
                   <div className="grid grid-cols-3 gap-2">
                     {availableSlots.map((slot, index) => {
                       const validationStatus = slotValidation[slot.startTime];
-                      const isUnavailable = validationStatus === 'unavailable';
-                      const isError = validationStatus === 'error';
-                      
+                      const isUnavailable = validationStatus === "unavailable";
+                      const isError = validationStatus === "error";
+
                       return (
                         <button
                           key={index}
@@ -344,18 +348,22 @@ const AppointmentBookingModal = ({
                               : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
                           }`}
                         >
-                          <div className={`font-medium ${
-                            isUnavailable || isError
-                              ? "text-red-600 dark:text-red-400"
-                              : "text-gray-900 dark:text-white"
-                          }`}>
+                          <div
+                            className={`font-medium ${
+                              isUnavailable || isError
+                                ? "text-red-600 dark:text-red-400"
+                                : "text-gray-900 dark:text-white"
+                            }`}
+                          >
                             {slot.displayTime}
                           </div>
-                          <div className={`text-sm ${
-                            isUnavailable || isError
-                              ? "text-red-500 dark:text-red-400"
-                              : "text-gray-500 dark:text-gray-400"
-                          }`}>
+                          <div
+                            className={`text-sm ${
+                              isUnavailable || isError
+                                ? "text-red-500 dark:text-red-400"
+                                : "text-gray-500 dark:text-gray-400"
+                            }`}
+                          >
                             {slot.durationMinutes} {t("minutes")}
                             {isUnavailable && " - " + t("unavailable")}
                             {isError && " - " + t("error")}
