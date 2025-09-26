@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("rawtypes")
 @ExtendWith(MockitoExtension.class)
 class CurrencyServiceTest {
 
@@ -70,7 +71,7 @@ class CurrencyServiceTest {
     @Test
     void getUsdToVndRate_ShouldReturnDefaultRate_WhenResponseIsNull() {
         // Given
-        ResponseEntity<Map> responseEntity = new ResponseEntity<>(null, HttpStatus.OK);
+        ResponseEntity<Map> responseEntity = new ResponseEntity<>(HttpStatus.OK);
         when(restTemplate.getForEntity(anyString(), eq(Map.class))).thenReturn(responseEntity);
 
         // When

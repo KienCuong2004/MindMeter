@@ -1,22 +1,41 @@
 package com.shop.backend.config;
 
+import com.shop.backend.interceptor.RateLimitInterceptor;
+import com.shop.backend.interceptor.IpFilteringInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.lang.NonNull;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    // CORS configuration moved to SecurityConfig to avoid conflicts
+    
+    @Autowired
+    private RateLimitInterceptor rateLimitInterceptor;
+    
+    @Autowired
+    private IpFilteringInterceptor ipFilteringInterceptor;
     
     @Override
-    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-        // Serve avatar files from uploads/avatars directory
-        registry.addResourceHandler("/uploads/avatars/**")
-                .addResourceLocations("file:uploads/avatars/");
+    public void addInterceptors(@NonNull InterceptorRegistry registry) {
+        // IP Filtering Interceptor - runs first
+        registry.addInterceptor(ipFilteringInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns(
+                    "/api/health",
+                    "/api/actuator/**",
+                    "/api/public/**",
+                    "/api/admin/security/ip-filtering/public/**"
+                );
         
-        // Serve blog featured images from uploads/blog/featured directory
-        registry.addResourceHandler("/uploads/blog/featured/**")
-                .addResourceLocations("file:uploads/blog/featured/");
+        // Rate Limiting Interceptor - runs after IP filtering
+        registry.addInterceptor(rateLimitInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns(
+                    "/api/health",
+                    "/api/actuator/**",
+                    "/api/public/**"
+                );
     }
 }
