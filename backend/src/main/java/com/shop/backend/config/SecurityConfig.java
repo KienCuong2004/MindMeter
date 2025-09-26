@@ -40,6 +40,16 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .headers(headers -> headers
+                .frameOptions(frameOptions -> frameOptions.deny())
+                .contentTypeOptions(contentTypeOptions -> {})
+                .httpStrictTransportSecurity(hstsConfig -> hstsConfig
+                    .maxAgeInSeconds(31536000)
+                )
+                .referrerPolicy(referrerPolicy -> referrerPolicy
+                    .policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+                )
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login**", "/error", "/api/depression-test/**", "/api/auth/**", "/api/password/**", "/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/api/feedback").permitAll()

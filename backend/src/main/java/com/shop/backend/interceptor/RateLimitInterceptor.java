@@ -1,10 +1,12 @@
 package com.shop.backend.interceptor;
 
 import com.shop.backend.service.RateLimitService;
+import com.shop.backend.service.SecurityMetricsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -13,9 +15,12 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     
     @Autowired
     private RateLimitService rateLimitService;
+
+    @Autowired
+    private SecurityMetricsService securityMetricsService;
     
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         String clientIP = getClientIP(request);
         String requestPath = request.getRequestURI();
         
@@ -33,6 +38,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
         
         if (isRateLimited) {
+            // Record rate limit hit in metrics
+            securityMetricsService.recordRateLimitHit(requestPath, clientIP);
+            
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setHeader("Retry-After", String.valueOf(rateLimitService.getResetTime(clientIP)));
             response.setContentType("application/json");
@@ -40,8 +48,20 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             return false;
         }
         
-        // Add rate limit headers
-        response.setHeader("X-RateLimit-Limit", "100");
+        // Record successful request
+        securityMetricsService.recordRequest(requestPath, clientIP);
+        
+        // Add rate limit headers based on endpoint
+        String limitHeader = "100"; // default
+        if (requestPath.startsWith("/api/auth/")) {
+            limitHeader = "30";
+        } else if (requestPath.startsWith("/api/payment/")) {
+            limitHeader = "3";
+        } else if (requestPath.startsWith("/api/")) {
+            limitHeader = "50";
+        }
+        
+        response.setHeader("X-RateLimit-Limit", limitHeader);
         response.setHeader("X-RateLimit-Remaining", String.valueOf(rateLimitService.getRemainingRequests(clientIP)));
         response.setHeader("X-RateLimit-Reset", String.valueOf(rateLimitService.getResetTime(clientIP)));
         
