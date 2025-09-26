@@ -49,6 +49,10 @@ export default function LoginPage() {
           "User";
         localStorage.setItem("user", JSON.stringify(user));
 
+        // Lưu thời gian đăng nhập để chống spam mua gói
+        const loginTimeKey = `lastLogin_${user.email}`;
+        localStorage.setItem(loginTimeKey, Date.now().toString());
+
         // Chuyển hướng sau đăng nhập thành công
         if (role === "EXPERT") {
           navigate("/expert/dashboard");

@@ -26,6 +26,8 @@ import com.stripe.net.Webhook;
 import java.util.logging.Logger;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -67,6 +69,37 @@ public class PaymentController {
         return backendBaseUrl + "/api/payment/webhook";
     }
 
+    // Method để kiểm tra rate limit
+    private boolean isRateLimited(String userEmail) {
+        long currentTime = System.currentTimeMillis();
+        
+        // Clean up old entries
+        userRequestTimes.entrySet().removeIf(entry -> 
+            currentTime - entry.getValue() > RATE_LIMIT_WINDOW);
+        userRequestCounts.entrySet().removeIf(entry -> 
+            currentTime - userRequestTimes.getOrDefault(entry.getKey(), 0L) > RATE_LIMIT_WINDOW);
+        
+        // Kiểm tra rate limit cho user hiện tại
+        Long lastRequestTime = userRequestTimes.get(userEmail);
+        Integer requestCount = userRequestCounts.getOrDefault(userEmail, 0);
+        
+        if (lastRequestTime == null || currentTime - lastRequestTime > RATE_LIMIT_WINDOW) {
+            // Reset counter nếu đã hết window
+            userRequestTimes.put(userEmail, currentTime);
+            userRequestCounts.put(userEmail, 1);
+            return false; // Không bị rate limit
+        } else {
+            // Trong cùng window, kiểm tra số lượng requests
+            if (requestCount >= MAX_REQUESTS_PER_WINDOW) {
+                logger.warning("Rate limit exceeded for user: " + userEmail + " (requests: " + requestCount + ")");
+                return true; // Bị rate limit
+            } else {
+                userRequestCounts.put(userEmail, requestCount + 1);
+                return false; // Không bị rate limit
+            }
+        }
+    }
+
     @Autowired
     private UserRepository userRepository;
 
@@ -75,6 +108,12 @@ public class PaymentController {
 
     @Autowired
     private JwtService jwtService;
+
+    // Rate limiting map để track requests per user
+    private final ConcurrentHashMap<String, Long> userRequestTimes = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Integer> userRequestCounts = new ConcurrentHashMap<>();
+    private static final long RATE_LIMIT_WINDOW = TimeUnit.MINUTES.toMillis(1); // 1 phút
+    private static final int MAX_REQUESTS_PER_WINDOW = 3; // Tối đa 3 requests trong 1 phút
 
     @PostConstruct
     public void validateStripeConfiguration() {
@@ -103,6 +142,17 @@ public class PaymentController {
     @PostMapping("/create-checkout-session")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> createCheckoutSession(@RequestBody Map<String, Object> payload, @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        String userEmail = userDetails.getUsername();
+        
+        // Kiểm tra rate limit
+        if (isRateLimited(userEmail)) {
+            logger.warning("Rate limit exceeded for user: " + userEmail);
+            return ResponseEntity.status(429).body(Map.of(
+                "error", "Rate limit exceeded. Please try again later.",
+                "retryAfter", 60 // seconds
+            ));
+        }
+        
         String plan = (String) payload.getOrDefault("plan", "plus");
         long amount = 399;
         String planName = "Plus";

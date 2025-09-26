@@ -531,7 +531,7 @@ const BlogListPage = () => {
           ) : posts.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">
-                📝
+                Blog
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 {t("blog.empty.title")}

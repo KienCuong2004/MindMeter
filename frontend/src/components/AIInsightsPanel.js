@@ -298,15 +298,11 @@ const AIInsightsPanel = ({ statisticsData, className = "" }) => {
             ) {
               const diff = predictionData.parsed.y - currentData.parsed.y;
               if (diff > 0) {
-                return `⚠️ ${
-                  t("aiInsights.trendWarning") || "Risk increasing"
-                }`;
+                return `${t("aiInsights.trendWarning") || "Risk increasing"}`;
               } else if (diff < 0) {
-                return `✅ ${
-                  t("aiInsights.trendImproving") || "Risk decreasing"
-                }`;
+                return `${t("aiInsights.trendImproving") || "Risk decreasing"}`;
               } else {
-                return `➡️ ${t("aiInsights.trendStable") || "Risk stable"}`;
+                return `${t("aiInsights.trendStable") || "Risk stable"}`;
               }
             }
             return "";
