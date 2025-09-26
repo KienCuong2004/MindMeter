@@ -1376,6 +1376,8 @@
   "consultationTypeOnline": "Online",
   "consultationTypePhone": "Phone",
   "consultationTypeInPerson": "In person",
+  "unavailable": "Unavailable",
+  "error": "Error",
   "schedule": {
     "dayOfWeek": "Day of Week",
     "startTime": "Start Time",
