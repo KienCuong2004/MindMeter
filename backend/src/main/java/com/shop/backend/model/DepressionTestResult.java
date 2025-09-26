@@ -20,7 +20,7 @@ public class DepressionTestResult {
     @Column(name = "total_score", nullable = false)
     private Integer totalScore;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String diagnosis;
 
     @Enumerated(EnumType.STRING)
@@ -30,7 +30,7 @@ public class DepressionTestResult {
     @Column(name = "tested_at")
     private LocalDateTime testedAt;
 
-    @Column(name = "recommendation")
+    @Column(name = "recommendation", length = 2000)
     private String recommendation;
 
     @Column(name = "test_type", length = 50)
