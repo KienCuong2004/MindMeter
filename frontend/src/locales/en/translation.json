@@ -197,7 +197,10 @@
     "pro6": "Highest priority support",
     "upgradePro": "Upgrade to Pro",
     "demoNote": "Choose the plan that best fits your needs",
-    "upgradeFree": "Use for free"
+    "upgradeFree": "Use for free",
+    "rateLimitTitle": "Please Wait",
+    "rateLimitMessage": "Please wait a moment before trying again",
+    "rateLimitExceeded": "Rate limit exceeded. Please try again later."
   },
   "appointmentsDescription": "Welcome to the appointment management page! Here, you can book new appointments with experienced experts, view and manage your appointments, and track the status of each appointment. Let's start your journey to mental health care today.",
   "notifications": {
