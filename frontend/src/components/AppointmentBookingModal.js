@@ -30,6 +30,7 @@ const AppointmentBookingModal = ({
   const [error, setError] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdAppointment, setCreatedAppointment] = useState(null);
+  const [slotValidation, setSlotValidation] = useState({});
 
   // Lấy ngày hiện tại và 7 ngày tiếp theo
   const getAvailableDates = () => {
@@ -49,22 +50,33 @@ const AppointmentBookingModal = ({
     const selectedDate = new Date(date);
     const dayOfWeek = selectedDate.getDay(); // 0 = Chủ nhật, 1 = Thứ 2, ...
 
-    // Chỉ tạo slots cho các ngày trong tuần (Thứ 2 - Thứ 6)
+    // Định nghĩa giờ làm việc cho từng ngày
+    let workingHours;
     if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-      // Giờ làm việc: 9:00 - 17:00, mỗi slot 60 phút
-      for (let hour = 9; hour < 17; hour++) {
-        // Tạo date object theo giờ địa phương, không chuyển về UTC
-        // Sử dụng UTC methods để tránh timezone issues
+      // Ngày trong tuần: 9:00 - 17:00
+      workingHours = { start: 9, end: 17 };
+    } else if (dayOfWeek === 6) {
+      // Thứ 7: 9:00 - 12:00
+      workingHours = { start: 9, end: 12 };
+    } else if (dayOfWeek === 0) {
+      // Chủ nhật: 10:00 - 14:00
+      workingHours = { start: 10, end: 14 };
+    } else {
+      return slots; // Không có giờ làm việc
+    }
+
+    // Tạo slots theo giờ làm việc
+    if (workingHours) {
+      for (let hour = workingHours.start; hour < workingHours.end; hour++) {
+        // Tạo date object theo giờ địa phương
         const slotTime = new Date(
-          Date.UTC(
-            selectedDate.getFullYear(),
-            selectedDate.getMonth(),
-            selectedDate.getDate(),
-            hour,
-            0,
-            0,
-            0
-          )
+          selectedDate.getFullYear(),
+          selectedDate.getMonth(),
+          selectedDate.getDate(),
+          hour,
+          0,
+          0,
+          0
         );
 
         // Chỉ tạo slots cho tương lai (không phải quá khứ)
@@ -98,6 +110,45 @@ const AppointmentBookingModal = ({
 
   const handleTimeSelect = (slot) => {
     setSelectedTime(slot.startTime);
+    // Validate slot availability in real-time
+    validateSlotAvailability(slot.startTime);
+  };
+
+  // Validate slot availability
+  const validateSlotAvailability = async (slotTime) => {
+    try {
+      const response = await authFetch("/api/appointments/available-slots", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          expertId: expertId,
+          startDate: selectedDate,
+          endDate: selectedDate,
+          durationMinutes: selectedDuration,
+          consultationType: consultationType,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const isAvailable = data.availableSlots.some(
+          (slot) => slot.startTime === slotTime && slot.isAvailable
+        );
+
+        setSlotValidation((prev) => ({
+          ...prev,
+          [slotTime]: isAvailable ? "available" : "unavailable",
+        }));
+      }
+    } catch (error) {
+      console.error("Error validating slot:", error);
+      setSlotValidation((prev) => ({
+        ...prev,
+        [slotTime]: "error",
+      }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -195,7 +246,9 @@ const AppointmentBookingModal = ({
           <div className="flex items-center space-x-3">
             <CalendarIcon className="h-6 w-6 text-blue-600" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {expertName && expertName.trim() !== ""
+              {expertName &&
+              expertName.trim() !== "" &&
+              !expertName.includes("{{")
                 ? t("appointmentWith", { expertName })
                 : t("bookAppointment")}
             </h2>
@@ -273,24 +326,43 @@ const AppointmentBookingModal = ({
                 </div>
                 {availableSlots.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2">
-                    {availableSlots.map((slot, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleTimeSelect(slot)}
-                        className={`p-3 text-center rounded-lg border transition-colors ${
-                          selectedTime === slot.startTime
-                            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                            : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-                        }`}
-                      >
-                        <div className="font-medium text-gray-900 dark:text-white">
-                          {slot.displayTime}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {slot.durationMinutes} {t("minutes")}
-                        </div>
-                      </button>
-                    ))}
+                    {availableSlots.map((slot, index) => {
+                      const validationStatus = slotValidation[slot.startTime];
+                      const isUnavailable = validationStatus === 'unavailable';
+                      const isError = validationStatus === 'error';
+                      
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleTimeSelect(slot)}
+                          disabled={isUnavailable || isError}
+                          className={`p-3 text-center rounded-lg border transition-colors ${
+                            selectedTime === slot.startTime
+                              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                              : isUnavailable || isError
+                              ? "border-red-300 bg-red-50 dark:bg-red-900/20 opacity-50 cursor-not-allowed"
+                              : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                          }`}
+                        >
+                          <div className={`font-medium ${
+                            isUnavailable || isError
+                              ? "text-red-600 dark:text-red-400"
+                              : "text-gray-900 dark:text-white"
+                          }`}>
+                            {slot.displayTime}
+                          </div>
+                          <div className={`text-sm ${
+                            isUnavailable || isError
+                              ? "text-red-500 dark:text-red-400"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}>
+                            {slot.durationMinutes} {t("minutes")}
+                            {isUnavailable && " - " + t("unavailable")}
+                            {isError && " - " + t("error")}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-4 text-gray-500 dark:text-gray-400">

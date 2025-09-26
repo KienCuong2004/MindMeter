@@ -1374,6 +1374,8 @@
   "consultationTypeOnline": "Trực tuyến",
   "consultationTypePhone": "Điện thoại",
   "consultationTypeInPerson": "Trực tiếp",
+  "unavailable": "Không khả dụng",
+  "error": "Lỗi",
   "schedule": {
     "dayOfWeek": "Thứ trong tuần",
     "startTime": "Giờ bắt đầu",
