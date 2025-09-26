@@ -32,6 +32,11 @@ export default function RegisterPage() {
       });
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Lưu thời gian đăng ký để chống spam mua gói
+      const loginTimeKey = `lastLogin_${data.user.email}`;
+      localStorage.setItem(loginTimeKey, Date.now().toString());
+
       navigate("/");
     } catch (error) {
       setError(error.response?.data?.message || "An error occurred");

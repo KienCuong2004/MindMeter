@@ -197,7 +197,14 @@
     "pro6": "Hỗ trợ ưu tiên cao nhất",
     "upgradePro": "Nâng cấp lên Pro",
     "demoNote": "Chọn gói dịch vụ phù hợp nhất với nhu cầu của bạn",
-    "upgradeFree": "Sử dụng miễn phí"
+    "upgradeFree": "Sử dụng miễn phí",
+    "rateLimitTitle": "Vui lòng chờ",
+    "rateLimitMessage": "Vui lòng chờ một chút trước khi thử lại",
+    "rateLimitExceeded": "Giới hạn tốc độ đã bị vượt quá. Vui lòng thử lại sau.",
+    "newUserWaitTitle": "Bảo mật tài khoản",
+    "newUserWaitMessage": "Vì lý do bảo mật, vui lòng đợi 60 giây sau khi đăng ký/đăng nhập trước khi mua gói dịch vụ.",
+    "newUserWaitCountdown": "Vui lòng đợi {{seconds}} giây trước khi mua gói...",
+    "preventReloadMessage": "Đang đếm ngược để mua gói. Bạn có chắc muốn rời khỏi trang này?"
   },
   "appointmentsDescription": "Chào mừng bạn đến với trang quản lý lịch hẹn! Tại đây, bạn có thể đặt lịch hẹn mới với các chuyên gia tư vấn giàu kinh nghiệm, xem và quản lý các lịch hẹn đã đặt, cũng như theo dõi trạng thái của từng cuộc hẹn. Hãy bắt đầu hành trình chăm sóc sức khỏe tinh thần của bạn ngay hôm nay.",
   "notifications": {

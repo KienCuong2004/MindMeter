@@ -31,6 +31,8 @@ export default function PricingPage() {
     message: "",
     onConfirm: null,
   });
+  const [lastClickTime, setLastClickTime] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     document.title = t("pricing.title") + " | MindMeter";
@@ -178,6 +180,26 @@ export default function PricingPage() {
   };
 
   const handleBuyPlan = async (plan) => {
+    // 🚫 Chống spam: Kiểm tra cooldown period (3 giây)
+    const now = Date.now();
+    const COOLDOWN_PERIOD = 3000; // 3 giây
+
+    if (now - lastClickTime < COOLDOWN_PERIOD) {
+      setNotificationModal({
+        isOpen: true,
+        type: "warning",
+        title: t("pricing.rateLimitTitle"),
+        message: t("pricing.rateLimitMessage"),
+        onConfirm: null,
+      });
+      return;
+    }
+
+    // 🚫 Chống spam: Kiểm tra đang xử lý
+    if (isProcessing) {
+      return;
+    }
+
     // Kiểm tra xem user có thể mua plan này không
     const planHierarchy = { FREE: 0, PLUS: 1, PRO: 2 };
     const currentPlanLevel = planHierarchy[currentPlan] || 0;
@@ -194,7 +216,11 @@ export default function PricingPage() {
       return;
     }
 
+    // Cập nhật state để chống spam
+    setLastClickTime(now);
+    setIsProcessing(true);
     setLoadingPlan(plan);
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
@@ -219,15 +245,30 @@ export default function PricingPage() {
         });
       }
     } catch (err) {
-      setNotificationModal({
-        isOpen: true,
-        type: "error",
-        title: t("common.error"),
-        message: err.response?.data?.error || t("pricing.createSessionError"),
-        onConfirm: null,
-      });
+      // Xử lý lỗi rate limit đặc biệt
+      if (
+        err.response?.status === 429 ||
+        err.response?.data?.error?.includes("Rate limit")
+      ) {
+        setNotificationModal({
+          isOpen: true,
+          type: "error",
+          title: t("pricing.rateLimitTitle"),
+          message: t("pricing.rateLimitExceeded"),
+          onConfirm: null,
+        });
+      } else {
+        setNotificationModal({
+          isOpen: true,
+          type: "error",
+          title: t("common.error"),
+          message: err.response?.data?.error || t("pricing.createSessionError"),
+          onConfirm: null,
+        });
+      }
     } finally {
       setLoadingPlan(null);
+      setIsProcessing(false);
     }
   };
 
@@ -472,7 +513,7 @@ export default function PricingPage() {
 
             <button
               className={`w-full py-3 rounded-lg font-semibold transition ${
-                currentPlan === "PLUS" || currentPlan === "PRO"
+                currentPlan === "PLUS" || currentPlan === "PRO" || isProcessing
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-green-600 hover:bg-green-700 text-white"
               }`}
@@ -481,7 +522,8 @@ export default function PricingPage() {
                 loadingPlan !== null ||
                 loadingPricing ||
                 currentPlan === "PLUS" ||
-                currentPlan === "PRO"
+                currentPlan === "PRO" ||
+                isProcessing
               }
             >
               {loadingPlan === "plus"
@@ -556,13 +598,16 @@ export default function PricingPage() {
 
             <button
               className={`w-full py-3 rounded-lg font-semibold transition ${
-                currentPlan === "PRO"
+                currentPlan === "PRO" || isProcessing
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-purple-600 hover:bg-purple-700 text-white"
               }`}
               onClick={() => handleBuyPlan("pro")}
               disabled={
-                loadingPlan !== null || loadingPricing || currentPlan === "PRO"
+                loadingPlan !== null ||
+                loadingPricing ||
+                currentPlan === "PRO" ||
+                isProcessing
               }
             >
               {loadingPlan === "pro"

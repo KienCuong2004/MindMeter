@@ -197,7 +197,14 @@
     "pro6": "Highest priority support",
     "upgradePro": "Upgrade to Pro",
     "demoNote": "Choose the plan that best fits your needs",
-    "upgradeFree": "Use for free"
+    "upgradeFree": "Use for free",
+    "rateLimitTitle": "Please Wait",
+    "rateLimitMessage": "Please wait a moment before trying again",
+    "rateLimitExceeded": "Rate limit exceeded. Please try again later.",
+    "newUserWaitTitle": "Account Security",
+    "newUserWaitMessage": "For security reasons, please wait 60 seconds after registration/login before purchasing a plan.",
+    "newUserWaitCountdown": "Please wait {{seconds}} seconds before purchasing...",
+    "preventReloadMessage": "Countdown in progress for package purchase. Are you sure you want to leave this page?"
   },
   "appointmentsDescription": "Welcome to the appointment management page! Here, you can book new appointments with experienced experts, view and manage your appointments, and track the status of each appointment. Let's start your journey to mental health care today.",
   "notifications": {
@@ -1377,7 +1384,6 @@
   "consultationTypePhone": "Phone",
   "consultationTypeInPerson": "In person",
   "unavailable": "Unavailable",
-  "error": "Error",
   "schedule": {
     "dayOfWeek": "Day of Week",
     "startTime": "Start Time",
