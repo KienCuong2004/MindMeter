@@ -17,7 +17,7 @@ const AppointmentBookingModal = ({
   expertName,
   onAppointmentCreated,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [step, setStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -238,9 +238,6 @@ const AppointmentBookingModal = ({
 
   if (!isOpen) return null;
 
-  // Debug log để kiểm tra expertName
-  console.log("AppointmentBookingModal - expertName:", expertName);
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -253,7 +250,7 @@ const AppointmentBookingModal = ({
               expertName.trim() !== "" &&
               !expertName.includes("{{") &&
               !expertName.includes("expertName")
-                ? t("appointmentWith", { expertName })
+                ? t("appointmentWith").replace("{{expertName}}", expertName)
                 : t("bookAppointment")}
             </h2>
           </div>
