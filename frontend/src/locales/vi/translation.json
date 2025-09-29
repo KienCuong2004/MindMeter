@@ -52,6 +52,7 @@
   "severeTests": "Mức độ: nặng",
   "userManagement": "Quản lý người dùng",
   "questionManagement": "Quản lý câu hỏi",
+  "blogManagement": "Quản lý bài viết",
   "announcementManagement": "Quản lý thông báo",
   "statistics": "Xem thống kê",
   "noDepression": "Không trầm cảm",
@@ -1782,6 +1783,62 @@
       "popular": "Phổ biến nhất",
       "trending": "Xu hướng"
     },
+    "createPostForm": {
+      "title": "Tạo Bài Viết Mới",
+      "subtitle": "Chia sẻ hành trình sức khỏe tâm thần và giúp đỡ người khác",
+      "form": {
+        "title": "Tiêu đề bài viết",
+        "titlePlaceholder": "Nhập tiêu đề hấp dẫn cho bài viết của bạn...",
+        "content": "Nội dung",
+        "contentPlaceholder": "Chia sẻ câu chuyện, trải nghiệm hoặc lời khuyên của bạn...",
+        "excerpt": "Tóm tắt",
+        "excerptPlaceholder": "Viết tóm tắt ngắn gọn về bài viết của bạn...",
+        "featuredImage": "Ảnh đại diện",
+        "featuredImagePlaceholder": "Tải lên một hình ảnh đại diện cho bài viết",
+        "category": "Danh mục",
+        "categoryPlaceholder": "Chọn danh mục",
+        "tags": "Thẻ",
+        "tagsPlaceholder": "Thêm thẻ cách nhau bởi dấu phẩy",
+        "status": "Trạng thái",
+        "publish": "Đăng bài",
+        "draft": "Lưu nháp",
+        "publishing": "Đang đăng bài...",
+        "saving": "Đang lưu...",
+        "cancel": "Hủy",
+        "preview": "Xem trước"
+      },
+      "validation": {
+        "titleRequired": "Tiêu đề là bắt buộc",
+        "contentRequired": "Nội dung là bắt buộc",
+        "titleMinLength": "Tiêu đề phải có ít nhất 10 ký tự",
+        "contentMinLength": "Nội dung phải có ít nhất 100 ký tự",
+        "invalidImageFormat": "Vui lòng tải lên file ảnh hợp lệ (JPG, PNG, GIF)",
+        "imageTooLarge": "Kích thước ảnh phải nhỏ hơn 5MB"
+      },
+      "success": {
+        "published": "Đăng bài thành công!",
+        "saved": "Lưu nháp thành công!",
+        "updated": "Cập nhật bài viết thành công!"
+      },
+      "error": {
+        "publishFailed": "Không thể đăng bài",
+        "saveFailed": "Không thể lưu bài viết",
+        "updateFailed": "Không thể cập nhật bài viết",
+        "uploadFailed": "Không thể tải lên hình ảnh"
+      }
+    },
+    "categories": {
+      "personalStory": "Câu chuyện cá nhân",
+      "mentalHealthTips": "Mẹo sức khỏe tâm thần",
+      "copingStrategies": "Chiến lược đối phó",
+      "therapy": "Trị liệu & Điều trị",
+      "lifestyle": "Lối sống & Sức khỏe",
+      "relationships": "Mối quan hệ",
+      "workLife": "Cân bằng công việc & cuộc sống",
+      "resources": "Tài nguyên & Công cụ",
+      "community": "Hỗ trợ cộng đồng",
+      "research": "Nghiên cứu & Tin tức"
+    },
     "comment": {
       "title": "Bình luận",
       "placeholder": "Viết bình luận...",
@@ -1831,6 +1888,62 @@
         "title": "Xóa Tất Cả Bài Viết Đã Lưu",
         "description": "Bạn có chắc chắn muốn xóa tất cả bài viết đã lưu? Hành động này không thể hoàn tác."
       }
+    },
+    "admin": {
+      "title": "Quản lý Bài viết",
+      "subtitle": "Quản lý và duyệt các bài viết blog",
+      "search": "Tìm kiếm bài viết...",
+      "filter": {
+        "status": "Lọc theo trạng thái",
+        "all": "Tất cả trạng thái"
+      },
+      "clearFilters": "Xóa bộ lọc",
+      "createPost": "Tạo Bài viết",
+      "table": {
+        "title": "Tiêu đề",
+        "author": "Tác giả",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo",
+        "actions": "Hành động"
+      },
+      "status": {
+        "published": "Đã xuất bản",
+        "draft": "Bản nháp",
+        "pending": "Chờ duyệt",
+        "rejected": "Đã từ chối"
+      },
+      "actions": {
+        "view": "Xem",
+        "approve": "Duyệt",
+        "reject": "Từ chối",
+        "edit": "Sửa",
+        "delete": "Xóa"
+      },
+      "dialog": {
+        "author": "Tác giả",
+        "createdAt": "Ngày tạo",
+        "status": "Trạng thái",
+        "approveTitle": "Duyệt Bài viết",
+        "approveMessage": "Bạn có chắc chắn muốn duyệt bài viết này: \"{{title}}\"?",
+        "rejectTitle": "Từ chối Bài viết",
+        "rejectMessage": "Bạn có chắc chắn muốn từ chối bài viết này: \"{{title}}\"?",
+        "rejectionReason": "Lý do từ chối (tùy chọn)"
+      },
+      "success": {
+        "postApproved": "Duyệt bài viết thành công",
+        "postRejected": "Từ chối bài viết thành công",
+        "postDeleted": "Xóa bài viết thành công"
+      },
+      "error": {
+        "fetchPosts": "Không thể tải danh sách bài viết",
+        "approveFailed": "Không thể duyệt bài viết",
+        "rejectFailed": "Không thể từ chối bài viết",
+        "deleteFailed": "Không thể xóa bài viết"
+      },
+      "confirm": {
+        "deletePost": "Bạn có chắc chắn muốn xóa bài viết này?"
+      },
+      "noPosts": "Không tìm thấy bài viết nào"
     }
   }
 }

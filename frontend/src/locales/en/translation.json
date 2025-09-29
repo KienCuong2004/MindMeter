@@ -52,6 +52,7 @@
   "severeTests": "Depression: Severe",
   "userManagement": "User Management",
   "questionManagement": "Question Management",
+  "blogManagement": "Blog Management",
   "announcementManagement": "Announcement Management",
   "statistics": "View Statistics",
   "noDepression": "No Depression",
@@ -1783,6 +1784,62 @@
       "popular": "Most Popular",
       "trending": "Trending"
     },
+    "createPostForm": {
+      "title": "Create New Post",
+      "subtitle": "Share your mental health journey and help others",
+      "form": {
+        "title": "Post Title",
+        "titlePlaceholder": "Enter a compelling title for your post...",
+        "content": "Content",
+        "contentPlaceholder": "Share your story, experiences, or advice...",
+        "excerpt": "Excerpt",
+        "excerptPlaceholder": "Write a brief summary of your post...",
+        "featuredImage": "Featured Image",
+        "featuredImagePlaceholder": "Upload an image that represents your post",
+        "category": "Category",
+        "categoryPlaceholder": "Select a category",
+        "tags": "Tags",
+        "tagsPlaceholder": "Add tags separated by commas",
+        "status": "Status",
+        "publish": "Publish",
+        "draft": "Save as Draft",
+        "publishing": "Publishing...",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "preview": "Preview"
+      },
+      "validation": {
+        "titleRequired": "Title is required",
+        "contentRequired": "Content is required",
+        "titleMinLength": "Title must be at least 10 characters",
+        "contentMinLength": "Content must be at least 100 characters",
+        "invalidImageFormat": "Please upload a valid image file (JPG, PNG, GIF)",
+        "imageTooLarge": "Image size must be less than 5MB"
+      },
+      "success": {
+        "published": "Post published successfully!",
+        "saved": "Post saved as draft!",
+        "updated": "Post updated successfully!"
+      },
+      "error": {
+        "publishFailed": "Failed to publish post",
+        "saveFailed": "Failed to save post",
+        "updateFailed": "Failed to update post",
+        "uploadFailed": "Failed to upload image"
+      }
+    },
+    "categories": {
+      "personalStory": "Personal Story",
+      "mentalHealthTips": "Mental Health Tips",
+      "copingStrategies": "Coping Strategies",
+      "therapy": "Therapy & Treatment",
+      "lifestyle": "Lifestyle & Wellness",
+      "relationships": "Relationships",
+      "workLife": "Work & Life Balance",
+      "resources": "Resources & Tools",
+      "community": "Community Support",
+      "research": "Research & News"
+    },
     "comment": {
       "title": "Comments",
       "placeholder": "Write a comment...",
@@ -1832,6 +1889,62 @@
         "title": "Clear All Saved Articles",
         "description": "Are you sure you want to remove all saved articles? This action cannot be undone."
       }
+    },
+    "admin": {
+      "title": "Blog Management",
+      "subtitle": "Manage and moderate blog posts",
+      "search": "Search posts...",
+      "filter": {
+        "status": "Filter by status",
+        "all": "All statuses"
+      },
+      "clearFilters": "Clear filters",
+      "createPost": "Create Post",
+      "table": {
+        "title": "Title",
+        "author": "Author",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft",
+        "pending": "Pending Review",
+        "rejected": "Rejected"
+      },
+      "actions": {
+        "view": "View",
+        "approve": "Approve",
+        "reject": "Reject",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "dialog": {
+        "author": "Author",
+        "createdAt": "Created At",
+        "status": "Status",
+        "approveTitle": "Approve Post",
+        "approveMessage": "Are you sure you want to approve this post: \"{{title}}\"?",
+        "rejectTitle": "Reject Post",
+        "rejectMessage": "Are you sure you want to reject this post: \"{{title}}\"?",
+        "rejectionReason": "Rejection reason (optional)"
+      },
+      "success": {
+        "postApproved": "Post approved successfully",
+        "postRejected": "Post rejected successfully",
+        "postDeleted": "Post deleted successfully"
+      },
+      "error": {
+        "fetchPosts": "Failed to fetch posts",
+        "approveFailed": "Failed to approve post",
+        "rejectFailed": "Failed to reject post",
+        "deleteFailed": "Failed to delete post"
+      },
+      "confirm": {
+        "deletePost": "Are you sure you want to delete this post?"
+      },
+      "noPosts": "No posts found"
     }
   }
 }

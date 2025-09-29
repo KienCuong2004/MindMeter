@@ -24,6 +24,7 @@ import {
   FaArrowDown,
   FaExclamationTriangle,
   FaBrain,
+  FaNewspaper,
 } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
@@ -110,6 +111,12 @@ const actionButtons = [
     color: "bg-green-500",
     icon: <FaQuestionCircle />,
     path: "/admin/questions",
+  },
+  {
+    key: "blogManagement",
+    color: "bg-purple-500",
+    icon: <FaNewspaper />,
+    path: "/admin/blog",
   },
   {
     key: "announcementManagement",

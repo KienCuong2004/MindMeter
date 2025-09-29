@@ -1,253 +1,339 @@
-import { authFetch } from "../authFetch";
+import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 
 class BlogService {
-  // Blog Posts
+  constructor() {
+    this.api = axios.create({
+      baseURL: `${API_BASE_URL}/blog`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    // Add request interceptor to include auth token
+    this.api.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem("token");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+
+    // Add response interceptor to handle common errors
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  // Get all blog posts with pagination and filters
+  async getPosts(params = {}) {
+    try {
+      const response = await this.api.get("/posts", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching blog posts:", error);
+      throw error;
+    }
+  }
+
+  // Alias for getPosts to maintain compatibility
   async getAllPosts(page = 0, size = 10) {
-    try {
-      const response = await authFetch(
-        `${API_BASE_URL}/api/blog/posts?page=${page}&size=${size}`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-      throw error;
-    }
+    return this.getPosts({ page, size });
   }
 
-  async getPostBySlug(slug) {
-    const response = await authFetch(`${API_BASE_URL}/api/blog/posts/${slug}`);
-    return response.json();
-  }
-
-  async getPostById(id) {
-    const response = await authFetch(`${API_BASE_URL}/api/blog/posts/id/${id}`);
-    return response.json();
-  }
-
-  // Public version for unauthenticated users
-  async getPostByIdPublic(id) {
-    try {
-      const response = await authFetch(
-        `${API_BASE_URL}/api/blog/posts/id/${id}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Error fetching post:", error);
-      throw error;
-    }
-  }
-
-  async searchPosts(keyword, page = 0, size = 10) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/search?keyword=${keyword}&page=${page}&size=${size}`
-    );
-    return response.json();
-  }
-
-  async getPostsByCategory(categoryId, page = 0, size = 10) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/category/${categoryId}?page=${page}&size=${size}`
-    );
-    return response.json();
-  }
-
-  async getPostsByTag(tagId, page = 0, size = 10) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/tag/${tagId}?page=${page}&size=${size}`
-    );
-    return response.json();
-  }
-
-  async createPost(postData) {
-    const response = await authFetch(`${API_BASE_URL}/api/blog/posts`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(postData),
-    });
-    return response.json();
-  }
-
-  async updatePost(id, postData) {
-    const response = await authFetch(`${API_BASE_URL}/api/blog/posts/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(postData),
-    });
-    return response.json();
-  }
-
-  async deletePost(id) {
-    const response = await authFetch(`${API_BASE_URL}/api/blog/posts/${id}`, {
-      method: "DELETE",
-    });
-    return response.json();
-  }
-
-  // Likes
-  async toggleLike(postId) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/${postId}/like`,
-      {
-        method: "POST",
-      }
-    );
-    return response.json();
-  }
-
-  async isLiked(postId) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/${postId}/like`
-    );
-    return response.json();
-  }
-
-  // Comments
-  async createComment(postId, commentData) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/${postId}/comments`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(commentData),
-      }
-    );
-    return response.json();
-  }
-
-  async getComments(postId, page = 0, size = 10) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/${postId}/comments?page=${page}&size=${size}`
-    );
-    return response.json();
-  }
-
-  // Shares
-  async createShare(postId, shareData) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/${postId}/share`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(shareData),
-      }
-    );
-    return response.json();
-  }
-
-  // Bookmarks
-  async toggleBookmark(postId) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/${postId}/bookmark`,
-      {
-        method: "POST",
-      }
-    );
-    return response.json();
-  }
-
-  // Views
-  async recordView(postId) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/blog/posts/${postId}/view/simple`,
-      {
-        method: "POST",
-      }
-    );
-    return response.json();
-  }
-
-  // Categories
+  // Get all categories
   async getAllCategories() {
-    const response = await authFetch(`${API_BASE_URL}/api/blog/categories`);
-    return response.json();
+    try {
+      const response = await this.api.get("/categories");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      throw error;
+    }
   }
 
-  // Tags
+  // Get all tags
   async getAllTags() {
-    const response = await authFetch(`${API_BASE_URL}/api/blog/tags`);
-    return response.json();
+    try {
+      const response = await this.api.get("/tags");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+      throw error;
+    }
   }
 
-  // Admin APIs
-  async getPendingPosts(page = 0, size = 10) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/admin/blog/posts/pending?page=${page}&size=${size}`
-    );
-    return response.json();
+  // Search posts with pagination
+  async searchPosts(query, page = 0, size = 10) {
+    try {
+      const response = await this.api.get("/search", {
+        params: { q: query, page, size },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error searching posts:", error);
+      throw error;
+    }
   }
 
-  async approvePost(id) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/admin/blog/posts/${id}/approve`
-    );
-    return response.json();
+  // Get posts by category with pagination
+  async getPostsByCategory(categoryId, page = 0, size = 10) {
+    try {
+      const response = await this.api.get(`/categories/${categoryId}/posts`, {
+        params: { page, size },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching posts by category:", error);
+      throw error;
+    }
   }
 
-  async rejectPost(id, reason) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/admin/blog/posts/${id}/reject?reason=${reason}`
-    );
-    return response.json();
+  // Get posts by tag with pagination
+  async getPostsByTag(tagId, page = 0, size = 10) {
+    try {
+      const response = await this.api.get(`/tags/${tagId}/posts`, {
+        params: { page, size },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching posts by tag:", error);
+      throw error;
+    }
   }
 
-  async publishPost(id) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/admin/blog/posts/${id}/publish`
-    );
-    return response.json();
+  // Create share record
+  async createShare(postId, shareData) {
+    try {
+      const response = await this.api.post(
+        `/posts/${postId}/shares`,
+        shareData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error creating share:", error);
+      throw error;
+    }
   }
 
-  async unpublishPost(id) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/admin/blog/posts/${id}/unpublish`
-    );
-    return response.json();
+  // Get a single blog post by ID
+  async getPost(id) {
+    try {
+      const response = await this.api.get(`/posts/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching blog post:", error);
+      throw error;
+    }
   }
 
-  async getPendingComments(page = 0, size = 10) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/admin/blog/comments/pending?page=${page}&size=${size}`
-    );
-    return response.json();
+  // Create a new blog post
+  async createPost(postData) {
+    try {
+      const formData = new FormData();
+
+      // Append text fields
+      formData.append("title", postData.title);
+      formData.append("content", postData.content);
+      formData.append("excerpt", postData.excerpt || "");
+      formData.append("category", postData.category);
+      formData.append("status", postData.status);
+      formData.append("tags", JSON.stringify(postData.tags));
+
+      // Append image file if exists
+      if (postData.featuredImage && postData.featuredImage instanceof File) {
+        formData.append("featuredImage", postData.featuredImage);
+      }
+
+      const response = await this.api.post("/posts", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error creating blog post:", error);
+      throw error;
+    }
   }
 
-  async approveComment(id) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/admin/blog/comments/${id}/approve`
-    );
-    return response.json();
+  // Update an existing blog post
+  async updatePost(id, postData) {
+    try {
+      const formData = new FormData();
+
+      // Append text fields
+      formData.append("title", postData.title);
+      formData.append("content", postData.content);
+      formData.append("excerpt", postData.excerpt || "");
+      formData.append("category", postData.category);
+      formData.append("status", postData.status);
+      formData.append("tags", JSON.stringify(postData.tags));
+
+      // Append image file if exists and is a new file
+      if (postData.featuredImage && postData.featuredImage instanceof File) {
+        formData.append("featuredImage", postData.featuredImage);
+      }
+
+      const response = await this.api.put(`/posts/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating blog post:", error);
+      throw error;
+    }
   }
 
-  async rejectComment(id, reason) {
-    const response = await authFetch(
-      `${API_BASE_URL}/api/admin/blog/comments/${id}/reject?reason=${reason}`
-    );
-    return response.json();
+  // Delete a blog post
+  async deletePost(id) {
+    try {
+      const response = await this.api.delete(`/posts/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting blog post:", error);
+      throw error;
+    }
   }
 
-  async getBlogStats() {
-    const response = await authFetch(`${API_BASE_URL}/api/admin/blog/stats`);
-    return response.json();
+  // Get user's saved posts
+  async getSavedPosts(params = {}) {
+    try {
+      const response = await this.api.get("/saved", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching saved posts:", error);
+      throw error;
+    }
+  }
+
+  // Save/unsave a post
+  async toggleSavePost(postId) {
+    try {
+      const response = await this.api.post(`/posts/${postId}/save`);
+      return response.data;
+    } catch (error) {
+      console.error("Error toggling save post:", error);
+      throw error;
+    }
+  }
+
+  // Like/unlike a post
+  async toggleLikePost(postId) {
+    try {
+      const response = await this.api.post(`/posts/${postId}/like`);
+      return response.data;
+    } catch (error) {
+      console.error("Error toggling like post:", error);
+      throw error;
+    }
+  }
+
+  // Get post comments
+  async getPostComments(postId, params = {}) {
+    try {
+      const response = await this.api.get(`/posts/${postId}/comments`, {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching post comments:", error);
+      throw error;
+    }
+  }
+
+  // Add a comment to a post
+  async addComment(postId, commentData) {
+    try {
+      const response = await this.api.post(
+        `/posts/${postId}/comments`,
+        commentData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      throw error;
+    }
+  }
+
+  // Get categories
+  async getCategories() {
+    try {
+      const response = await this.api.get("/categories");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      throw error;
+    }
+  }
+
+  // Get popular tags
+  async getPopularTags(limit = 20) {
+    try {
+      const response = await this.api.get("/tags/popular", {
+        params: { limit },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching popular tags:", error);
+      throw error;
+    }
+  }
+
+  // Get user's posts (for authenticated users)
+  async getUserPosts(userId = null, params = {}) {
+    try {
+      const url = userId ? `/users/${userId}/posts` : "/my-posts";
+      const response = await this.api.get(url, { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+      throw error;
+    }
+  }
+
+  // Admin methods
+  async updatePostStatus(postId, status, rejectionReason = null) {
+    try {
+      const data = { status };
+      if (rejectionReason) {
+        data.rejectionReason = rejectionReason;
+      }
+      const response = await this.api.put(`/posts/${postId}/status`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating post status:", error);
+      throw error;
+    }
+  }
+
+  async deletePost(postId) {
+    try {
+      const response = await this.api.delete(`/posts/${postId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      throw error;
+    }
   }
 }
 
-const blogService = new BlogService();
-export default blogService;
+export default new BlogService();
