@@ -8,9 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/blog")
@@ -46,10 +52,27 @@ public class BlogController {
         return ResponseEntity.notFound().build();
     }
     
+    @GetMapping("/posts/{id}/public")
+    public ResponseEntity<BlogPostDTO> getPostPublic(@PathVariable Long id) {
+        BlogPostDTO post = blogService.getPostByIdPublic(id);
+        if (post != null) {
+            return ResponseEntity.ok(post);
+        }
+        return ResponseEntity.notFound().build();
+    }
+    
     @PostMapping("/admin/update-comment-counts")
     public ResponseEntity<String> updateAllCommentCounts() {
         blogService.updateAllCommentCounts();
         return ResponseEntity.ok("Comment counts updated successfully");
+    }
+    
+    
+    // Record view for a blog post
+    @PostMapping("/posts/{id}/view")
+    public ResponseEntity<String> recordView(@PathVariable Long id) {
+        blogService.recordView(id);
+        return ResponseEntity.ok("View recorded");
     }
     
     @GetMapping("/posts/search")
@@ -68,6 +91,46 @@ public class BlogController {
     public ResponseEntity<Page<BlogPostDTO>> getPostsByTag(@PathVariable Long tagId, Pageable pageable) {
         Page<BlogPostDTO> posts = blogService.getPostsByTag(tagId, pageable);
         return ResponseEntity.ok(posts);
+    }
+    
+    // Upload featured image
+    @PostMapping("/upload-image")
+    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file, Authentication authentication) {
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("File is empty");
+            }
+            
+            // Validate file type
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return ResponseEntity.badRequest().body("Only image files are allowed");
+            }
+            
+            // Create upload directory if it doesn't exist
+            String uploadDir = System.getProperty("user.dir") + "/uploads/blog";
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            
+            // Generate unique filename
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null ? 
+                originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
+            String filename = UUID.randomUUID().toString() + extension;
+            
+            // Save file
+            Path filePath = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), filePath);
+            
+            // Return the file URL
+            String fileUrl = "/uploads/blog/" + filename;
+            return ResponseEntity.ok(fileUrl);
+            
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Failed to upload file: " + e.getMessage());
+        }
     }
     
     @PostMapping("/posts")
@@ -116,8 +179,16 @@ public class BlogController {
     
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<BlogCommentDTO>> getComments(@PathVariable Long postId, Pageable pageable) {
-        Page<BlogCommentDTO> comments = blogService.getComments(postId, pageable);
-        return ResponseEntity.ok(comments);
+        try {
+            System.out.println("BlogController.getComments() called with postId: " + postId);
+            Page<BlogCommentDTO> comments = blogService.getComments(postId, pageable);
+            System.out.println("BlogController.getComments() completed successfully, found " + comments.getTotalElements() + " comments");
+            return ResponseEntity.ok(comments);
+        } catch (Exception e) {
+            System.err.println("Error in BlogController.getComments(): " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(null);
+        }
     }
     
     // Share Endpoints

@@ -21,6 +21,7 @@ import AdviceSentPage from "./pages/AdviceSentPage";
 import { jwtDecode } from "jwt-decode";
 import { authFetch } from "./authFetch";
 import AdminTestResultsPage from "./pages/AdminTestResultsPage";
+import BlogManagementPage from "./pages/BlogManagementPage";
 import StudentHomePage from "./pages/StudentHomePage";
 import IntroduceMindMeterPage from "./pages/IntroduceMindMeterPage";
 import StudentTestResultPage from "./pages/StudentTestResultPage";
@@ -31,6 +32,7 @@ import TermsOfUse from "./pages/TermsOfUse";
 import BlogListPage from "./pages/BlogListPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import SavedArticlesPage from "./pages/SavedArticlesPage";
+import CreatePostPage from "./pages/CreatePostPage";
 import BlogErrorBoundary from "./components/BlogErrorBoundary";
 import Disclaimer from "./pages/Disclaimer";
 import SecurityPolicy from "./pages/SecurityPolicy";
@@ -159,6 +161,7 @@ export default function AppRoutes() {
       "/contact",
       "/pricing",
       "/blog",
+      "/blog/create",
       "/saved-articles",
       "/login",
       "/register",
@@ -497,6 +500,14 @@ export default function AppRoutes() {
             }
           />
           <Route
+            path="/blog/create"
+            element={
+              <BlogErrorBoundary>
+                <CreatePostPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
             path="/blog/post/:id"
             element={
               <BlogErrorBoundary>
@@ -564,6 +575,10 @@ export default function AppRoutes() {
             element={<AnnouncementManagementPage handleLogout={handleLogout} />}
           />
           <Route
+            path="/admin/blog"
+            element={<BlogManagementPage handleLogout={handleLogout} />}
+          />
+          <Route
             path="/admin/statistics"
             element={<AdminStatisticsPage handleLogout={handleLogout} />}
           />
@@ -592,6 +607,14 @@ export default function AppRoutes() {
             element={
               <BlogErrorBoundary>
                 <BlogListPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
+            path="/blog/create"
+            element={
+              <BlogErrorBoundary>
+                <CreatePostPage />
               </BlogErrorBoundary>
             }
           />
@@ -677,6 +700,14 @@ export default function AppRoutes() {
             element={
               <BlogErrorBoundary>
                 <BlogListPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
+            path="/blog/create"
+            element={
+              <BlogErrorBoundary>
+                <CreatePostPage />
               </BlogErrorBoundary>
             }
           />
