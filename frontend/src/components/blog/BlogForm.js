@@ -1,48 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Grid,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Box,
-  Button,
-  Typography,
-  Alert,
-  CircularProgress,
-  IconButton,
-  Tooltip,
-} from "@mui/material";
-import {
-  Save as SaveIcon,
-  Publish as PublishIcon,
-  Cancel as CancelIcon,
-  Image as ImageIcon,
-  Preview as PreviewIcon,
-} from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
-
-const ImageUploadArea = styled(Box)(({ theme }) => ({
-  border: `2px dashed ${theme.palette.grey[300]}`,
-  borderRadius: theme.spacing(1),
-  padding: theme.spacing(3),
-  textAlign: "center",
-  cursor: "pointer",
-  transition: "all 0.3s ease",
-  "&:hover": {
-    borderColor: theme.palette.primary.main,
-    backgroundColor: theme.palette.primary.light + "10",
-  },
-}));
-
-const TagInput = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    padding: theme.spacing(1),
-  },
-}));
+import { useTheme } from "@mui/material/styles";
+import { useTheme as useCustomTheme } from "../../hooks/useTheme";
 
 const BlogForm = ({
   initialData = null,
@@ -53,6 +12,8 @@ const BlogForm = ({
   success = "",
 }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const { theme: themeMode } = useCustomTheme();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -209,187 +170,285 @@ const BlogForm = ({
   };
 
   return (
-    <Box>
+    <div className="space-y-6">
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <div className="p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg">
           {error}
-        </Alert>
+        </div>
       )}
 
       {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
+        <div className="p-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-300 rounded-lg">
           {success}
-        </Alert>
+        </div>
       )}
 
-      <Grid container spacing={3}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Title */}
-        <Grid size={12}>
-          <TextField
-            fullWidth
-            label={t("blog.createPostForm.form.title")}
-            placeholder={t("blog.createPostForm.form.titlePlaceholder")}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t("blog.createPostForm.form.title")} *
+          </label>
+          <input
+            type="text"
             value={formData.title}
             onChange={handleInputChange("title")}
-            variant="outlined"
-            required
-            error={!!validationErrors.title}
-            helperText={validationErrors.title}
+            className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+            placeholder={t("blog.createPostForm.form.titlePlaceholder")}
           />
-        </Grid>
+          {validationErrors.title && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+              {validationErrors.title}
+            </p>
+          )}
+        </div>
 
         {/* Category */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <FormControl fullWidth>
-            <InputLabel>{t("blog.createPostForm.form.category")}</InputLabel>
-            <Select
-              value={formData.category}
-              onChange={handleInputChange("category")}
-              label={t("blog.createPostForm.form.category")}
-            >
-              {categories.map((category) => (
-                <MenuItem key={category.value} value={category.value}>
-                  {category.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
+        <div className="md:col-span-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t("blog.createPostForm.form.category")}
+          </label>
+          <select
+            value={formData.category}
+            onChange={handleInputChange("category")}
+            className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+          >
+            <option value="">
+              {t("blog.createPostForm.form.selectCategory")}
+            </option>
+            {categories.map((category) => (
+              <option key={category.value} value={category.value}>
+                {category.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {/* Tags */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Box>
-            <TagInput
-              fullWidth
-              label={t("blog.createPostForm.form.tags")}
-              placeholder={t("blog.createPostForm.form.tagsPlaceholder")}
-              value={tagInput}
-              onChange={handleTagInputChange}
-              onKeyPress={handleTagInputKeyPress}
-              variant="outlined"
-              onBlur={addTag}
-            />
-            <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {formData.tags.map((tag, index) => (
-                <Chip
-                  key={index}
-                  label={tag}
-                  onDelete={() => removeTag(tag)}
-                  color="primary"
-                  variant="outlined"
-                  size="small"
-                />
-              ))}
-            </Box>
-          </Box>
-        </Grid>
+        <div className="md:col-span-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t("blog.createPostForm.form.tags")}
+          </label>
+          <input
+            type="text"
+            value={tagInput}
+            onChange={handleTagInputChange}
+            onKeyPress={handleTagInputKeyPress}
+            onBlur={addTag}
+            className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+            placeholder={t("blog.createPostForm.form.tagsPlaceholder")}
+          />
+          <div className="mt-2 flex flex-wrap gap-2">
+            {formData.tags.map((tag, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="ml-2 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
 
         {/* Featured Image */}
-        <Grid size={12}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {t("blog.createPostForm.form.featuredImage")}
-          </Typography>
+          </label>
           <input
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
-            style={{ display: "none" }}
+            className="hidden"
             id="featured-image-upload"
           />
-          <label htmlFor="featured-image-upload">
-            <ImageUploadArea>
-              <ImageIcon
-                sx={{ fontSize: 48, color: "text.secondary", mb: 1 }}
-              />
-              <Typography variant="body2" color="text.secondary">
+          <label htmlFor="featured-image-upload" className="cursor-pointer">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 48 48"
+              >
+                <path
+                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 {formData.featuredImage
                   ? typeof formData.featuredImage === "string"
                     ? formData.featuredImage
                     : formData.featuredImage.name
                   : t("blog.createPostForm.form.featuredImagePlaceholder")}
-              </Typography>
-            </ImageUploadArea>
+              </p>
+            </div>
           </label>
           {validationErrors.featuredImage && (
-            <Alert severity="error" sx={{ mt: 1 }}>
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
               {validationErrors.featuredImage}
-            </Alert>
+            </p>
           )}
-        </Grid>
+        </div>
 
         {/* Excerpt */}
-        <Grid size={12}>
-          <TextField
-            fullWidth
-            label={t("blog.createPostForm.form.excerpt")}
-            placeholder={t("blog.createPostForm.form.excerptPlaceholder")}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t("blog.createPostForm.form.excerpt")}
+          </label>
+          <textarea
             value={formData.excerpt}
             onChange={handleInputChange("excerpt")}
-            variant="outlined"
-            multiline
             rows={3}
+            className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+            placeholder={t("blog.createPostForm.form.excerptPlaceholder")}
           />
-        </Grid>
+        </div>
 
         {/* Content */}
-        <Grid size={12}>
-          <TextField
-            fullWidth
-            label={t("blog.createPostForm.form.content")}
-            placeholder={t("blog.createPostForm.form.contentPlaceholder")}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t("blog.createPostForm.form.content")} *
+          </label>
+          <textarea
             value={formData.content}
             onChange={handleInputChange("content")}
-            variant="outlined"
-            multiline
             rows={12}
-            required
-            error={!!validationErrors.content}
-            helperText={validationErrors.content}
+            className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+            placeholder={t("blog.createPostForm.form.contentPlaceholder")}
           />
-        </Grid>
+          {validationErrors.content && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+              {validationErrors.content}
+            </p>
+          )}
+        </div>
 
         {/* Action Buttons */}
-        <Grid size={12}>
-          <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-            <Button
-              variant="outlined"
-              startIcon={<CancelIcon />}
+        <div className="md:col-span-2">
+          <div className="flex gap-4 justify-end">
+            <button
+              type="button"
               onClick={onCancel}
               disabled={loading}
+              className="px-6 py-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
               {t("blog.createPostForm.form.cancel")}
-            </Button>
+            </button>
 
-            <Button
-              variant="outlined"
-              startIcon={<SaveIcon />}
+            <button
+              type="button"
               onClick={() => handleSubmit("draft")}
               disabled={loading}
+              className="px-6 py-3 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {loading ? (
-                <CircularProgress size={20} />
+                <svg
+                  className="animate-spin h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
               ) : (
-                t("blog.createPostForm.form.draft")
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                  />
+                </svg>
               )}
-            </Button>
+              {t("blog.createPostForm.form.draft")}
+            </button>
 
-            <Button
-              variant="contained"
-              startIcon={<PublishIcon />}
+            <button
+              type="button"
               onClick={() => handleSubmit("published")}
               disabled={loading}
-              color="primary"
+              className="px-6 py-3 text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {loading ? (
-                <CircularProgress size={20} color="inherit" />
+                <svg
+                  className="animate-spin h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
               ) : (
-                t("blog.createPostForm.form.publish")
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
+                </svg>
               )}
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
+              {t("blog.createPostForm.form.publish")}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

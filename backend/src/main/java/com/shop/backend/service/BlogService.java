@@ -6,7 +6,9 @@ import com.shop.backend.repository.*;
 import com.shop.backend.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,6 +113,20 @@ public class BlogService {
         return null;
     }
     
+    public BlogPostDTO getPostByIdPublic(Long id) {
+        // For public access, only return published posts
+        Optional<BlogPost> post = blogPostRepository.findByIdAndStatus(id, BlogPost.BlogPostStatus.published);
+        if (post.isPresent()) {
+            // Force update comment count before returning
+            updateCommentCount(id);
+            
+            // Refresh post from database after update
+            post = blogPostRepository.findByIdAndStatus(id, BlogPost.BlogPostStatus.published);
+            return convertToDTO(post.get());
+        }
+        return null;
+    }
+    
     public BlogPostDTO createPost(BlogPostRequest request, String authorEmail) {
         User author = userRepository.findByEmail(authorEmail)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -166,8 +182,11 @@ public class BlogService {
             throw new RuntimeException("Unauthorized to update this post");
         }
         
-        post.setTitle(request.getTitle());
-        post.setSlug(generateSlug(request.getTitle()));
+        // Only update slug if title changed
+        if (!post.getTitle().equals(request.getTitle())) {
+            post.setTitle(request.getTitle());
+            post.setSlug(generateSlug(request.getTitle()));
+        }
         post.setContent(request.getContent());
         post.setExcerpt(request.getExcerpt());
         post.setStatus(request.getStatus());
@@ -370,12 +389,39 @@ public class BlogService {
         return tags.stream().map(this::convertTagToDTO).collect(Collectors.toList());
     }
     
+    // Get comments for a blog post with pagination
+    public Page<BlogCommentDTO> getCommentsByPostId(Long postId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<BlogComment> comments = blogCommentRepository.findByPostIdAndStatusOrderByCreatedAtDesc(postId, BlogComment.CommentStatus.approved, pageable);
+        return comments.map(this::convertCommentToDTO);
+    }
+    
     // Helper Methods
     private String generateSlug(String title) {
-        return title.toLowerCase()
+        String baseSlug = title.toLowerCase()
             .replaceAll("[^a-z0-9\\s]", "")
             .replaceAll("\\s+", "-")
             .trim();
+        
+        // Ensure slug is not too long (MySQL limit)
+        if (baseSlug.length() > 100) {
+            baseSlug = baseSlug.substring(0, 100);
+        }
+        
+        String slug = baseSlug;
+        int counter = 1;
+        
+        // Check if slug already exists and append counter if needed
+        while (blogPostRepository.existsBySlug(slug)) {
+            String suffix = "-" + counter;
+            if (baseSlug.length() + suffix.length() > 100) {
+                baseSlug = baseSlug.substring(0, 100 - suffix.length());
+            }
+            slug = baseSlug + suffix;
+            counter++;
+        }
+        
+        return slug;
     }
     
     private void updateLikeCount(Long postId) {

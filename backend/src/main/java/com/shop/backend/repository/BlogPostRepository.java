@@ -33,6 +33,9 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
     // Find post by slug
     Optional<BlogPost> findBySlug(String slug);
     
+    // Check if slug exists
+    boolean existsBySlug(String slug);
+    
     // Find post by id and status
     Optional<BlogPost> findByIdAndStatus(Long id, BlogPost.BlogPostStatus status);
     

@@ -130,7 +130,7 @@ class BlogService {
     }
   }
 
-  // Get a single blog post by ID
+  // Get a single blog post by ID (authenticated)
   async getPost(id) {
     try {
       const response = await this.api.get(`/posts/${id}`);
@@ -141,27 +141,69 @@ class BlogService {
     }
   }
 
+  // Get a single blog post by ID (public - no auth required)
+  async getPostByIdPublic(id) {
+    try {
+      const response = await this.api.get(`/posts/${id}/public`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching public blog post:", error);
+      throw error;
+    }
+  }
+
+  // Get a single blog post by ID (alias for getPost)
+  async getPostById(id) {
+    return this.getPost(id);
+  }
+
+  // Upload featured image
+  async uploadImage(file) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await this.api.post("/upload-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data; // Returns the file URL
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  }
+
   // Create a new blog post
   async createPost(postData) {
     try {
-      const formData = new FormData();
+      let featuredImageUrl = null;
 
-      // Append text fields
-      formData.append("title", postData.title);
-      formData.append("content", postData.content);
-      formData.append("excerpt", postData.excerpt || "");
-      formData.append("category", postData.category);
-      formData.append("status", postData.status);
-      formData.append("tags", JSON.stringify(postData.tags));
-
-      // Append image file if exists
+      // Upload featured image if exists
       if (postData.featuredImage && postData.featuredImage instanceof File) {
-        formData.append("featuredImage", postData.featuredImage);
+        console.log("Uploading featured image...");
+        featuredImageUrl = await this.uploadImage(postData.featuredImage);
+        console.log("Featured image uploaded:", featuredImageUrl);
       }
 
-      const response = await this.api.post("/posts", formData, {
+      // Prepare JSON payload according to BlogPostRequest DTO
+      const payload = {
+        title: postData.title,
+        content: postData.content,
+        excerpt: postData.excerpt || "",
+        status: postData.status, // This should be enum: "draft", "pending", "published", etc.
+        categoryIds: [], // TODO: Fix category mapping - backend expects actual category IDs from database
+        tagIds: [], // Backend expects array of tag IDs, we'll handle this later
+        featuredImage: featuredImageUrl, // Use the uploaded image URL
+        isFeatured: false,
+        images: [],
+      };
+
+      const response = await this.api.post("/posts", payload, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
         },
       });
 
@@ -175,24 +217,31 @@ class BlogService {
   // Update an existing blog post
   async updatePost(id, postData) {
     try {
-      const formData = new FormData();
+      let featuredImageUrl = null;
 
-      // Append text fields
-      formData.append("title", postData.title);
-      formData.append("content", postData.content);
-      formData.append("excerpt", postData.excerpt || "");
-      formData.append("category", postData.category);
-      formData.append("status", postData.status);
-      formData.append("tags", JSON.stringify(postData.tags));
-
-      // Append image file if exists and is a new file
+      // Upload featured image if exists
       if (postData.featuredImage && postData.featuredImage instanceof File) {
-        formData.append("featuredImage", postData.featuredImage);
+        console.log("Uploading featured image...");
+        featuredImageUrl = await this.uploadImage(postData.featuredImage);
+        console.log("Featured image uploaded:", featuredImageUrl);
       }
 
-      const response = await this.api.put(`/posts/${id}`, formData, {
+      // Prepare JSON payload according to BlogPostRequest DTO
+      const payload = {
+        title: postData.title,
+        content: postData.content,
+        excerpt: postData.excerpt || "",
+        status: postData.status, // This should be enum: "draft", "pending", "published", etc.
+        categoryIds: [], // TODO: Fix category mapping - backend expects actual category IDs from database
+        tagIds: [], // Backend expects array of tag IDs, we'll handle this later
+        featuredImage: featuredImageUrl, // Use the uploaded image URL
+        isFeatured: false,
+        images: [],
+      };
+
+      const response = await this.api.put(`/posts/${id}`, payload, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
         },
       });
 
@@ -210,6 +259,66 @@ class BlogService {
       return response.data;
     } catch (error) {
       console.error("Error deleting blog post:", error);
+      throw error;
+    }
+  }
+
+  // Get comments for a blog post
+  async getComments(postId, page = 0, size = 10) {
+    try {
+      const response = await this.api.get(`/posts/${postId}/comments`, {
+        params: { page, size },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      throw error;
+    }
+  }
+
+  // Create a new comment
+  async createComment(postId, commentData) {
+    try {
+      const response = await this.api.post(
+        `/posts/${postId}/comments`,
+        commentData
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      throw error;
+    }
+  }
+
+  // Toggle like for a blog post
+  async toggleLike(postId) {
+    try {
+      const response = await this.api.post(`/posts/${postId}/like`);
+      return response.data;
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      throw error;
+    }
+  }
+
+  // Toggle bookmark for a blog post
+  async toggleBookmark(postId) {
+    try {
+      const response = await this.api.post(`/posts/${postId}/bookmark`);
+      return response.data;
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      throw error;
+    }
+  }
+
+  // Record view for a blog post
+  async recordView(postId) {
+    try {
+      const response = await this.api.post(`/posts/${postId}/view`);
+      return response.data;
+    } catch (error) {
+      console.error("Error recording view:", error);
       throw error;
     }
   }

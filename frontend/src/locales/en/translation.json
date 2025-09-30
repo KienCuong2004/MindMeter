@@ -1798,6 +1798,7 @@
         "featuredImagePlaceholder": "Upload an image that represents your post",
         "category": "Category",
         "categoryPlaceholder": "Select a category",
+        "selectCategory": "Select a category",
         "tags": "Tags",
         "tagsPlaceholder": "Add tags separated by commas",
         "status": "Status",
