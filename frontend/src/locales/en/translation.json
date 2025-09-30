@@ -458,6 +458,7 @@
     "notification": "Notification",
     "error": "Error",
     "cancel": "Cancel",
+    "close": "Close",
     "firstName": "First Name",
     "lastName": "Last Name",
     "fullName": "Full Name",
@@ -1820,7 +1821,8 @@
       "success": {
         "published": "Post published successfully!",
         "saved": "Post saved as draft!",
-        "updated": "Post updated successfully!"
+        "updated": "Post updated successfully!",
+        "pending": "Post submitted for admin approval! You will be notified when the post is approved."
       },
       "error": {
         "publishFailed": "Failed to publish post",
@@ -1926,10 +1928,11 @@
         "createdAt": "Created At",
         "status": "Status",
         "approveTitle": "Approve Post",
-        "approveMessage": "Are you sure you want to approve this post: \"{{title}}\"?",
+        "approveMessage": "Are you sure you want to approve this post?",
         "rejectTitle": "Reject Post",
-        "rejectMessage": "Are you sure you want to reject this post: \"{{title}}\"?",
-        "rejectionReason": "Rejection reason (optional)"
+        "rejectMessage": "Are you sure you want to reject this post?",
+        "rejectionReason": "Rejection reason (optional)",
+        "rejectionReasonPlaceholder": "Enter rejection reason (optional)..."
       },
       "success": {
         "postApproved": "Post approved successfully",

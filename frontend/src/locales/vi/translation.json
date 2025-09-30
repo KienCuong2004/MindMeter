@@ -456,6 +456,7 @@
     "notification": "Thông báo",
     "error": "Lỗi",
     "cancel": "Hủy",
+    "close": "Đóng",
     "firstName": "Họ",
     "lastName": "Tên",
     "fullName": "Họ tên",
@@ -1819,7 +1820,8 @@
       "success": {
         "published": "Đăng bài thành công!",
         "saved": "Lưu nháp thành công!",
-        "updated": "Cập nhật bài viết thành công!"
+        "updated": "Cập nhật bài viết thành công!",
+        "pending": "Bài viết đã được gửi để admin duyệt! Bạn sẽ được thông báo khi bài viết được phê duyệt."
       },
       "error": {
         "publishFailed": "Không thể đăng bài",
@@ -1925,10 +1927,11 @@
         "createdAt": "Ngày tạo",
         "status": "Trạng thái",
         "approveTitle": "Duyệt Bài viết",
-        "approveMessage": "Bạn có chắc chắn muốn duyệt bài viết này: \"{{title}}\"?",
+        "approveMessage": "Bạn có chắc chắn muốn duyệt bài viết này?",
         "rejectTitle": "Từ chối Bài viết",
-        "rejectMessage": "Bạn có chắc chắn muốn từ chối bài viết này: \"{{title}}\"?",
-        "rejectionReason": "Lý do từ chối (tùy chọn)"
+        "rejectMessage": "Bạn có chắc chắn muốn từ chối bài viết này?",
+        "rejectionReason": "Lý do từ chối (tùy chọn)",
+        "rejectionReasonPlaceholder": "Nhập lý do từ chối (tùy chọn)..."
       },
       "success": {
         "postApproved": "Duyệt bài viết thành công",

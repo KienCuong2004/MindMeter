@@ -51,7 +51,7 @@ const CreatePostPage = () => {
       const response = await blogService.createPost(formData);
       console.log("Post created successfully:", response);
 
-      setSuccess(t("blog.createPostForm.success.published"));
+      setSuccess(t("blog.createPostForm.success.pending"));
 
       // Redirect to blog page after successful creation
       setTimeout(() => {

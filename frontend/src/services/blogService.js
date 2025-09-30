@@ -50,6 +50,17 @@ class BlogService {
     }
   }
 
+  // Get all blog posts for admin (including pending)
+  async getPostsForAdmin(params = {}) {
+    try {
+      const response = await this.api.get("/admin/posts", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching admin blog posts:", error);
+      throw error;
+    }
+  }
+
   // Alias for getPosts to maintain compatibility
   async getAllPosts(page = 0, size = 10) {
     return this.getPosts({ page, size });

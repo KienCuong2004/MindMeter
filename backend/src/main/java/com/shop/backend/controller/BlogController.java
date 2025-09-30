@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +32,14 @@ public class BlogController {
     public ResponseEntity<Page<BlogPostDTO>> getAllPosts(Pageable pageable, Authentication authentication) {
         String userEmail = authentication != null ? authentication.getName() : null;
         Page<BlogPostDTO> posts = blogService.getAllPosts(pageable, userEmail);
+        return ResponseEntity.ok(posts);
+    }
+
+    // Admin endpoint to get all posts (including pending)
+    @GetMapping("/admin/posts")
+    public ResponseEntity<Page<BlogPostDTO>> getAllPostsForAdmin(Pageable pageable, Authentication authentication) {
+        String userEmail = authentication != null ? authentication.getName() : null;
+        Page<BlogPostDTO> posts = blogService.getAllPostsForAdmin(pageable, userEmail);
         return ResponseEntity.ok(posts);
     }
     
@@ -147,12 +156,33 @@ public class BlogController {
         return ResponseEntity.ok(post);
     }
     
-    @DeleteMapping("/posts/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id, Authentication authentication) {
-        String authorEmail = getCurrentUserEmail(authentication);
-        blogService.deletePost(id, authorEmail);
-        return ResponseEntity.ok().build();
-    }
+           @DeleteMapping("/posts/{id}")
+           public ResponseEntity<Void> deletePost(@PathVariable Long id, Authentication authentication) {
+               String authorEmail = getCurrentUserEmail(authentication);
+               blogService.deletePost(id, authorEmail);
+               return ResponseEntity.ok().build();
+           }
+
+           // Admin endpoints
+           @PutMapping("/posts/{id}/status")
+           public ResponseEntity<BlogPostDTO> updatePostStatus(@PathVariable Long id, @RequestBody Map<String, String> request, Authentication authentication) {
+               try {
+                   System.out.println("BlogController.updatePostStatus() called with id: " + id + ", request: " + request);
+                   String userEmail = getCurrentUserEmail(authentication);
+                   String status = request.get("status");
+                   String rejectionReason = request.get("rejectionReason");
+                   
+                   System.out.println("Extracted status: " + status + ", rejectionReason: " + rejectionReason + ", userEmail: " + userEmail);
+                   
+                   BlogPostDTO post = blogService.updatePostStatus(id, status, rejectionReason, userEmail);
+                   System.out.println("BlogService returned post: " + post.getTitle() + " with status: " + post.getStatus());
+                   return ResponseEntity.ok(post);
+               } catch (Exception e) {
+                   System.err.println("Error in BlogController.updatePostStatus: " + e.getMessage());
+                   e.printStackTrace();
+                   return ResponseEntity.status(500).build();
+               }
+           }
     
     // Like Endpoints
     @PostMapping("/posts/{postId}/like")
