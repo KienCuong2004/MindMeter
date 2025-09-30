@@ -278,9 +278,17 @@ public class BlogService {
     }
     
     public Page<BlogCommentDTO> getComments(Long postId, Pageable pageable) {
-        Page<BlogComment> comments = blogCommentRepository.findByPostIdAndStatusOrderByCreatedAtDesc(
-            postId, BlogComment.CommentStatus.approved, pageable);
-        return comments.map(this::convertCommentToDTO);
+        try {
+            System.out.println("BlogService.getComments() called with postId: " + postId);
+            Page<BlogComment> comments = blogCommentRepository.findByPostIdAndStatusOrderByCreatedAtDesc(
+                postId, BlogComment.CommentStatus.approved, pageable);
+            System.out.println("BlogService.getComments() found " + comments.getTotalElements() + " comments");
+            return comments.map(this::convertCommentToDTO);
+        } catch (Exception e) {
+            System.err.println("Error in BlogService.getComments(): " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     // Share Methods
@@ -528,19 +536,27 @@ public class BlogService {
     }
     
     private BlogCommentDTO convertCommentToDTO(BlogComment comment) {
-        BlogCommentDTO dto = new BlogCommentDTO();
-        dto.setId(comment.getId());
-        dto.setPostId(comment.getPost().getId());
-        dto.setUserId(comment.getUser().getId());
-        dto.setUserName(comment.getUser().getFirstName() + " " + comment.getUser().getLastName());
-        dto.setUserAvatar(comment.getUser().getAvatarUrl());
-        dto.setParentId(comment.getParent() != null ? comment.getParent().getId() : null);
-        dto.setContent(comment.getContent());
-        dto.setStatus(comment.getStatus());
-        dto.setLikeCount(comment.getLikeCount());
-        dto.setCreatedAt(comment.getCreatedAt());
-        dto.setUpdatedAt(comment.getUpdatedAt());
-        return dto;
+        try {
+            System.out.println("BlogService.convertCommentToDTO() called for comment ID: " + comment.getId());
+            BlogCommentDTO dto = new BlogCommentDTO();
+            dto.setId(comment.getId());
+            dto.setPostId(comment.getPost().getId());
+            dto.setUserId(comment.getUser().getId());
+            dto.setUserName(comment.getUser().getFirstName() + " " + comment.getUser().getLastName());
+            dto.setUserAvatar(comment.getUser().getAvatarUrl());
+            dto.setParentId(comment.getParent() != null ? comment.getParent().getId() : null);
+            dto.setContent(comment.getContent());
+            dto.setStatus(comment.getStatus());
+            dto.setLikeCount(comment.getLikeCount());
+            dto.setCreatedAt(comment.getCreatedAt());
+            dto.setUpdatedAt(comment.getUpdatedAt());
+            System.out.println("BlogService.convertCommentToDTO() completed successfully for comment ID: " + comment.getId());
+            return dto;
+        } catch (Exception e) {
+            System.err.println("Error in BlogService.convertCommentToDTO(): " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     private BlogCategoryDTO convertCategoryToDTO(BlogCategory category) {

@@ -67,15 +67,6 @@ public class BlogController {
         return ResponseEntity.ok("Comment counts updated successfully");
     }
     
-    // Get comments for a blog post
-    @GetMapping("/posts/{id}/comments")
-    public ResponseEntity<Page<BlogCommentDTO>> getComments(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Page<BlogCommentDTO> comments = blogService.getCommentsByPostId(id, page, size);
-        return ResponseEntity.ok(comments);
-    }
     
     // Record view for a blog post
     @PostMapping("/posts/{id}/view")
@@ -188,8 +179,16 @@ public class BlogController {
     
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<BlogCommentDTO>> getComments(@PathVariable Long postId, Pageable pageable) {
-        Page<BlogCommentDTO> comments = blogService.getComments(postId, pageable);
-        return ResponseEntity.ok(comments);
+        try {
+            System.out.println("BlogController.getComments() called with postId: " + postId);
+            Page<BlogCommentDTO> comments = blogService.getComments(postId, pageable);
+            System.out.println("BlogController.getComments() completed successfully, found " + comments.getTotalElements() + " comments");
+            return ResponseEntity.ok(comments);
+        } catch (Exception e) {
+            System.err.println("Error in BlogController.getComments(): " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(null);
+        }
     }
     
     // Share Endpoints

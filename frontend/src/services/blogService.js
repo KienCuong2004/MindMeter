@@ -252,17 +252,6 @@ class BlogService {
     }
   }
 
-  // Delete a blog post
-  async deletePost(id) {
-    try {
-      const response = await this.api.delete(`/posts/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error("Error deleting blog post:", error);
-      throw error;
-    }
-  }
-
   // Get comments for a blog post
   async getComments(postId, page = 0, size = 10) {
     try {
@@ -445,4 +434,5 @@ class BlogService {
   }
 }
 
-export default new BlogService();
+const blogService = new BlogService();
+export default blogService;
