@@ -72,6 +72,12 @@ public class BlogService {
             BlogPost.BlogPostStatus.published, LocalDateTime.now(), pageable);
         return posts.map(post -> convertToDTO(post, userEmail));
     }
+
+    // Admin method to get all posts (including pending, draft, etc.)
+    public Page<BlogPostDTO> getAllPostsForAdmin(Pageable pageable, String userEmail) {
+        Page<BlogPost> posts = blogPostRepository.findAll(pageable);
+        return posts.map(post -> convertToDTO(post, userEmail));
+    }
     
     public Page<BlogPostDTO> getPostsByCategory(Long categoryId, Pageable pageable) {
         Page<BlogPost> posts = blogPostRepository.findByCategoryIdAndStatus(
@@ -201,16 +207,59 @@ public class BlogService {
         return convertToDTO(post);
     }
     
-    public void deletePost(Long id, String authorEmail) {
-        BlogPost post = blogPostRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Post not found"));
-        
-        if (!post.getAuthor().getEmail().equals(authorEmail)) {
-            throw new RuntimeException("Unauthorized to delete this post");
-        }
-        
-        blogPostRepository.delete(post);
-    }
+           public void deletePost(Long id, String authorEmail) {
+               BlogPost post = blogPostRepository.findById(id)
+                   .orElseThrow(() -> new RuntimeException("Post not found"));
+
+               if (!post.getAuthor().getEmail().equals(authorEmail)) {
+                   throw new RuntimeException("Unauthorized to delete this post");
+               }
+
+               blogPostRepository.delete(post);
+           }
+
+           // Admin method to update post status
+           public BlogPostDTO updatePostStatus(Long id, String status, String rejectionReason, String adminEmail) {
+               try {
+                   System.out.println("BlogService.updatePostStatus() called with id: " + id + ", status: " + status + ", adminEmail: " + adminEmail);
+                   
+                   BlogPost post = blogPostRepository.findById(id)
+                       .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+                   System.out.println("Found post: " + post.getTitle() + " with current status: " + post.getStatus());
+
+                   // TODO: Add admin role check here if needed
+                   // For now, any authenticated user can update status
+
+                   // Update status
+                   try {
+                       BlogPost.BlogPostStatus newStatus = BlogPost.BlogPostStatus.valueOf(status.toLowerCase());
+                       System.out.println("Converting status '" + status + "' to enum: " + newStatus);
+                       
+                       post.setStatus(newStatus);
+                       
+                       // If approving, set published date
+                       if (newStatus == BlogPost.BlogPostStatus.published && post.getPublishedAt() == null) {
+                           post.setPublishedAt(LocalDateTime.now());
+                           System.out.println("Set published date to: " + post.getPublishedAt());
+                       }
+                       
+                       post = blogPostRepository.save(post);
+                       System.out.println("Post saved successfully with new status: " + post.getStatus());
+                       
+                       BlogPostDTO dto = convertToDTO(post);
+                       System.out.println("DTO created successfully for post: " + dto.getTitle());
+                       return dto;
+                   } catch (IllegalArgumentException e) {
+                       System.err.println("Invalid status: " + status + ", error: " + e.getMessage());
+                       throw new RuntimeException("Invalid status: " + status + ". Valid statuses are: draft, pending, published, rejected");
+                   }
+               } catch (Exception e) {
+                   System.err.println("Error in updatePostStatus: " + e.getMessage());
+                   e.printStackTrace();
+                   throw e;
+               }
+           }
     
     // Like Methods
     public boolean toggleLike(Long postId, String userEmail) {
