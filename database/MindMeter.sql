@@ -200,7 +200,7 @@ INSERT INTO users (email, password, first_name, last_name, phone, avatar_url, ro
 ('trankiencuong30072003@gmail.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Trần Kiên', 'Cường', '0369702376', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'ADMIN', 'ACTIVE', false, 'PRO', NULL, NULL),
 
 -- Experts (Chuyên gia tâm lý) - FREE plan không có thời hạn
-('cuongcodehub@gmail.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Nguyễn Thị', 'Dung', '0369702376', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'EXPERT', 'ACTIVE', false, 'FREE', NULL, NULL),
+('cuongcodehub@gmail.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Trần Kiên', 'Cường', '0369702376', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'EXPERT', 'ACTIVE', false, 'FREE', NULL, NULL),
 ('expert2@mindmeter.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Trần Văn', 'Hùng', '0987654323', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'EXPERT', 'ACTIVE', false, 'FREE', NULL, NULL),
 ('expert3@mindmeter.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Lê Thị', 'Thu Hà', '0987654324', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'EXPERT', 'ACTIVE', false, 'FREE', NULL, NULL),
 

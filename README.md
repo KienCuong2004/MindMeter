@@ -670,7 +670,27 @@ spring.datasource.hikari.connection-timeout=60000
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+
+### License Summary
+
+MindMeter is released under the **Apache License 2.0**, which provides:
+
+- ✅ **Commercial Use**: Free to use in commercial projects
+- ✅ **Modification**: Freedom to modify and create derivative works
+- ✅ **Distribution**: Right to distribute and sell
+- ✅ **Patent Use**: Grant of patent rights from contributors
+- ✅ **Private Use**: Use in private projects without restrictions
+
+### Key Benefits
+
+- **Open Source**: Source code is freely available
+- **Enterprise Ready**: Suitable for both open source and commercial projects
+- **Legal Protection**: Clear licensing terms with warranty disclaimers
+- **Community Friendly**: Encourages contributions and collaboration
+- **Patent Protection**: Provides protection against patent litigation
+
+For more details, see the full [Apache License 2.0](LICENSE) text.
 
 ## 👥 Team & Contributors
 
