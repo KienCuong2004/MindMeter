@@ -57,7 +57,6 @@ export async function authFetch(url, options = {}) {
     if (anonymousToken || creatingAnonymousAccount) {
       // Đối với anonymous user, chỉ clear token thông thường, không redirect
       localStorage.removeItem("token");
-      console.log("401 error for anonymous user, not redirecting to login");
       return res; // Return response để component có thể handle
     } else {
       // Đối với regular user, clear data và redirect
