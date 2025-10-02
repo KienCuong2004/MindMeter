@@ -93,7 +93,7 @@ public class AuthService {
             
             // Tạo JWT token cho anonymous session (không lưu vào database)
             java.util.Map<String, Object> claims = new java.util.HashMap<>();
-            claims.put("role", "STUDENT");
+            claims.put("role", "ANONYMOUS");
             claims.put("firstName", "Anonymous");
             claims.put("lastName", "User");
             claims.put("anonymous", true);
@@ -105,21 +105,21 @@ public class AuthService {
                 new org.springframework.security.core.userdetails.User(
                     sessionId, // Username = sessionId
                     "", // Password rỗng
-                    java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_STUDENT"))
+                    java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ANONYMOUS"))
                 )
             );
 
             // Tạo UserDTO ảo cho frontend (không lưu vào database)
             UserDTO anonymousUserDTO = new UserDTO();
             anonymousUserDTO.setId(null); // Không có ID thật
-            anonymousUserDTO.setEmail(null); // Không có email
+            anonymousUserDTO.setEmail("anonymous"); // Set email để frontend có thể detect
             anonymousUserDTO.setFirstName("Anonymous");
             anonymousUserDTO.setLastName("User");
-            anonymousUserDTO.setRole("STUDENT");
+            anonymousUserDTO.setRole("ANONYMOUS");
             anonymousUserDTO.setStatus("ACTIVE");
             anonymousUserDTO.setPlan("FREE");
 
-            return new AuthResponse(token, null, Role.STUDENT, anonymousUserDTO, true, null);
+            return new AuthResponse(token, null, Role.ANONYMOUS, anonymousUserDTO, true, null);
             
         } catch (Exception e) {
             throw new RuntimeException("Không thể tạo session ẩn danh: " + e.getMessage());

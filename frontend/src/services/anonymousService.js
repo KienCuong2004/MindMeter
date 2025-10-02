@@ -42,9 +42,7 @@ export const isAnonymousUser = (user) => {
     user.email === "anonymous" ||
     user.email === null ||
     (user.firstName === ANONYMOUS_USER.firstName &&
-      user.lastName === ANONYMOUS_USER.lastName) ||
-    // Check cho trường hợp anonymous user có role "STUDENT" nhưng email là "anonymous"
-    (user.role === "STUDENT" && user.email === "anonymous")
+      user.lastName === ANONYMOUS_USER.lastName)
   );
 };
 
