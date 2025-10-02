@@ -217,10 +217,14 @@ const StudentHomePage = () => {
   // Sửa hàm handleAnonymousStart để dùng selectedTestType
   const handleAnonymousStart = async () => {
     try {
+      // Set flag để đánh dấu đang tạo anonymous account
+      localStorage.setItem("creatingAnonymousAccount", "true");
+
       const response = await createAnonymousAccount();
 
       const { user: anonymousUser, token } = response;
       if (!token) {
+        localStorage.removeItem("creatingAnonymousAccount");
         setNotificationModal({
           isOpen: true,
           type: "error",
@@ -230,17 +234,39 @@ const StudentHomePage = () => {
         });
         return;
       }
+
       // Lưu thông tin user và token
       saveAnonymousUser(anonymousUser);
       saveAnonymousToken(token);
+
       // Đóng modal
       setAnonymousModalOpen(false);
+
       // Lưu pendingTestType vào localStorage để AppRoutes xử lý điều hướng
       const type = selectedTestType || "DASS-21";
-      localStorage.setItem("pendingTestType", type);
-      // Navigate trực tiếp thay vì reload
-      navigate(`/student/test?type=${type}`);
+
+      // Validate test type
+      const validTestTypes = [
+        "DASS-21",
+        "DASS-42",
+        "RADS",
+        "BDI",
+        "EPDS",
+        "SAS",
+      ];
+      const finalTestType = validTestTypes.includes(type) ? type : "DASS-21";
+
+      localStorage.setItem("pendingTestType", finalTestType);
+
+      // Clear flag
+      localStorage.removeItem("creatingAnonymousAccount");
+
+      // Navigate ngay lập tức
+      const testUrl = `/student/test?type=${finalTestType}`;
+      navigate(testUrl);
     } catch (error) {
+      // Clear flag on error
+      localStorage.removeItem("creatingAnonymousAccount");
       // Error creating anonymous account
       setNotificationModal({
         isOpen: true,
@@ -401,7 +427,11 @@ const StudentHomePage = () => {
 
       <AnonymousTestModal
         isOpen={anonymousModalOpen}
-        onClose={() => setAnonymousModalOpen(false)}
+        onClose={() => {
+          setAnonymousModalOpen(false);
+          // Reset selectedTestType khi đóng modal
+          setSelectedTestType(null);
+        }}
         onAnonymousStart={handleAnonymousStart}
         onLoginStart={handleLoginStart}
       />

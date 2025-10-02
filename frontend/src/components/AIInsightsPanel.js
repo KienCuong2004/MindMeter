@@ -685,27 +685,27 @@ const AIInsightsPanel = ({ statisticsData, className = "" }) => {
                       predictions?.trend ||
                       t("aiInsights.fallbackTrend")}
                   </p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    <strong>{t("aiInsights.expectedChange")}:</strong>{" "}
-                    {predictions?.predictions?.next_7_days_trend
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      <strong>{t("aiInsights.expectedChange")}:</strong>{" "}
+                      {predictions?.predictions?.next_7_days_trend
                       ?.percentage_change || t("aiInsights.fallbackChange")}
                   </p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">
-                    <strong>{t("aiInsights.period")}:</strong>{" "}
-                    {predictions?.predictions?.next_7_days_trend?.dates
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      <strong>{t("aiInsights.period")}:</strong>{" "}
+                      {predictions?.predictions?.next_7_days_trend?.dates
                       ?.start_date || t("aiInsights.fallbackStartDate")}{" "}
                     {t("aiInsights.to")}{" "}
-                    {predictions?.predictions?.next_7_days_trend?.dates
+                      {predictions?.predictions?.next_7_days_trend?.dates
                       ?.end_date || t("aiInsights.fallbackEndDate")}
                   </p>
                 </div>
               </div>
             )}
             {/* Peak Risk Periods */}
-            <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-2">
-                {t("aiInsights.peakRiskPeriods")}
-              </h4>
+              <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                  {t("aiInsights.peakRiskPeriods")}
+                </h4>
               {predictions?.predictions?.peak_risk_periods &&
               Array.isArray(predictions.predictions.peak_risk_periods) &&
               !shouldShowNoDataMessage(
@@ -714,20 +714,20 @@ const AIInsightsPanel = ({ statisticsData, className = "" }) => {
                 <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
                   {predictions.predictions.peak_risk_periods.map(
                     (period, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0 ${
+                    <li key={index} className="flex items-start space-x-2">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0 ${
                             period.priority === "urgent"
-                              ? "bg-red-500"
+                            ? "bg-red-500"
                               : period.priority === "high"
-                              ? "bg-orange-500"
-                              : "bg-yellow-500"
-                          }`}
-                        ></span>
-                        <div>
-                          <span className="font-medium">
+                            ? "bg-orange-500"
+                            : "bg-yellow-500"
+                        }`}
+                      ></span>
+                      <div>
+                        <span className="font-medium">
                             {period.date || period.period}
-                          </span>
+                        </span>
                           <span className="text-gray-500">
                             {" "}
                             -{" "}
@@ -735,8 +735,8 @@ const AIInsightsPanel = ({ statisticsData, className = "" }) => {
                               period.description ||
                               period.event}
                           </span>
-                        </div>
-                      </li>
+                      </div>
+                    </li>
                     )
                   )}
                 </ul>
@@ -744,8 +744,8 @@ const AIInsightsPanel = ({ statisticsData, className = "" }) => {
                 <div className="text-sm text-gray-500 dark:text-gray-400 italic">
                   {t("aiInsights.noRiskPeriods") ||
                     "No specific risk periods identified"}
-                </div>
-              )}
+              </div>
+            )}
             </div>
 
             {/* Trend Prediction Chart */}
@@ -756,7 +756,7 @@ const AIInsightsPanel = ({ statisticsData, className = "" }) => {
                     <FaCircle className="w-3 h-3 text-blue-500 animate-pulse" />
                     <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                       {t("aiInsights.liveData") || "Live Data"}
-                    </span>
+                            </span>
                   </div>
                   <div className="flex items-center space-x-4 text-xs text-gray-500">
                     <div className="flex items-center space-x-1">
@@ -775,26 +775,26 @@ const AIInsightsPanel = ({ statisticsData, className = "" }) => {
                   <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white/20 to-transparent rounded-t-lg"></div>
                     <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white/20 to-transparent rounded-b-lg"></div>
-                  </div>
                 </div>
+              </div>
                 <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
                   <div className="flex items-center space-x-2">
                     <FaCircle className="w-2 h-2 text-green-400" />
                     <span>{t("aiInsights.lowRisk") || "Low Risk (0-3)"}</span>
-                  </div>
+                      </div>
                   <div className="flex items-center space-x-2">
                     <FaCircle className="w-2 h-2 text-yellow-400" />
                     <span>
                       {t("aiInsights.mediumRisk") || "Medium Risk (4-6)"}
                     </span>
-                  </div>
+                      </div>
                   <div className="flex items-center space-x-2">
                     <FaCircle className="w-2 h-2 text-red-400" />
                     <span>
                       {t("aiInsights.highRisk") || "High Risk (7-10)"}
-                    </span>
+                        </span>
                   </div>
-                </div>
+                      </div>
               </div>
             </div>
           </div>

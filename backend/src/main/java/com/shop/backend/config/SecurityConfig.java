@@ -61,6 +61,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/chatbot").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/expert/**").hasAnyRole("ADMIN", "EXPERT")
+                .requestMatchers("/api/student/**").hasAnyRole("STUDENT", "ANONYMOUS") // Allow anonymous users to access student endpoints
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

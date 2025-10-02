@@ -48,10 +48,23 @@ export async function authFetch(url, options = {}) {
   const res = await fetch(fullUrl, { ...options, headers });
 
   if (res.status === 401) {
-    localStorage.removeItem("token");
-    clearAnonymousData();
-    window.location.href = "/login";
-    return;
+    // Kiểm tra xem có phải anonymous user không
+    const anonymousToken = localStorage.getItem("anonymousToken");
+    const creatingAnonymousAccount = localStorage.getItem(
+      "creatingAnonymousAccount"
+    );
+
+    if (anonymousToken || creatingAnonymousAccount) {
+      // Đối với anonymous user, chỉ clear token thông thường, không redirect
+      localStorage.removeItem("token");
+      return res; // Return response để component có thể handle
+    } else {
+      // Đối với regular user, clear data và redirect
+      localStorage.removeItem("token");
+      clearAnonymousData();
+      window.location.href = "/login";
+      return;
+    }
   }
 
   return res;
