@@ -288,6 +288,13 @@ export default function AppRoutes() {
 
       // Redirect về /home nếu không ở /home hoặc public paths
       // Nhưng không redirect nếu đang ở trang login/register/forgot-password hoặc blog post
+      // Hoặc nếu đang trong quá trình tạo anonymous account
+      const pendingTestType = localStorage.getItem("pendingTestType");
+      const creatingAnonymousAccount = localStorage.getItem(
+        "creatingAnonymousAccount"
+      );
+      const isTestPage = window.location.pathname.startsWith("/student/test");
+
       if (
         window.location.pathname !== "/home" &&
         window.location.pathname !== "/" &&
@@ -296,7 +303,8 @@ export default function AppRoutes() {
         !isSavedArticlesPath &&
         !window.location.pathname.startsWith("/login") &&
         !window.location.pathname.startsWith("/register") &&
-        !window.location.pathname.startsWith("/forgot-password")
+        !window.location.pathname.startsWith("/forgot-password") &&
+        !(isTestPage && (pendingTestType || creatingAnonymousAccount)) // Cho phép test page nếu có pendingTestType hoặc đang tạo anonymous account
       ) {
         navigate("/home", { replace: true });
       }

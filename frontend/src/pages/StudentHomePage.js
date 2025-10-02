@@ -200,9 +200,17 @@ const StudentHomePage = () => {
 
   // Thay đổi hàm handleTakeTest để nhận loại test
   const handleTakeTest = (testType) => {
+    console.log("handleTakeTest called with testType:", testType);
+    console.log("currentUser:", currentUser);
+    console.log("currentToken:", currentToken);
+
     // Kiểm tra xem user đã đăng nhập hoặc có tài khoản ẩn danh chưa
     if (!currentUser && !currentToken) {
       // Chưa có tài khoản, lưu lại testType và hiển thị modal chọn
+      console.log(
+        "No user/token found, setting selectedTestType to:",
+        testType
+      );
       setSelectedTestType(testType); // Lưu testType
       setAnonymousModalOpen(true);
       return;
@@ -210,6 +218,7 @@ const StudentHomePage = () => {
     // Truyền ngôn ngữ hiện tại vào URL để đảm bảo test hiển thị đúng ngôn ngữ
     const currentLanguage = i18n.language;
     const testUrl = `/student/test?type=${testType}&lang=${currentLanguage}`;
+    console.log("User already logged in, navigating to:", testUrl);
 
     navigate(testUrl);
   };
@@ -217,10 +226,17 @@ const StudentHomePage = () => {
   // Sửa hàm handleAnonymousStart để dùng selectedTestType
   const handleAnonymousStart = async () => {
     try {
+      console.log("Creating anonymous account...");
+
+      // Set flag để đánh dấu đang tạo anonymous account
+      localStorage.setItem("creatingAnonymousAccount", "true");
+
       const response = await createAnonymousAccount();
 
       const { user: anonymousUser, token } = response;
       if (!token) {
+        console.error("No token received from anonymous account creation");
+        localStorage.removeItem("creatingAnonymousAccount");
         setNotificationModal({
           isOpen: true,
           type: "error",
@@ -230,17 +246,45 @@ const StudentHomePage = () => {
         });
         return;
       }
+
+      console.log("Anonymous account created successfully:", anonymousUser);
+
       // Lưu thông tin user và token
       saveAnonymousUser(anonymousUser);
       saveAnonymousToken(token);
+
       // Đóng modal
       setAnonymousModalOpen(false);
+
       // Lưu pendingTestType vào localStorage để AppRoutes xử lý điều hướng
       const type = selectedTestType || "DASS-21";
-      localStorage.setItem("pendingTestType", type);
-      // Navigate trực tiếp thay vì reload
-      navigate(`/student/test?type=${type}`);
+      console.log("Selected test type:", type);
+
+      // Validate test type
+      const validTestTypes = [
+        "DASS-21",
+        "DASS-42",
+        "RADS",
+        "BDI",
+        "EPDS",
+        "SAS",
+      ];
+      const finalTestType = validTestTypes.includes(type) ? type : "DASS-21";
+      console.log("Final test type:", finalTestType);
+
+      localStorage.setItem("pendingTestType", finalTestType);
+
+      // Clear flag
+      localStorage.removeItem("creatingAnonymousAccount");
+
+      // Navigate ngay lập tức
+      const testUrl = `/student/test?type=${finalTestType}`;
+      console.log("Navigating to:", testUrl);
+      navigate(testUrl);
     } catch (error) {
+      console.error("Error creating anonymous account:", error);
+      // Clear flag on error
+      localStorage.removeItem("creatingAnonymousAccount");
       // Error creating anonymous account
       setNotificationModal({
         isOpen: true,
@@ -401,7 +445,11 @@ const StudentHomePage = () => {
 
       <AnonymousTestModal
         isOpen={anonymousModalOpen}
-        onClose={() => setAnonymousModalOpen(false)}
+        onClose={() => {
+          setAnonymousModalOpen(false);
+          // Reset selectedTestType khi đóng modal
+          setSelectedTestType(null);
+        }}
         onAnonymousStart={handleAnonymousStart}
         onLoginStart={handleLoginStart}
       />
