@@ -201,7 +201,7 @@
     "upgradeFree": "Use for free",
     "rateLimitTitle": "Please Wait",
     "rateLimitMessage": "Please wait a moment before trying again",
-    "rateLimitExceeded": "Rate limit exceeded. Please try again later.",
+    "rateLimitExceeded": "You have sent too many requests. Please wait to try again.",
     "newUserWaitTitle": "Account Security",
     "newUserWaitMessage": "For security reasons, please wait 60 seconds after registration/login before purchasing a plan.",
     "newUserWaitCountdown": "Please wait {{seconds}} seconds before purchasing...",

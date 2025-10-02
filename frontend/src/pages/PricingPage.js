@@ -11,6 +11,7 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import NotificationModal from "../components/NotificationModal";
+import RateLimitModal from "../components/RateLimitModal";
 
 export default function PricingPage() {
   const { t, i18n } = useTranslation();
@@ -33,6 +34,10 @@ export default function PricingPage() {
   });
   const [lastClickTime, setLastClickTime] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [rateLimitModal, setRateLimitModal] = useState({
+    isOpen: false,
+    retryAfterSeconds: 60,
+  });
 
   useEffect(() => {
     document.title = t("pricing.title") + " | MindMeter";
@@ -250,12 +255,14 @@ export default function PricingPage() {
         err.response?.status === 429 ||
         err.response?.data?.error?.includes("Rate limit")
       ) {
-        setNotificationModal({
+        // Extract retry-after from response headers or use default
+        const retryAfter = err.response?.headers?.['retry-after'] || 
+                          err.response?.data?.retryAfter || 
+                          60; // Default 60 seconds
+        
+        setRateLimitModal({
           isOpen: true,
-          type: "error",
-          title: t("pricing.rateLimitTitle"),
-          message: t("pricing.rateLimitExceeded"),
-          onConfirm: null,
+          retryAfterSeconds: parseInt(retryAfter),
         });
       } else {
         setNotificationModal({
@@ -634,6 +641,17 @@ export default function PricingPage() {
         title={notificationModal.title}
         message={notificationModal.message}
         onConfirm={notificationModal.onConfirm}
+      />
+
+      {/* Rate Limit Modal */}
+      <RateLimitModal
+        isOpen={rateLimitModal.isOpen}
+        onClose={() =>
+          setRateLimitModal((prev) => ({ ...prev, isOpen: false }))
+        }
+        retryAfterSeconds={rateLimitModal.retryAfterSeconds}
+        title={t("pricing.rateLimitTitle")}
+        message={t("pricing.rateLimitExceeded")}
       />
     </div>
   );
