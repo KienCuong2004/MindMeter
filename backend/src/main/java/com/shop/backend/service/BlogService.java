@@ -82,27 +82,35 @@ public class BlogService {
     public Page<BlogPostDTO> getPostsByCategory(Long categoryId, Pageable pageable) {
         Page<BlogPost> posts = blogPostRepository.findByCategoryIdAndStatus(
             categoryId, BlogPost.BlogPostStatus.published, pageable);
-        return posts.map(this::convertToDTO);
+        return posts.map(post -> convertToDTO(post, null));
     }
     
     public Page<BlogPostDTO> getPostsByTag(Long tagId, Pageable pageable) {
         Page<BlogPost> posts = blogPostRepository.findByTagIdAndStatus(
             tagId, BlogPost.BlogPostStatus.published, pageable);
-        return posts.map(this::convertToDTO);
+        return posts.map(post -> convertToDTO(post, null));
     }
     
     public Page<BlogPostDTO> searchPosts(String keyword, Pageable pageable) {
         Page<BlogPost> posts = blogPostRepository.searchPosts(
             BlogPost.BlogPostStatus.published, keyword, pageable);
-        return posts.map(this::convertToDTO);
+        return posts.map(post -> convertToDTO(post, null));
     }
     
     public BlogPostDTO getPostBySlug(String slug) {
+        return getPostBySlug(slug, null);
+    }
+    
+    public BlogPostDTO getPostBySlug(String slug, String userEmail) {
         Optional<BlogPost> post = blogPostRepository.findBySlug(slug);
-        return post.map(this::convertToDTO).orElse(null);
+        return post.map(p -> convertToDTO(p, userEmail)).orElse(null);
     }
     
     public BlogPostDTO getPostById(Long id) {
+        return getPostById(id, null);
+    }
+    
+    public BlogPostDTO getPostById(Long id, String userEmail) {
         Optional<BlogPost> post = blogPostRepository.findById(id);
         if (post.isPresent()) {
             // Debug comment count
@@ -114,12 +122,16 @@ public class BlogService {
             
             // Refresh post from database after update
             post = blogPostRepository.findById(id);
-            return convertToDTO(post.get());
+            return convertToDTO(post.get(), userEmail);
         }
         return null;
     }
     
     public BlogPostDTO getPostByIdPublic(Long id) {
+        return getPostByIdPublic(id, null);
+    }
+    
+    public BlogPostDTO getPostByIdPublic(Long id, String userEmail) {
         // For public access, only return published posts
         Optional<BlogPost> post = blogPostRepository.findByIdAndStatus(id, BlogPost.BlogPostStatus.published);
         if (post.isPresent()) {
@@ -128,7 +140,7 @@ public class BlogService {
             
             // Refresh post from database after update
             post = blogPostRepository.findByIdAndStatus(id, BlogPost.BlogPostStatus.published);
-            return convertToDTO(post.get());
+            return convertToDTO(post.get(), userEmail);
         }
         return null;
     }
