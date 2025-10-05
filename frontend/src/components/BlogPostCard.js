@@ -25,9 +25,10 @@ const BlogPostCard = ({
   currentUser,
 }) => {
   const { t, i18n } = useTranslation();
-  const { toggleSaveArticle, isArticleSaved } = useSavedArticles();
+  const { toggleSaveArticle, isArticleSaved, saveArticle, unsaveArticle } =
+    useSavedArticles();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
-  const [isBookmarked, setIsBookmarked] = useState(isArticleSaved(post.id));
+  const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
   const [likeCount, setLikeCount] = useState(post.likeCount || 0);
   const [commentCount] = useState(post.commentCount || 0);
   const [shareCount, setShareCount] = useState(post.shareCount || 0);
@@ -56,14 +57,30 @@ const BlogPostCard = ({
   const handleBookmark = async () => {
     if (isLoading) return;
 
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // You might want to show a login prompt here
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Use the context to toggle save state
-      const newSavedState = toggleSaveArticle(post);
-      setIsBookmarked(newSavedState);
+      // Use backend API to toggle bookmark
+      const result = await blogService.toggleBookmark(post.id);
+      setIsBookmarked(result);
+
+      // Also update localStorage system for saved articles count display
+      if (result) {
+        // Bookmarked - add to localStorage
+        saveArticle(post);
+      } else {
+        // Unbookmarked - remove from localStorage
+        unsaveArticle(post.id);
+      }
 
       // Also call the original onBookmark callback if provided
-      if (onBookmark) onBookmark(post.id, newSavedState);
+      if (onBookmark) onBookmark(post.id, result);
     } catch (error) {
       console.error("Error toggling bookmark:", error);
     } finally {
