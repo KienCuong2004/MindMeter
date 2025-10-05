@@ -20,6 +20,7 @@ import {
 import blogService from "../services/blogService";
 import CommentSection from "../components/CommentSection";
 import BlogPostMeta from "../components/BlogPostMeta";
+import { useSavedArticles } from "../contexts/SavedArticlesContext";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 import "../styles/blog.css";
@@ -28,6 +29,7 @@ const BlogPostPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { saveArticle, unsaveArticle } = useSavedArticles();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,7 +63,7 @@ const BlogPostPage = () => {
       setError(null);
       // Try to load real data first
       try {
-        const postData = await blogService.getPostByIdPublic(id);
+        const postData = await blogService.getPostById(id);
 
         setPost(postData);
         setIsLiked(postData.isLiked || false);
@@ -172,6 +174,15 @@ const BlogPostPage = () => {
     try {
       const result = await blogService.toggleBookmark(post.id);
       setIsBookmarked(result);
+
+      // Also update localStorage system for saved articles count display
+      if (result) {
+        // Bookmarked - add to localStorage
+        saveArticle(post);
+      } else {
+        // Unbookmarked - remove from localStorage
+        unsaveArticle(post.id);
+      }
     } catch (error) {
       console.error("Error toggling bookmark:", error);
       setToastMessage("Có lỗi xảy ra khi thực hiện chức năng bookmark");
