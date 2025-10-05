@@ -43,9 +43,24 @@ public class BlogController {
         return ResponseEntity.ok(posts);
     }
     
-    @GetMapping("/posts/{slug}")
-    public ResponseEntity<BlogPostDTO> getPostBySlug(@PathVariable String slug) {
-        BlogPostDTO post = blogService.getPostBySlug(slug);
+    @GetMapping("/posts/{id}")
+    public ResponseEntity<BlogPostDTO> getPostByIdOrSlug(@PathVariable String id, Authentication authentication) {
+        String userEmail = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            userEmail = getCurrentUserEmail(authentication);
+        }
+        
+        BlogPostDTO post;
+        
+        // Try to parse as Long ID first
+        try {
+            Long postId = Long.parseLong(id);
+            post = blogService.getPostById(postId, userEmail);
+        } catch (NumberFormatException e) {
+            // If not a number, treat as slug
+            post = blogService.getPostBySlug(id, userEmail);
+        }
+        
         if (post != null) {
             return ResponseEntity.ok(post);
         }
@@ -62,8 +77,12 @@ public class BlogController {
     }
     
     @GetMapping("/posts/{id}/public")
-    public ResponseEntity<BlogPostDTO> getPostPublic(@PathVariable Long id) {
-        BlogPostDTO post = blogService.getPostByIdPublic(id);
+    public ResponseEntity<BlogPostDTO> getPostPublic(@PathVariable Long id, Authentication authentication) {
+        String userEmail = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            userEmail = getCurrentUserEmail(authentication);
+        }
+        BlogPostDTO post = blogService.getPostByIdPublic(id, userEmail);
         if (post != null) {
             return ResponseEntity.ok(post);
         }
