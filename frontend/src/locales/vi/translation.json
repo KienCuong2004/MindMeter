@@ -457,6 +457,11 @@
     "error": "Lỗi",
     "cancel": "Hủy",
     "close": "Đóng",
+    "retry": "Thử lại",
+    "save": "Lưu",
+    "saving": "Đang lưu...",
+    "delete": "Xóa",
+    "deleting": "Đang xóa...",
     "firstName": "Họ",
     "lastName": "Tên",
     "fullName": "Họ tên",
@@ -1784,6 +1789,28 @@
       "popular": "Phổ biến nhất",
       "trending": "Xu hướng"
     },
+    "post": {
+      "loginRequired": "Vui lòng đăng nhập để thực hiện chức năng này",
+      "likeError": "Có lỗi xảy ra khi thực hiện chức năng like",
+      "bookmarkError": "Có lỗi xảy ra khi thực hiện chức năng bookmark",
+      "share": {
+        "copySuccess": "Đã sao chép liên kết vào clipboard!",
+        "copyError": "Không thể sao chép liên kết"
+      },
+      "delete": {
+        "button": "Xóa bài viết",
+        "confirm": "Bạn có chắc chắn muốn xóa bài viết này?",
+        "warning": "Hành động này không thể hoàn tác. Bài viết sẽ bị xóa vĩnh viễn.",
+        "success": "Bài viết đã được xóa thành công",
+        "error": "Có lỗi xảy ra khi xóa bài viết"
+      },
+      "comment": {
+        "deleteConfirm": "Xóa bình luận",
+        "deleteWarning": "Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa bình luận này?",
+        "deleteSuccess": "Bình luận đã được xóa thành công",
+        "deleteError": "Có lỗi xảy ra khi xóa bình luận"
+      }
+    },
     "createPostForm": {
       "title": "Tạo Bài Viết Mới",
       "subtitle": "Chia sẻ hành trình sức khỏe tâm thần và giúp đỡ người khác",
@@ -1853,6 +1880,9 @@
       "replyingTo": "Đang phản hồi",
       "loading": "Đang tải bình luận...",
       "loadMore": "Tải thêm bình luận",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "edited": "Đã chỉnh sửa",
       "empty": {
         "title": "Chưa có bình luận nào",
         "description": "Hãy là người đầu tiên chia sẻ suy nghĩ của bạn về bài viết này."

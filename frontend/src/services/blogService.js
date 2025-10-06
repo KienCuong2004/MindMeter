@@ -443,6 +443,29 @@ class BlogService {
       throw error;
     }
   }
+
+  // Comment methods
+  async editComment(commentId, content) {
+    try {
+      const response = await this.api.put(`/comments/${commentId}`, {
+        content,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error editing comment:", error);
+      throw error;
+    }
+  }
+
+  async deleteComment(commentId) {
+    try {
+      const response = await this.api.delete(`/comments/${commentId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      throw error;
+    }
+  }
 }
 
 const blogService = new BlogService();

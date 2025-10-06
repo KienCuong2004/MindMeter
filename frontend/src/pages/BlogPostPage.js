@@ -1,34 +1,38 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { jwtDecode } from "jwt-decode";
 import {
   FaHeart,
   FaComment,
   FaShare,
   FaBookmark,
-  FaArrowLeft,
   FaUser,
   FaCalendarAlt,
   FaEye,
   FaTag,
-  FaEdit,
   FaTrash,
-  FaEllipsisH,
   FaTimes,
   FaCopy,
+  FaBrain,
 } from "react-icons/fa";
 import blogService from "../services/blogService";
 import CommentSection from "../components/CommentSection";
 import BlogPostMeta from "../components/BlogPostMeta";
+import DashboardHeader from "../components/DashboardHeader";
+import FooterSection from "../components/FooterSection";
 import { useSavedArticles } from "../contexts/SavedArticlesContext";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
+import { useTheme } from "../hooks/useTheme";
+import { handleLogout } from "../utils/logoutUtils";
 import "../styles/blog.css";
 
 const BlogPostPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { theme, setTheme } = useTheme();
   const { saveArticle, unsaveArticle } = useSavedArticles();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +40,6 @@ const BlogPostPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [commentCount, setCommentCount] = useState(0);
   const [actualCommentCount, setActualCommentCount] = useState(0);
   const [shareCount, setShareCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,8 +47,68 @@ const BlogPostPage = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const currentLocale = i18n.language === "vi" ? vi : enUS;
+
+  // Get current user from token
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        const storedUser = localStorage.getItem("user");
+        let userData = {};
+
+        if (storedUser && storedUser !== "undefined") {
+          try {
+            userData = JSON.parse(storedUser);
+          } catch (e) {
+            userData = {};
+          }
+        }
+
+        const userObject = {
+          email: decoded.sub,
+          role: decoded.role,
+          firstName: decoded.firstName || userData.firstName || "",
+          lastName: decoded.lastName || userData.lastName || "",
+          plan: decoded.plan || userData.plan || "FREE",
+          phone: decoded.phone || userData.phone,
+          avatarUrl: decoded.avatarUrl || userData.avatarUrl,
+          anonymous: decoded.anonymous || userData.anonymous || false,
+        };
+
+        setCurrentUser(userObject);
+      } catch (e) {
+        setCurrentUser(null);
+      }
+    } else {
+      setCurrentUser(null);
+    }
+  }, []);
+
+  // Check if current user can delete post (author or admin)
+  const canDeletePost = (post) => {
+    if (!post || !currentUser) return false;
+    return (
+      currentUser.role === "ADMIN" ||
+      currentUser.email === post.authorEmail ||
+      currentUser.email === post.author?.email
+    );
+  };
+
+  // Check if current user can delete comment (admin or comment author)
+  const canDeleteComment = (comment) => {
+    if (!comment || !currentUser) return false;
+
+    return (
+      currentUser.role === "ADMIN" ||
+      currentUser.email === comment.userEmail ||
+      currentUser.email === comment.user?.email
+    );
+  };
 
   // Function to scroll to comments section
   const scrollToComments = () => {
@@ -69,7 +132,7 @@ const BlogPostPage = () => {
         setIsLiked(postData.isLiked || false);
         setIsBookmarked(postData.isBookmarked || false);
         setLikeCount(postData.likeCount || 0);
-        setCommentCount(postData.commentCount || 0);
+        setActualCommentCount(postData.commentCount || 0);
         setShareCount(postData.shareCount || 0);
 
         // Record view - temporarily disabled to avoid 500 error
@@ -109,7 +172,7 @@ const BlogPostPage = () => {
         setIsLiked(false);
         setIsBookmarked(false);
         setLikeCount(0);
-        setCommentCount(0);
+        setActualCommentCount(0);
         setShareCount(0);
       }
     } catch (err) {
@@ -135,7 +198,7 @@ const BlogPostPage = () => {
     // Check if user is logged in
     const token = localStorage.getItem("token");
     if (!token) {
-      setToastMessage("Vui lòng đăng nhập để thực hiện chức năng này");
+      setToastMessage(t("blog.post.loginRequired"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
       return;
@@ -150,7 +213,7 @@ const BlogPostPage = () => {
       setLikeCount(updatedPost.likeCount);
     } catch (error) {
       console.error("Error toggling like:", error);
-      setToastMessage("Có lỗi xảy ra khi thực hiện chức năng like");
+      setToastMessage(t("blog.post.likeError"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } finally {
@@ -164,7 +227,7 @@ const BlogPostPage = () => {
     // Check if user is logged in
     const token = localStorage.getItem("token");
     if (!token) {
-      setToastMessage("Vui lòng đăng nhập để thực hiện chức năng này");
+      setToastMessage(t("blog.post.loginRequired"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
       return;
@@ -185,7 +248,7 @@ const BlogPostPage = () => {
       }
     } catch (error) {
       console.error("Error toggling bookmark:", error);
-      setToastMessage("Có lỗi xảy ra khi thực hiện chức năng bookmark");
+      setToastMessage(t("blog.post.bookmarkError"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } finally {
@@ -203,7 +266,6 @@ const BlogPostPage = () => {
     const url = window.location.href;
     const title = post.title;
     const description = post.excerpt || post.content.substring(0, 200) + "...";
-    const text = description;
 
     let shareUrl = "";
 
@@ -239,14 +301,14 @@ const BlogPostPage = () => {
       case "copy":
         try {
           await navigator.clipboard.writeText(url);
-          setToastMessage("Đã sao chép liên kết vào clipboard!");
+          setToastMessage(t("blog.post.share.copySuccess"));
           setShowToast(true);
           setShowShareModal(false);
           setTimeout(() => setShowToast(false), 3000);
           return;
         } catch (err) {
           console.error("Failed to copy: ", err);
-          setToastMessage("Không thể sao chép liên kết");
+          setToastMessage(t("blog.post.share.copyError"));
           setShowToast(true);
           setTimeout(() => setShowToast(false), 3000);
           return;
@@ -285,6 +347,36 @@ const BlogPostPage = () => {
       addSuffix: true,
       locale: currentLocale,
     });
+  };
+
+  const handleDeletePost = () => {
+    if (!post || !canDeletePost(post)) return;
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeletePost = async () => {
+    try {
+      setIsLoading(true);
+      await blogService.deletePost(post.id);
+      setToastMessage(t("blog.post.delete.success"));
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+        navigate("/blog");
+      }, 2000);
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      setToastMessage(t("blog.post.delete.error"));
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } finally {
+      setIsLoading(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteComment = (commentId) => {
+    // Comment deletion is handled by CommentSection, no toast notification needed
   };
 
   if (loading) {
@@ -326,32 +418,17 @@ const BlogPostPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <BlogPostMeta post={post} />
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate("/blog")}
-              className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <FaArrowLeft />
-              <span>{t("blog.backToBlog")}</span>
-            </button>
 
-            <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-                <FaEdit className="text-gray-500 dark:text-gray-400" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-                <FaTrash className="text-red-500" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-                <FaEllipsisH className="text-gray-500 dark:text-gray-400" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Main Header */}
+      <DashboardHeader
+        logoIcon={<FaBrain className="w-8 h-8" />}
+        logoText="MindMeter Blog"
+        user={currentUser}
+        theme={theme}
+        setTheme={setTheme}
+        onLogout={handleLogout}
+        className="relative"
+      />
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -391,11 +468,24 @@ const BlogPostPage = () => {
                 </div>
               </div>
 
-              {post.isFeatured && (
-                <span className="bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded-full">
-                  {t("blog.featured")}
-                </span>
-              )}
+              <div className="flex items-center space-x-3">
+                {post.isFeatured && (
+                  <span className="bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded-full">
+                    {t("blog.featured")}
+                  </span>
+                )}
+
+                {/* Only show delete button if user can delete post */}
+                {canDeletePost(post) && (
+                  <button
+                    onClick={handleDeletePost}
+                    disabled={isLoading}
+                    className="px-3 py-1 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 font-medium"
+                  >
+                    {t("blog.post.delete.button")}
+                  </button>
+                )}
+              </div>
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -530,9 +620,15 @@ const BlogPostPage = () => {
           <CommentSection
             postId={id}
             onCommentCountChange={setActualCommentCount}
+            currentUser={currentUser}
+            canDeleteComment={canDeleteComment}
+            onDeleteComment={handleDeleteComment}
           />
         </div>
       </div>
+
+      {/* Footer */}
+      <FooterSection />
 
       {/* Share Modal */}
       {showShareModal && (
@@ -641,6 +737,55 @@ const BlogPostPage = () => {
             >
               <FaTimes className="w-4 h-4" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Post Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+            {/* Modal Header */}
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                <FaTrash className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                {t("blog.post.delete.confirm")}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                {t("blog.post.delete.warning")}
+              </p>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                onClick={confirmDeletePost}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {t("common.deleting")}
+                  </>
+                ) : (
+                  t("common.delete")
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

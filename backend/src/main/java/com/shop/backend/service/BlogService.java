@@ -12,6 +12,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +37,9 @@ public class BlogService {
     
     @Autowired
     private BlogCommentRepository blogCommentRepository;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
     
     // @Autowired
     // private BlogCommentLikeRepository blogCommentLikeRepository; // Not used yet
@@ -223,7 +228,14 @@ public class BlogService {
                BlogPost post = blogPostRepository.findById(id)
                    .orElseThrow(() -> new RuntimeException("Post not found"));
 
-               if (!post.getAuthor().getEmail().equals(authorEmail)) {
+               User user = userRepository.findByEmail(authorEmail)
+                   .orElseThrow(() -> new RuntimeException("User not found"));
+
+               // Check if user is admin or the post author
+               boolean isAdmin = user.getRole() == Role.ADMIN;
+               boolean isAuthor = post.getAuthor().getEmail().equals(authorEmail);
+
+               if (!isAdmin && !isAuthor) {
                    throw new RuntimeException("Unauthorized to delete this post");
                }
 
@@ -240,8 +252,13 @@ public class BlogService {
 
                    System.out.println("Found post: " + post.getTitle() + " with current status: " + post.getStatus());
 
-                   // TODO: Add admin role check here if needed
-                   // For now, any authenticated user can update status
+                   // Check if user is admin
+                   User user = userRepository.findByEmail(adminEmail)
+                       .orElseThrow(() -> new RuntimeException("User not found"));
+                   
+                   if (user.getRole() != Role.ADMIN) {
+                       throw new RuntimeException("Only admin can update post status");
+                   }
 
                    // Update status
                    try {
@@ -325,6 +342,7 @@ public class BlogService {
         comment.setPost(post);
         comment.setUser(user);
         comment.setContent(request.getContent());
+        comment.setStatus(BlogComment.CommentStatus.approved); // Set status to approved
         
         if (request.getParentId() != null) {
             BlogComment parent = blogCommentRepository.findById(request.getParentId())
@@ -333,6 +351,21 @@ public class BlogService {
         }
         
         comment = blogCommentRepository.save(comment);
+        
+        // Set updatedAt to createdAt for new comments to ensure proper sorting
+        if (comment.getUpdatedAt() == null) {
+            comment.setUpdatedAt(comment.getCreatedAt());
+            comment = blogCommentRepository.save(comment);
+        }
+        
+        // Ensure updatedAt is not in the future (fix any data issues)
+        LocalDateTime now = LocalDateTime.now();
+        if (comment.getUpdatedAt().isAfter(now)) {
+            System.out.println("Warning: Comment " + comment.getId() + " has future updatedAt, fixing to current time");
+            comment.setUpdatedAt(now);
+            comment = blogCommentRepository.save(comment);
+        }
+        
         updateCommentCount(postId);
         
         return convertCommentToDTO(comment);
@@ -341,15 +374,80 @@ public class BlogService {
     public Page<BlogCommentDTO> getComments(Long postId, Pageable pageable) {
         try {
             System.out.println("BlogService.getComments() called with postId: " + postId);
-            Page<BlogComment> comments = blogCommentRepository.findByPostIdAndStatusOrderByCreatedAtDesc(
-                postId, BlogComment.CommentStatus.approved, pageable);
+            System.out.println("Using new sorting method: findByPostIdAndStatusOrderByUpdatedAtDesc");
+            
+            // Use native query to bypass JPA cache completely
+            int pageNumber = pageable.getPageNumber();
+            int pageSize = pageable.getPageSize();
+            int offset = pageNumber * pageSize;
+            
+            List<BlogComment> commentList = blogCommentRepository.findCommentsByPostIdNative(
+                postId, "approved", pageSize, offset);
+            
+            // Create a simple Page object
+            Page<BlogComment> comments = new org.springframework.data.domain.PageImpl<>(
+                commentList, pageable, commentList.size());
             System.out.println("BlogService.getComments() found " + comments.getTotalElements() + " comments");
+            
+            // Debug: Print comment order
+            System.out.println("Comment order (by updatedAt):");
+            for (BlogComment comment : comments.getContent()) {
+                System.out.println("Comment ID: " + comment.getId() + 
+                    ", createdAt: " + comment.getCreatedAt() + 
+                    ", updatedAt: " + comment.getUpdatedAt());
+            }
+            
             return comments.map(this::convertCommentToDTO);
         } catch (Exception e) {
             System.err.println("Error in BlogService.getComments(): " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
+    }
+    
+    public BlogCommentDTO updateComment(Long commentId, BlogCommentRequest request, String userEmail) {
+        BlogComment comment = blogCommentRepository.findById(commentId)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
+        
+        User user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Check if user is admin or the comment author
+        boolean isAdmin = user.getRole() == Role.ADMIN;
+        boolean isAuthor = comment.getUser().getId().equals(user.getId());
+        
+        if (!isAdmin && !isAuthor) {
+            throw new RuntimeException("You don't have permission to edit this comment");
+        }
+        
+        // Update comment content
+        comment.setContent(request.getContent());
+        comment.setUpdatedAt(LocalDateTime.now());
+        
+        comment = blogCommentRepository.save(comment);
+        
+        return convertCommentToDTO(comment);
+    }
+    
+    public void deleteComment(Long commentId, String userEmail) {
+        BlogComment comment = blogCommentRepository.findById(commentId)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
+        
+        User user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Check if user is admin or the comment author
+        boolean isAdmin = user.getRole() == Role.ADMIN;
+        boolean isAuthor = comment.getUser().getId().equals(user.getId());
+        
+        if (!isAdmin && !isAuthor) {
+            throw new RuntimeException("You don't have permission to delete this comment");
+        }
+        
+        blogCommentRepository.delete(comment);
+        
+        // Update comment count for the post
+        updateCommentCount(comment.getPost().getId());
     }
     
     // Share Methods
@@ -460,8 +558,8 @@ public class BlogService {
     
     // Get comments for a blog post with pagination
     public Page<BlogCommentDTO> getCommentsByPostId(Long postId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<BlogComment> comments = blogCommentRepository.findByPostIdAndStatusOrderByCreatedAtDesc(postId, BlogComment.CommentStatus.approved, pageable);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending().and(Sort.by("createdAt").descending()));
+        Page<BlogComment> comments = blogCommentRepository.findByPostIdAndStatusOrderByUpdatedAtDesc(postId, BlogComment.CommentStatus.approved, pageable);
         return comments.map(this::convertCommentToDTO);
     }
     
@@ -605,6 +703,7 @@ public class BlogService {
             dto.setUserId(comment.getUser().getId());
             dto.setUserName(comment.getUser().getFirstName() + " " + comment.getUser().getLastName());
             dto.setUserAvatar(comment.getUser().getAvatarUrl());
+            dto.setUserEmail(comment.getUser().getEmail()); // Add user email
             dto.setParentId(comment.getParent() != null ? comment.getParent().getId() : null);
             dto.setContent(comment.getContent());
             dto.setStatus(comment.getStatus());

@@ -240,6 +240,20 @@ public class BlogController {
         }
     }
     
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<BlogCommentDTO> updateComment(@PathVariable Long commentId, @RequestBody BlogCommentRequest request, Authentication authentication) {
+        String userEmail = getCurrentUserEmail(authentication);
+        BlogCommentDTO updatedComment = blogService.updateComment(commentId, request, userEmail);
+        return ResponseEntity.ok(updatedComment);
+    }
+    
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId, Authentication authentication) {
+        String userEmail = getCurrentUserEmail(authentication);
+        blogService.deleteComment(commentId, userEmail);
+        return ResponseEntity.ok().build();
+    }
+    
     // Share Endpoints
     @PostMapping("/posts/{postId}/share")
     public ResponseEntity<BlogShareDTO> createShare(@PathVariable Long postId, @RequestBody BlogShareRequest request, Authentication authentication) {

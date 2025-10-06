@@ -4285,13 +4285,17 @@ INSERT INTO blog_likes (post_id, user_id) VALUES
 (3, 6), (3, 7), (3, 8), (3, 9);
 
 -- Insert sample blog comments
-INSERT INTO blog_comments (post_id, user_id, content, status) VALUES
-(1, 7, 'Bài viết rất hữu ích! Tôi đã áp dụng một số phương pháp và thấy cải thiện rõ rệt.', 'approved'),
-(1, 8, 'Cảm ơn tác giả đã chia sẻ. Tôi cũng đang trong quá trình phục hồi từ trầm cảm.', 'approved'),
-(2, 6, 'Là sinh viên, tôi thấy những lời khuyên này rất thực tế và dễ áp dụng.', 'approved'),
-(2, 9, 'Quản lý thời gian là vấn đề lớn nhất của tôi. Cảm ơn vì đã chia sẻ!', 'approved'),
-(3, 7, 'Tôi mới bắt đầu thiền định được 1 tuần. Cảm thấy tâm trí thư thái hơn nhiều.', 'approved'),
-(3, 8, 'Hướng dẫn rất chi tiết và dễ hiểu. Cảm ơn tác giả!', 'approved');
+INSERT INTO blog_comments (post_id, user_id, content, status, created_at, updated_at) VALUES
+(1, 7, 'Bài viết rất hữu ích! Tôi đã áp dụng một số phương pháp và thấy cải thiện rõ rệt.', 'approved', '2025-10-06 01:00:00', '2025-10-06 01:00:00'),
+(1, 8, 'Cảm ơn tác giả đã chia sẻ. Tôi cũng đang trong quá trình phục hồi từ trầm cảm.', 'approved', '2025-10-06 01:30:00', '2025-10-06 01:30:00'),
+(2, 6, 'Là sinh viên, tôi thấy những lời khuyên này rất thực tế và dễ áp dụng.', 'approved', '2025-10-06 02:00:00', '2025-10-06 02:00:00'),
+(2, 9, 'Quản lý thời gian là vấn đề lớn nhất của tôi. Cảm ơn vì đã chia sẻ!', 'approved', '2025-10-06 02:30:00', '2025-10-06 02:30:00'),
+(3, 7, 'Tôi mới bắt đầu thiền định được 1 tuần. Cảm thấy tâm trí thư thái hơn nhiều.', 'approved', '2025-10-06 03:00:00', '2025-10-06 03:00:00'),
+(3, 8, 'Hướng dẫn rất chi tiết và dễ hiểu. Cảm ơn tác giả!', 'approved', '2025-10-06 03:30:00', '2025-10-06 03:30:00');
+
+-- Fix existing comments with wrong timestamps
+UPDATE blog_comments SET created_at = '2025-10-06 02:00:00', updated_at = '2025-10-06 02:00:00' WHERE id = 3 AND post_id = 2;
+UPDATE blog_comments SET created_at = '2025-10-06 02:30:00', updated_at = '2025-10-06 02:30:00' WHERE id = 4 AND post_id = 2;
 
 -- Insert sample blog shares
 INSERT INTO blog_shares (post_id, user_id, platform) VALUES

@@ -18,6 +18,7 @@ public class BlogCommentDTO {
     private Long userId;
     private String userName;
     private String userAvatar;
+    private String userEmail;
     private Long parentId;
     private String content;
     private BlogComment.CommentStatus status;

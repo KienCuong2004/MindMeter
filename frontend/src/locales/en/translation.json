@@ -459,6 +459,11 @@
     "error": "Error",
     "cancel": "Cancel",
     "close": "Close",
+    "retry": "Try Again",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "deleting": "Deleting...",
     "firstName": "First Name",
     "lastName": "Last Name",
     "fullName": "Full Name",
@@ -1785,6 +1790,28 @@
       "popular": "Most Popular",
       "trending": "Trending"
     },
+    "post": {
+      "loginRequired": "Please login to use this feature",
+      "likeError": "Error occurred while liking",
+      "bookmarkError": "Error occurred while bookmarking",
+      "share": {
+        "copySuccess": "Link copied to clipboard!",
+        "copyError": "Unable to copy link"
+      },
+      "delete": {
+        "button": "Delete Post",
+        "confirm": "Are you sure you want to delete this post?",
+        "warning": "This action cannot be undone. The post will be permanently deleted.",
+        "success": "Post deleted successfully",
+        "error": "Error occurred while deleting post"
+      },
+      "comment": {
+        "deleteConfirm": "Delete Comment",
+        "deleteWarning": "This action cannot be undone. Are you sure you want to delete this comment?",
+        "deleteSuccess": "Comment deleted successfully",
+        "deleteError": "Error occurred while deleting comment"
+      }
+    },
     "createPostForm": {
       "title": "Create New Post",
       "subtitle": "Share your mental health journey and help others",
@@ -1854,6 +1881,9 @@
       "replyingTo": "Replying to",
       "loading": "Loading comments...",
       "loadMore": "Load more comments",
+      "edit": "Edit",
+      "delete": "Delete",
+      "edited": "Edited",
       "empty": {
         "title": "No comments yet",
         "description": "Be the first to share your thoughts on this post."

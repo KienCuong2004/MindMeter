@@ -1,18 +1,24 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FaHeart,
   FaReply,
   FaUser,
-  FaEllipsisH,
   FaEdit,
   FaTrash,
+  FaEllipsisV,
 } from "react-icons/fa";
 import blogService from "../services/blogService";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 
-const CommentSection = ({ postId, onCommentCountChange }) => {
+const CommentSection = ({
+  postId,
+  onCommentCountChange,
+  currentUser,
+  canDeleteComment,
+  onDeleteComment,
+}) => {
   const { t, i18n } = useTranslation();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,6 +97,21 @@ const CommentSection = ({ postId, onCommentCountChange }) => {
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await blogService.deleteComment(commentId);
+      // Refresh comments after deletion
+      loadComments();
+      // Call parent's onDeleteComment for success toast notification
+      if (onDeleteComment) {
+        onDeleteComment(commentId);
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      // TODO: Show error toast notification here
+    }
+  };
+
   const handleReply = (commentId) => {
     setReplyingTo(commentId);
     setNewComment("");
@@ -104,16 +125,48 @@ const CommentSection = ({ postId, onCommentCountChange }) => {
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
+    const now = new Date();
+
+    // Debug timezone issue
+    console.log("=== DATE DEBUG ===");
+    console.log("Original dateString:", dateString);
+    console.log("Parsed date:", date);
+    console.log("Date ISO:", date.toISOString());
+    console.log("Date local:", date.toString());
+    console.log("Current time:", now);
+    console.log("Current ISO:", now.toISOString());
+    console.log("Difference (hours):", (now - date) / (1000 * 60 * 60));
+    console.log("==================");
+
     return formatDistanceToNow(date, {
       addSuffix: true,
       locale: currentLocale,
     });
   };
 
-  const CommentItem = ({ comment, level = 0 }) => {
+  const CommentItem = ({ comment, level = 0, onCommentUpdate }) => {
     const [isLiked] = useState(comment.isLiked || false);
     const [likeCount] = useState(comment.likeCount || 0);
     const [isLoading, setIsLoading] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(comment.content);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const menuRef = useRef(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (menuRef.current && !menuRef.current.contains(event.target)) {
+          setShowMenu(false);
+        }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, []);
 
     const handleLike = async () => {
       if (isLoading) return;
@@ -129,6 +182,65 @@ const CommentSection = ({ postId, onCommentCountChange }) => {
       } finally {
         setIsLoading(false);
       }
+    };
+
+    const handleDelete = async () => {
+      if (!canDeleteComment || !canDeleteComment(comment)) return;
+
+      setShowDeleteModal(true);
+      setShowMenu(false);
+    };
+
+    const confirmDelete = async () => {
+      try {
+        await handleDeleteComment(comment.id);
+        setShowDeleteModal(false);
+      } catch (error) {
+        console.error("Error deleting comment:", error);
+      }
+    };
+
+    const handleEdit = () => {
+      setIsEditing(true);
+      setShowMenu(false);
+    };
+
+    const handleSaveEdit = async () => {
+      if (!editContent.trim()) return;
+
+      try {
+        setIsLoading(true);
+
+        // Call real edit comment API
+        const updatedComment = await blogService.editComment(
+          comment.id,
+          editContent
+        );
+
+        // Update the comment content locally with server response
+        comment.content = updatedComment.content;
+        comment.updatedAt = updatedComment.updatedAt;
+
+        setIsEditing(false);
+        setShowMenu(false);
+
+        // Refresh comments to get updated data from server
+        if (onCommentUpdate) {
+          onCommentUpdate();
+        }
+      } catch (error) {
+        console.error("Error editing comment:", error);
+        // Reset to original content on error
+        setEditContent(comment.content);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const handleCancelEdit = () => {
+      setIsEditing(false);
+      setEditContent(comment.content);
+      setShowMenu(false);
     };
 
     return (
@@ -153,27 +265,83 @@ const CommentSection = ({ postId, onCommentCountChange }) => {
                   <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
                     {comment.userName}
                   </h4>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {formatDate(comment.createdAt)}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatDate(comment.createdAt)}
+                    </span>
+                    {comment.updatedAt &&
+                      new Date(comment.updatedAt).getTime() >
+                        new Date(comment.createdAt).getTime() && (
+                        <span className="text-xs text-gray-400 dark:text-gray-500 italic">
+                          {t("blog.comment.edited")}
+                        </span>
+                      )}
+                  </div>
                 </div>
 
-                <div className="flex items-center space-x-1">
-                  <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
-                    <FaEdit className="text-gray-400 text-xs" />
-                  </button>
-                  <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
-                    <FaTrash className="text-red-400 text-xs" />
-                  </button>
-                  <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
-                    <FaEllipsisH className="text-gray-400 text-xs" />
-                  </button>
-                </div>
+                {/* Menu button for comment author or admin */}
+                {canDeleteComment && canDeleteComment(comment) && (
+                  <div className="relative" ref={menuRef}>
+                    <button
+                      onClick={() => setShowMenu(!showMenu)}
+                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                    >
+                      <FaEllipsisV className="text-gray-400 text-xs" />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {showMenu && (
+                      <div className="absolute right-0 top-8 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10 min-w-[120px]">
+                        <button
+                          onClick={handleEdit}
+                          className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center space-x-2"
+                        >
+                          <FaEdit className="text-xs" />
+                          <span>{t("blog.comment.edit")}</span>
+                        </button>
+                        <button
+                          onClick={handleDelete}
+                          className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center space-x-2"
+                        >
+                          <FaTrash className="text-xs" />
+                          <span>{t("blog.comment.delete")}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-3">
-                {comment.content}
-              </p>
+              {isEditing ? (
+                <div className="mb-3">
+                  <textarea
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm resize-none"
+                    rows="3"
+                    maxLength="1000"
+                  />
+                  <div className="flex justify-end space-x-2 mt-2">
+                    <button
+                      onClick={handleCancelEdit}
+                      className="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      {t("common.cancel")}
+                    </button>
+                    <button
+                      onClick={handleSaveEdit}
+                      disabled={!editContent.trim() || isLoading}
+                      className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? t("common.saving") : t("common.save")}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-3">
+                  {comment.content}
+                </p>
+              )}
 
               <div className="flex items-center space-x-4">
                 <button
@@ -207,8 +375,68 @@ const CommentSection = ({ postId, onCommentCountChange }) => {
         {comment.replies && comment.replies.length > 0 && (
           <div className="mt-4 space-y-4">
             {comment.replies.map((reply) => (
-              <CommentItem key={reply.id} comment={reply} level={level + 1} />
+              <CommentItem
+                key={reply.id}
+                comment={reply}
+                level={level + 1}
+                onCommentUpdate={loadComments}
+              />
             ))}
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+              <div className="flex items-center mb-4">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-6 h-6 text-red-600 dark:text-red-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                    {t("blog.post.comment.deleteConfirm")}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {t("blog.post.comment.deleteWarning") ||
+                    "This action cannot be undone."}
+                </p>
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
+                >
+                  {t("common.cancel")}
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={isLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+                >
+                  {isLoading ? t("common.deleting") : t("common.delete")}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -322,7 +550,11 @@ const CommentSection = ({ postId, onCommentCountChange }) => {
         ) : (
           <div className="space-y-6">
             {comments.map((comment) => (
-              <CommentItem key={comment.id} comment={comment} />
+              <CommentItem
+                key={comment.id}
+                comment={comment}
+                onCommentUpdate={loadComments}
+              />
             ))}
 
             {hasMore && (
