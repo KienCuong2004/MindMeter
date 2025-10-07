@@ -25,7 +25,8 @@ public class RateLimitingConfig {
     // Rate limiting configuration
     private static final int MAX_REQUESTS_PER_MINUTE = 300; // Increased for development
     private static final int MAX_REQUESTS_PER_HOUR = 5000; // Increased for development
-    private static final int MAX_AUTH_REQUESTS_PER_MINUTE = 30;
+    private static final int MAX_AUTH_REQUESTS_PER_MINUTE = 100; // Increased for anonymous accounts
+    private static final int MAX_ANONYMOUS_REQUESTS_PER_MINUTE = 200; // Special limit for anonymous
     private static final int MAX_PAYMENT_REQUESTS_PER_MINUTE = 10;
     private static final int MAX_BLOG_REQUESTS_PER_MINUTE = 200; // Special limit for blog
 
@@ -71,11 +72,22 @@ public class RateLimitingConfig {
         // Clean up old entries
         cleanupOldEntries(currentTime);
         
+        // For development: Reset rate limit for localhost every 30 seconds
+        if ("127.0.0.1".equals(clientId) || "localhost".equals(clientId) || "0:0:0:0:0:0:0:1".equals(clientId)) {
+            RateLimitData existingData = rateLimitStore.get(clientId);
+            if (existingData != null && currentTime - existingData.lastMinuteReset > 30000) { // 30 seconds for dev
+                existingData.minuteCount.set(0);
+                existingData.lastMinuteReset = currentTime;
+            }
+        }
+        
         RateLimitData data = rateLimitStore.computeIfAbsent(clientId, k -> new RateLimitData());
         
         // Determine rate limit based on endpoint
         int maxRequests;
-        if (requestURI.contains("/api/auth/")) {
+        if (requestURI.contains("/api/auth/anonymous/")) {
+            maxRequests = MAX_ANONYMOUS_REQUESTS_PER_MINUTE;
+        } else if (requestURI.contains("/api/auth/")) {
             maxRequests = MAX_AUTH_REQUESTS_PER_MINUTE;
         } else if (requestURI.contains("/api/payment/")) {
             maxRequests = MAX_PAYMENT_REQUESTS_PER_MINUTE;

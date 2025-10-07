@@ -215,42 +215,44 @@ const StudentTestResultPage = () => {
             )}
           </div>
 
-          {/* Nút Liên hệ chuyên gia - chỉ hiển thị cho kết quả trầm cảm nhẹ trở lên */}
+          {/* Nút Liên hệ chuyên gia - chỉ hiển thị cho kết quả trầm cảm nhẹ trở lên và không phải người dùng ẩn danh */}
           {(severity === "MILD" ||
             severity === "MODERATE" ||
-            severity === "SEVERE") && (
-            <div className="w-full mt-4">
-              <button
-                className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-3 px-6 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-base flex items-center justify-center gap-3 group"
-                onClick={() =>
-                  navigate("/consult-therapy", {
-                    state: {
-                      testResult: result,
-                      testType: testType,
-                    },
-                  })
-                }
-              >
-                <svg
-                  className="w-5 h-5 group-hover:scale-110 transition-transform"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            severity === "SEVERE") &&
+            currentUser &&
+            !isAnonymousUser(currentUser) && (
+              <div className="w-full mt-4">
+                <button
+                  className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-3 px-6 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-base flex items-center justify-center gap-3 group"
+                  onClick={() =>
+                    navigate("/consult-therapy", {
+                      state: {
+                        testResult: result,
+                        testType: testType,
+                      },
+                    })
+                  }
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2l4 4z"
-                  />
-                </svg>
-                {t("studentTestResultPage.contactExpert")}
-              </button>
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                {t("studentTestResultPage.contactExpertDesc")}
-              </p>
-            </div>
-          )}
+                  <svg
+                    className="w-5 h-5 group-hover:scale-110 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2l4 4z"
+                    />
+                  </svg>
+                  {t("studentTestResultPage.contactExpert")}
+                </button>
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                  {t("studentTestResultPage.contactExpertDesc")}
+                </p>
+              </div>
+            )}
         </div>
       </div>
 

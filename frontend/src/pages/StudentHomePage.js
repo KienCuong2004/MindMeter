@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,6 @@ import AnonymousTestModal from "../components/AnonymousTestModal";
 import UpgradeAnonymousModal from "../components/UpgradeAnonymousModal";
 import AnonymousChatbotNotice from "../components/AnonymousChatbotNotice";
 import ChangePasswordModal from "../components/ChangePasswordModal";
-import AppointmentList from "../components/AppointmentList";
 import DashboardHeader from "../components/DashboardHeader";
 import HeroSection from "../components/HeroSection";
 import TestListSection from "../components/TestListSection";
@@ -51,6 +50,9 @@ const StudentHomePage = () => {
     onConfirm: null,
   });
 
+  // Ref để track component mount status
+  const isMountedRef = useRef(true);
+
   // State for password change modal
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [passwordChangeMessage, setPasswordChangeMessage] = useState("");
@@ -58,7 +60,7 @@ const StudentHomePage = () => {
   useEffect(() => {
     document.title =
       i18n.language === "vi" ? t("pageTitles.home") : "Home | MindMeter";
-  }, [i18n.language]);
+  }, [i18n.language, t]);
 
   useEffect(() => {
     if (location.hash) {
@@ -135,6 +137,7 @@ const StudentHomePage = () => {
   };
 
   // Các loại bài test hiện có
+  // eslint-disable-next-line no-unused-vars
   const testTypes = [
     {
       key: "PHQ-9",
@@ -261,12 +264,27 @@ const StudentHomePage = () => {
       // Clear flag
       localStorage.removeItem("creatingAnonymousAccount");
 
-      // Navigate ngay lập tức
+      // Navigate với delay nhỏ để đảm bảo component đã stable
       const testUrl = `/student/test?type=${finalTestType}`;
-      navigate(testUrl);
+
+      // Sử dụng setTimeout để đảm bảo navigation được thực hiện
+      const navigationTimeout = setTimeout(() => {
+        try {
+          navigate(testUrl);
+        } catch (navError) {
+          // Fallback to window.location if navigate fails
+          window.location.href = testUrl;
+        }
+      }, 100);
+
+      // Store timeout ID for cleanup if needed
+      window.navigationTimeout = navigationTimeout;
     } catch (error) {
+      console.error("Error creating anonymous account:", error);
+
       // Clear flag on error
       localStorage.removeItem("creatingAnonymousAccount");
+
       // Error creating anonymous account
       setNotificationModal({
         isOpen: true,
@@ -314,6 +332,32 @@ const StudentHomePage = () => {
     return () => {
       delete window.handleUpgradeClick;
     };
+  }, []);
+
+  // Cleanup event listeners khi component unmount
+  useEffect(() => {
+    return () => {
+      // Mark component as unmounted
+      isMountedRef.current = false;
+
+      // Cleanup navigation timeout
+      if (window.navigationTimeout) {
+        clearTimeout(window.navigationTimeout);
+        delete window.navigationTimeout;
+      }
+
+      // Cleanup drag event listeners
+      document.removeEventListener("mousemove", handleDragMove);
+      document.removeEventListener("mouseup", handleDragEnd);
+      document.removeEventListener("touchmove", handleDragMove);
+      document.removeEventListener("touchend", handleDragEnd);
+
+      // Cleanup window functions
+      if (window.handleUpgradeClick) {
+        delete window.handleUpgradeClick;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Drag handlers for chatbot icon
