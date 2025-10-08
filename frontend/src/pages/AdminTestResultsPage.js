@@ -312,7 +312,7 @@ export default function AdminTestResultsPage() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       <DashboardHeader
         logoIcon={
-          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={t("email.testResult.title")}
         user={user}

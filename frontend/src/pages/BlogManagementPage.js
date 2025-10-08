@@ -1,68 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useTheme as useCustomTheme } from "../hooks/useTheme";
-import { useTheme as useMuiTheme } from "@mui/material/styles";
 import { jwtDecode } from "jwt-decode";
 import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  IconButton,
+  Alert,
+  Snackbar,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  MenuItem,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Alert,
-  Snackbar,
-  Pagination,
-  FormControl,
-  InputLabel,
-  Select,
 } from "@mui/material";
 import {
-  Edit as EditIcon,
   Delete as DeleteIcon,
   Visibility as ViewIcon,
   CheckCircle as ApproveIcon,
   Cancel as RejectIcon,
   Search as SearchIcon,
   FilterList as FilterIcon,
-  Article as BlogIcon,
 } from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
+import { FaBrain } from "react-icons/fa";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import blogService from "../services/blogService";
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  marginBottom: theme.spacing(2),
-  borderRadius: theme.spacing(2),
-  boxShadow:
-    theme.palette.mode === "dark"
-      ? "0 4px 20px rgba(0, 0, 0, 0.3)"
-      : "0 4px 20px rgba(0, 0, 0, 0.1)",
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? theme.palette.grey[800]
-      : theme.palette.background.paper,
-}));
 
 const StatusChip = ({ status }) => {
   const { t } = useTranslation();
@@ -112,7 +72,6 @@ const BlogManagementPage = ({ handleLogout }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { theme: themeMode, setTheme } = useCustomTheme();
-  const muiTheme = useMuiTheme();
   const [user, setUser] = useState(null);
 
   const [posts, setPosts] = useState([]);
@@ -122,7 +81,6 @@ const BlogManagementPage = ({ handleLogout }) => {
   const [page, setPage] = useState(0);
   const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -135,22 +93,7 @@ const BlogManagementPage = ({ handleLogout }) => {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
 
-  useEffect(() => {
-    // Get user info from token
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        setUser(decoded);
-      } catch (error) {
-        console.error("Error decoding token:", error);
-      }
-    }
-
-    fetchPosts();
-  }, [page, statusFilter, searchQuery]);
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -173,14 +116,28 @@ const BlogManagementPage = ({ handleLogout }) => {
 
       setPosts(response.content || []);
       setTotalPages(response.totalPages || 0);
-      setTotalElements(response.totalElements || 0);
     } catch (error) {
       console.error("Error fetching posts:", error);
       setError(t("blog.admin.error.fetchPosts"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, statusFilter, searchQuery, size, t]);
+
+  useEffect(() => {
+    // Get user info from token
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUser(decoded);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+
+    fetchPosts();
+  }, [page, statusFilter, searchQuery, fetchPosts]);
 
   const handleViewPost = (post) => {
     setSelectedPost(post);
@@ -259,14 +216,12 @@ const BlogManagementPage = ({ handleLogout }) => {
     setPage(0);
   };
 
-  const handlePageChange = (event, newPage) => {
-    setPage(newPage - 1);
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-blue-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       <DashboardHeader
-        logoIcon={<BlogIcon />}
+        logoIcon={
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
+        }
         logoText={t("blog.admin.title")}
         user={user}
         theme={themeMode}

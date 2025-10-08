@@ -9,8 +9,7 @@ import { useTranslation } from "react-i18next";
 import { authFetch } from "../authFetch";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
-import { FaUsers } from "react-icons/fa";
-import { jwtDecode } from "jwt-decode";
+import { FaBrain } from "react-icons/fa";
 
 const emptyUser = {
   email: "",
@@ -26,6 +25,7 @@ const emptyUser = {
 
 // roleOptionsForForm sẽ được định nghĩa trong component để có thể sử dụng t function
 
+/* eslint-disable no-unused-vars */
 const EmailIcon = () => (
   <svg
     stroke="currentColor"
@@ -294,6 +294,7 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
 
   useEffect(() => {
     document.title = t("userManagementTitle") + " | MindMeter";
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Khi trang mount hoặc URL thay đổi, đọc role từ query param
@@ -626,7 +627,7 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-blue-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
         <DashboardHeader
           logoIcon={
-            <FaUsers className="text-indigo-500 dark:text-indigo-300 text-3xl" />
+            <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
           }
           logoText={
             <span className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 dark:from-indigo-300 dark:via-blue-300 dark:to-purple-400 bg-clip-text text-transparent tracking-wide">
@@ -688,7 +689,7 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-blue-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       <DashboardHeader
         logoIcon={
-          <FaUsers className="text-indigo-500 dark:text-indigo-300 text-3xl" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={
           <span className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 dark:from-indigo-300 dark:via-blue-300 dark:to-purple-400 bg-clip-text text-transparent tracking-wide">
@@ -1250,3 +1251,4 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
     </div>
   );
 }
+/* eslint-enable no-unused-vars */

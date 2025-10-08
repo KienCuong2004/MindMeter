@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
+  FaBrain,
   FaBookmark,
   FaHeart,
   FaComment,
@@ -27,7 +28,7 @@ import { handleLogout } from "../utils/logoutUtils";
 const SavedArticlesPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { theme, setTheme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const {
     savedArticles,
     unsaveArticle,
@@ -52,7 +53,7 @@ const SavedArticlesPage = () => {
         const storedUser = localStorage.getItem("user");
 
         if (token) {
-          const decoded = jwtDecode(token);
+          const tokenData = jwtDecode(token);
           let userData = {};
 
           if (storedUser && storedUser !== "undefined") {
@@ -64,19 +65,18 @@ const SavedArticlesPage = () => {
           }
 
           const userObject = {
-            email: decoded.sub,
-            role: decoded.role,
-            firstName: decoded.firstName || userData.firstName || "",
-            lastName: decoded.lastName || userData.lastName || "",
-            plan: decoded.plan || userData.plan || "FREE",
-            phone: decoded.phone || userData.phone,
-            avatarUrl: decoded.avatarUrl || userData.avatarUrl,
-            anonymous: decoded.anonymous || userData.anonymous || false,
+            email: tokenData.sub,
+            role: tokenData.role,
+            firstName: tokenData.firstName || userData.firstName || "",
+            lastName: tokenData.lastName || userData.lastName || "",
+            plan: tokenData.plan || userData.plan || "FREE",
+            phone: tokenData.phone || userData.phone,
+            avatarUrl: tokenData.avatarUrl || userData.avatarUrl,
+            anonymous: tokenData.anonymous || userData.anonymous || false,
           };
 
           setUser(userObject);
         } else if (anonymousToken) {
-          const decoded = jwtDecode(anonymousToken);
           setUser({
             email: "anonymous",
             role: "ANONYMOUS",
@@ -182,7 +182,7 @@ const SavedArticlesPage = () => {
       {/* Dashboard Header */}
       <DashboardHeader
         logoIcon={
-          <FaBookmark className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={t("blog.savedArticles.title")}
         user={user}

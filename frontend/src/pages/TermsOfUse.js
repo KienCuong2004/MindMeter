@@ -67,7 +67,7 @@ export default function TermsOfUse() {
     <div className="min-h-screen flex flex-col bg-[#f4f6fa] dark:bg-[#181e29]">
       <DashboardHeader
         logoIcon={
-          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={t("terms.title")}
         user={user}

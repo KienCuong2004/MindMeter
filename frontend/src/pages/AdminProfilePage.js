@@ -284,7 +284,7 @@ export default function AdminProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <DashboardHeader
         logoIcon={
-          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={t("adminProfileTitle")}
         user={user}

@@ -9,7 +9,7 @@ import { authFetch } from "../authFetch";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import DualLanguageQuestionModal from "../components/DualLanguageQuestionModal";
-import { FaQuestionCircle } from "react-icons/fa";
+import { FaBrain } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 
 export default function QuestionManagementPage({
@@ -446,9 +446,9 @@ export default function QuestionManagementPage({
       <DashboardHeader
         key="question-management-header"
         logoIcon={
-          <FaQuestionCircle
+          <FaBrain
             key="question-management-logo"
-            className="text-indigo-500 dark:text-indigo-300 text-3xl"
+            className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow"
           />
         }
         logoText={

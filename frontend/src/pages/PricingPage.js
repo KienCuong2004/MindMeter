@@ -256,10 +256,11 @@ export default function PricingPage() {
         err.response?.data?.error?.includes("Rate limit")
       ) {
         // Extract retry-after from response headers or use default
-        const retryAfter = err.response?.headers?.['retry-after'] || 
-                          err.response?.data?.retryAfter || 
-                          60; // Default 60 seconds
-        
+        const retryAfter =
+          err.response?.headers?.["retry-after"] ||
+          err.response?.data?.retryAfter ||
+          60; // Default 60 seconds
+
         setRateLimitModal({
           isOpen: true,
           retryAfterSeconds: parseInt(retryAfter),
@@ -321,7 +322,7 @@ export default function PricingPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-100 to-purple-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex flex-col">
       <DashboardHeader
         logoIcon={
-          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={t("pricing.title") || "Chọn gói dịch vụ"}
         user={user}

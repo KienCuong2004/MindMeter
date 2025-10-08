@@ -165,7 +165,7 @@ export default function ContactPage() {
     <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
       <DashboardHeader
         logoIcon={
-          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={t("contact.title")}
         user={user}

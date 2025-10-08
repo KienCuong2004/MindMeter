@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "@mui/material/styles";
 import { useTheme as useCustomTheme } from "../hooks/useTheme";
 import { jwtDecode } from "jwt-decode";
 import BlogForm from "../components/blog/BlogForm";
 import blogService from "../services/blogService";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
+import { FaBrain } from "react-icons/fa";
 
 const CreatePostPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const theme = useTheme();
   const { theme: themeMode, setTheme } = useCustomTheme();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -72,7 +71,9 @@ const CreatePostPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-blue-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       <DashboardHeader
-        logoIcon="✍️"
+        logoIcon={
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
+        }
         logoText="Create Post"
         user={user}
         theme={themeMode}

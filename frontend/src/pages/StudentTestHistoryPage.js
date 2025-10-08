@@ -209,7 +209,7 @@ const StudentTestHistoryPage = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-blue-50 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       <DashboardHeader
         logoIcon={
-          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={t("testHistory.title")}
         user={user}

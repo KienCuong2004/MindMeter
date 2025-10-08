@@ -396,7 +396,7 @@ const StudentHomePage = () => {
       {/* Dashboard Header */}
       <DashboardHeader
         logoIcon={
-          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={t("studentHomeHeader")}
         user={user}

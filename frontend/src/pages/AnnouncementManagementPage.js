@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 import { authFetch } from "../authFetch";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
-import { FaBullhorn } from "react-icons/fa";
+import { FaBrain } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { useTheme } from "../hooks/useTheme";
 
@@ -319,7 +319,7 @@ export default function AnnouncementManagementPage({
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-blue-100 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       <DashboardHeader
         logoIcon={
-          <FaBullhorn className="text-indigo-500 dark:text-indigo-300 text-3xl" />
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
         }
         logoText={
           <span className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 dark:from-indigo-300 dark:via-blue-300 dark:to-purple-400 bg-clip-text text-transparent tracking-wide">
