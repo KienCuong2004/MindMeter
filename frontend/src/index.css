@@ -67,6 +67,21 @@ code {
   animation: bounce-in 0.6s ease-out;
 }
 
+/* Brain icon pulse animation */
+@keyframes pulse-slow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(165, 180, 252, 0.8));
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2.5s infinite;
+}
+
 /* Hide scrollbar for chat input */
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */
