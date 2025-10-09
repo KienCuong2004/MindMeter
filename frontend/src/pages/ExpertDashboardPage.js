@@ -420,11 +420,6 @@ export default function ExpertDashboardPage({
           to { opacity: 1; transform: scale(1); }
         }
         .animate-count { animation: count 0.7s both; }
-        @keyframes pulse-slow {
-          0%, 100% { filter: drop-shadow(0 0 0 #fff); }
-          50% { filter: drop-shadow(0 0 12px #a5b4fc); }
-        }
-        .animate-pulse-slow { animation: pulse-slow 2.5s infinite; }
         @keyframes bounce-slow {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-8px); }
