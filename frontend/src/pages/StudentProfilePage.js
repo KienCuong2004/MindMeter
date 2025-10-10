@@ -145,8 +145,7 @@ export default function StudentProfilePage({ updateUserAvatar }) {
 
   const handleLogoutLocal = () => handleLogout(navigate);
 
-  const handleSave = async (e) => {
-    e.preventDefault();
+  const handleSave = async (formData) => {
     setSaving(true);
     setAlert("");
     setError("");
@@ -154,9 +153,9 @@ export default function StudentProfilePage({ updateUserAvatar }) {
     try {
       // Tạo object data để gửi lên backend
       const updateData = {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        phone: form.phone,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
       };
 
       // Nếu có ảnh mới được chọn, upload ảnh trước
@@ -208,7 +207,7 @@ export default function StudentProfilePage({ updateUserAvatar }) {
       setSelectedFile(null);
 
       // Cập nhật user data với thông tin profile mới
-      updateUserAndToken(setUser, updatedProfile, form, updateUserAvatar);
+      updateUserAndToken(setUser, updatedProfile, formData, updateUserAvatar);
     } catch (err) {
       // Update error
       setError(err.message || "Lỗi cập nhật thông tin");
