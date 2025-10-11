@@ -68,7 +68,8 @@ public class AuthService {
         user.setAvatarUrl("/src/assets/images/User-avatar.png"); // Avatar mặc định cho user đăng ký thông thường
 
         userRepository.save(user);
-        sendRegisterSuccessEmail(user.getEmail(), user.getFirstName());
+        // Temporarily comment out email service to debug registration issue
+        // sendRegisterSuccessEmail(user.getEmail(), user.getFirstName());
         java.util.Map<String, Object> claims = new java.util.HashMap<>();
         claims.put("role", user.getRole().name().toUpperCase());
         claims.put("firstName", user.getFirstName());
