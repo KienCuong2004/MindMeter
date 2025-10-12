@@ -71,13 +71,18 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
         if (userOpt.isPresent()) {
             user = userOpt.get();
 
-            // Nếu user đã tồn tại nhưng chưa có OAuth provider, cập nhật thông tin
+            // Trường hợp: Local → Google (cùng email)
+            // Nếu user đã tồn tại với local account (có password), liên kết với Google
             if (user.getOauthProvider() == null || user.getOauthProvider().isEmpty()) {
                 user.setOauthProvider("GOOGLE");
                 if (picture != null) {
                     user.setAvatarUrl(picture);
                 }
                 userRepository.save(user);
+                System.out.println("[OAuth2] Linked existing local account with Google: " + email);
+            } else if ("GOOGLE".equals(user.getOauthProvider())) {
+                // User đã đăng nhập bằng Google trước đó
+                System.out.println("[OAuth2] Existing Google account logged in: " + email);
             }
             
             // Cập nhật avatar nếu user chưa có hoặc muốn cập nhật từ Google

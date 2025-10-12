@@ -14,31 +14,7 @@ import { useTranslation, Trans } from "react-i18next";
 import { authFetch } from "../authFetch";
 import { useTheme } from "../hooks/useTheme";
 
-// Submit Button Component để force re-render
-const SubmitButton = ({ loading, success, t }) => {
-  console.log("SubmitButton render - loading:", loading, "success:", success);
-
-  if (success) {
-    return (
-      <div className="w-full bg-[#22c55e] text-white font-semibold py-2 rounded-lg text-lg shadow text-center">
-        <div className="flex items-center justify-center">
-          <FaCheck className="mr-2" />
-          {success}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      type="submit"
-      className="w-full bg-[#22c55e] hover:bg-[#16a34a] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] text-white font-semibold py-2 rounded-lg transition text-lg shadow"
-      disabled={loading}
-    >
-      {loading ? t("loading") : t("register")}
-    </button>
-  );
-};
+// Removed SubmitButton component - using inline rendering instead
 
 function RegisterForm({ onRegister, onSwitchForm }) {
   const { t } = useTranslation();
@@ -47,17 +23,14 @@ function RegisterForm({ onRegister, onSwitchForm }) {
     password: "",
     confirmPassword: "",
   });
-  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [fieldError, setFieldError] = useState({});
   const [agree, setAgree] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
-  const [showError, setShowError] = useState(false);
-  const [countdown, setCountdown] = useState(5);
-  const [forceUpdate, setForceUpdate] = useState(0);
-  const [renderKey, setRenderKey] = useState(0);
+  const [success, setSuccess] = useState("");
+  const [countdown, setCountdown] = useState(3);
 
   const emailRef = useRef();
   const passwordRef = useRef();
@@ -90,21 +63,28 @@ function RegisterForm({ onRegister, onSwitchForm }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted - agree:", agree);
+    console.log("=== REGISTRATION START ===");
+    // Form submitted
     setError("");
     setSuccess("");
     if (!validate()) {
-      console.log("Validation failed");
+      console.log("=== VALIDATION FAILED ===");
+      // Validation failed
       return;
     }
-    console.log("Validation passed, starting registration...");
+    console.log("=== VALIDATION PASSED ===");
+    // Validation passed, starting registration
     setLoading(true);
+    console.log("=== LOADING SET TO TRUE ===");
+
     try {
+      console.log("=== MAKING API CALL ===");
       const res = await authFetch("http://localhost:8080/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      console.log("=== API CALL COMPLETED ===");
       if (!res.ok) {
         let errorMessage = t("registerFailed");
         try {
@@ -120,9 +100,21 @@ function RegisterForm({ onRegister, onSwitchForm }) {
 
       // Parse response data
       let responseData;
+      console.log("Response status:", res.status);
+      console.log("Response headers:", res.headers);
+
       try {
-        responseData = await res.json();
-        console.log("Registration successful:", responseData);
+        const responseText = await res.text();
+        console.log("Response text:", responseText);
+
+        if (responseText) {
+          responseData = JSON.parse(responseText);
+        } else {
+          responseData = { message: "Registration completed" };
+        }
+
+        // Registration successful
+        console.log("Parsed response data:", responseData);
 
         // Store token and user data if available
         if (responseData.token) {
@@ -137,40 +129,41 @@ function RegisterForm({ onRegister, onSwitchForm }) {
         responseData = { message: "Registration completed" };
       }
 
-      // Check if component is still mounted
-      if (!isMountedRef.current) {
-        return;
+      // Skip mount check - handle response immediately
+      console.log("=== SKIPPING MOUNT CHECK - HANDLING RESPONSE ===");
+
+      // Store token and user data if available
+      if (responseData.token) {
+        localStorage.setItem("token", responseData.token);
+      }
+      if (responseData.user) {
+        localStorage.setItem("user", JSON.stringify(responseData.user));
       }
 
-      // Force UI update by setting success state immediately
-      const successMessage =
-        "Đăng ký thành công! Chuyển về trang đăng nhập sau 5 giây...";
-      console.log("Setting success message:", successMessage);
+      // Check if there's a custom message from backend (account linking case)
+      const isAccountLinking =
+        responseData.message && responseData.message.includes("Google");
+      const countdownTime = isAccountLinking ? 3 : 5;
 
-      // Force re-render by updating multiple states
+      let successMessage;
+      if (isAccountLinking) {
+        // Account linking case: show custom message with countdown
+        successMessage = `${responseData.message} Chuyển về trang đăng nhập sau ${countdownTime} giây...`;
+      } else {
+        // Normal registration case
+        successMessage = `Đăng ký thành công! Chuyển về trang đăng nhập sau ${countdownTime} giây...`;
+      }
+
+      // Set success state and start countdown
+      console.log("=== SETTING SUCCESS STATE ===");
+      console.log("Success message:", successMessage);
+      console.log("Countdown time:", countdownTime);
+
       setLoading(false);
       setSuccess(successMessage);
-      setCountdown(5);
-      setForceUpdate((prev) => prev + 1);
-      setRenderKey((prev) => prev + 1); // Force re-render
-      setRenderKey((prev) => prev + 1); // Force re-render with new key
+      setCountdown(countdownTime);
 
-      // Force another re-render
-      setTimeout(() => {
-        setForm((prev) => ({ ...prev }));
-        setForceUpdate((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-      }, 10);
-
-      // Force another re-render after a longer delay
-      setTimeout(() => {
-        setForceUpdate((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-      }, 100);
+      console.log("=== SUCCESS STATE SET ===");
 
       // Start countdown timer
       const timer = setInterval(() => {
@@ -179,8 +172,16 @@ function RegisterForm({ onRegister, onSwitchForm }) {
             clearInterval(timer);
             // Use setTimeout to ensure the navigation happens after state update
             setTimeout(() => {
-              if (isMountedRef.current && onSwitchForm) {
+              console.log("=== ATTEMPTING NAVIGATION ===");
+              console.log("isMountedRef.current:", isMountedRef.current);
+              console.log("onSwitchForm:", onSwitchForm);
+              if (onSwitchForm) {
+                console.log("=== CALLING onSwitchForm('login') ===");
                 onSwitchForm("login");
+              } else {
+                console.log("=== onSwitchForm is not available ===");
+                // Fallback: redirect manually
+                window.location.href = "/login";
               }
             }, 100);
             return 0;
@@ -197,11 +198,9 @@ function RegisterForm({ onRegister, onSwitchForm }) {
         setError(err.message || "Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
       }
     } finally {
-      console.log("Registration finally block - setting loading to false");
-      if (isMountedRef.current) {
+      // Only set loading to false if there was an error (success case already handled above)
+      if (isMountedRef.current && !success) {
         setLoading(false);
-        // Force a re-render by updating a dummy state
-        setForm((prev) => ({ ...prev }));
       }
     }
   };
@@ -225,14 +224,6 @@ function RegisterForm({ onRegister, onSwitchForm }) {
   );
 
   useEffect(() => {
-    if (requiredErrors.length > 0) {
-      setShowError(true);
-      const timer = setTimeout(() => setShowError(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [requiredErrors.length]);
-
-  useEffect(() => {
     document.title = t("registerTitle") + " | MindMeter";
   }, [t]);
 
@@ -245,107 +236,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
     };
   }, []);
 
-  // Force re-render when success state changes
-  useEffect(() => {
-    console.log("Success state changed:", success);
-    if (success) {
-      console.log("Success state changed, forcing re-render");
-      setLoading(false);
-      setForceUpdate((prev) => prev + 1);
-      setRenderKey((prev) => prev + 1);
-      setRenderKey((prev) => prev + 1);
-
-      // Force another re-render after a short delay
-      setTimeout(() => {
-        setForceUpdate((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-      }, 50);
-
-      // Force another re-render after another delay
-      setTimeout(() => {
-        setForceUpdate((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-      }, 100);
-    }
-  }, [success]);
-
-  // Debug loading state
-  useEffect(() => {
-    console.log("Loading state changed:", loading);
-  }, [loading]);
-
-  // Force re-render when forceUpdate changes
-  useEffect(() => {
-    console.log("ForceUpdate triggered, forcing re-render");
-    setForm((prev) => ({ ...prev }));
-  }, [forceUpdate]);
-
-  // Debug forceUpdate state
-  useEffect(() => {
-    console.log("ForceUpdate state changed:", forceUpdate);
-  }, [forceUpdate]);
-
-  // Debug renderKey state
-  useEffect(() => {
-    console.log("RenderKey state changed:", renderKey);
-  }, [renderKey]);
-
-  // Force re-render when loading state changes
-  useEffect(() => {
-    if (!loading && success) {
-      console.log(
-        "Loading changed to false, success is true, forcing re-render"
-      );
-      setForceUpdate((prev) => prev + 1);
-      setRenderKey((prev) => prev + 1);
-    }
-  }, [loading, success]);
-
-  // Force re-render when loading state changes
-  useEffect(() => {
-    if (!loading && success) {
-      console.log(
-        "Loading changed to false, success is true, forcing re-render AGAIN"
-      );
-      setForceUpdate((prev) => prev + 1);
-      setRenderKey((prev) => prev + 1);
-    }
-  }, [loading, success]);
-
-  // Force re-render when success state changes
-  useEffect(() => {
-    if (success) {
-      console.log("Success state changed, forcing re-render");
-      setForceUpdate((prev) => prev + 1);
-      setRenderKey((prev) => prev + 1);
-
-      // Force another re-render after a short delay
-      setTimeout(() => {
-        setForceUpdate((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-      }, 50);
-
-      // Force another re-render after another delay
-      setTimeout(() => {
-        setForceUpdate((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-      }, 100);
-
-      // Force another re-render after another delay
-      setTimeout(() => {
-        setForceUpdate((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-      }, 200);
-
-      // Force another re-render after another delay
-      setTimeout(() => {
-        setForceUpdate((prev) => prev + 1);
-        setRenderKey((prev) => prev + 1);
-      }, 500);
-    }
-  }, [success]);
+  // Cleaned up unnecessary useEffect hooks
 
   // Tạo thông báo gom lỗi
   let errorMsg = "";
@@ -386,17 +277,10 @@ function RegisterForm({ onRegister, onSwitchForm }) {
             className="w-full px-10 pt-8 pb-10"
             autoComplete="off"
           >
-            {showError && errorMsg && (
+            {errorMsg && (
               <div className="mb-4 flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg shadow animate-shake">
                 <FaExclamationCircle className="text-xl mr-2 text-red-500 dark:text-red-300" />
                 <div className="font-semibold">{errorMsg}</div>
-              </div>
-            )}
-            {success && (
-              <div className="mb-4 flex items-center gap-2 bg-green-50 dark:bg-green-900/30 border border-green-300 dark:border-green-600 text-green-700 dark:text-green-300 px-4 py-2 rounded-lg shadow">
-                <div className="font-semibold">
-                  {t("registerSuccess", { count: countdown })}
-                </div>
               </div>
             )}
             <div className="flex flex-col items-center mb-6">
@@ -588,11 +472,23 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                 />
               </label>
             </div>
+
+            {/* Error display */}
+            {error && (
+              <div className="w-full bg-red-500 text-white font-semibold py-2 rounded-lg text-center mb-4">
+                {error}
+              </div>
+            )}
+
             {success ? (
               <div className="w-full bg-[#22c55e] text-white font-semibold py-2 rounded-lg text-lg shadow text-center">
-                <div className="flex items-center justify-center">
-                  <FaCheck className="mr-2" />
-                  {success}
+                <div className="flex flex-col items-center justify-center">
+                  <div className="flex items-center">
+                    <FaCheck className="mr-2" />
+                    <span>
+                      {success.replace(/\d+ giây/, `${countdown} giây`)}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : (

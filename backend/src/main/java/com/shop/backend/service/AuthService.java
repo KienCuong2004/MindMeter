@@ -19,6 +19,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Random;
+import java.util.Optional;
 import com.shop.backend.dto.UserDTO;
 
 @Service
@@ -54,12 +55,53 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại");
+        // Chuẩn hóa email
+        String email = request.getEmail().trim().toLowerCase();
+        
+        // Kiểm tra xem email đã tồn tại chưa
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            
+            // Trường hợp: Google → Local (cùng email)
+            // User đã đăng ký bằng Google, giờ muốn thêm password để đăng nhập local
+            if ("GOOGLE".equals(user.getOauthProvider())) {
+                // Cập nhật password cho user Google
+                user.setPassword(passwordEncoder.encode(request.getPassword()));
+                user.setTemporaryPassword(false); // Đánh dấu là password thật, không phải temp
+                user.setTempPasswordUsed(false);
+                userRepository.save(user);
+                
+                // Generate token
+                java.util.Map<String, Object> claims = new java.util.HashMap<>();
+                claims.put("role", user.getRole().name().toUpperCase());
+                claims.put("firstName", user.getFirstName());
+                claims.put("lastName", user.getLastName());
+                claims.put("avatarUrl", user.getAvatarUrl());
+                claims.put("plan", user.getPlan());
+                
+                String token = jwtService.generateToken(
+                    claims,
+                    new org.springframework.security.core.userdetails.User(
+                        user.getEmail(),
+                        user.getPassword(),
+                        java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                    )
+                );
+                
+                AuthResponse response = new AuthResponse(token, user.getEmail(), user.getRole(), convertToUserDTO(user), false, null);
+                response.setMessage("Đã thêm mật khẩu cho tài khoản Google. Bạn có thể đăng nhập bằng email/mật khẩu hoặc Google.");
+                return response;
+            } else {
+                // User đã tồn tại với local account
+                throw new RuntimeException("Email đã tồn tại");
+            }
         }
 
+        // Tạo user mới với local account
         User user = new User();
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFirstName("Người dùng");
         user.setLastName(String.valueOf(10000 + random.nextInt(90000)));
