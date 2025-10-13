@@ -1980,5 +1980,24 @@
       },
       "noPosts": "No posts found"
     }
+  },
+  "accountLinking": {
+    "title": "Account Successfully Linked",
+    "subtitle": "Your account has been linked with Google",
+    "accountInfo": "Account Information",
+    "email": "Email:",
+    "loginMethod": "Login Method:",
+    "loginMethodValue": "Google + Password",
+    "howItWorks": "How the System Works",
+    "explanation1": "You have created an account using email and traditional password",
+    "explanation2": "The system has automatically linked this account with Google",
+    "explanation3": "Now you can login using both methods:",
+    "explanation4": "Email and traditional password",
+    "explanation5": "Google account (Google login button)",
+    "explanation6": "All your data and history are preserved",
+    "continueToHome": "Continue to Home",
+    "goToLogin": "Go to Login",
+    "autoRedirect": "Auto redirect after {{count}} seconds",
+    "loadingInfo": "Loading information..."
   }
 }

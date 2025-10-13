@@ -7,7 +7,6 @@ import {
   FaGoogle,
   FaTimes,
   FaExclamationTriangle,
-  FaCheck,
 } from "react-icons/fa";
 import TermsModal from "./TermsModal";
 import { useTranslation, Trans } from "react-i18next";
@@ -372,7 +371,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                     iconClass = "text-lg";
                   } else if (level === "strong") {
                     color = "text-green-600";
-                    icon = <FaCheck className="text-lg" />;
+                    icon = <FaExclamationCircle className="text-lg" />;
                     iconClass = "text-lg";
                   }
                   return (
@@ -481,15 +480,8 @@ function RegisterForm({ onRegister, onSwitchForm }) {
             )}
 
             {success ? (
-              <div className="w-full bg-[#22c55e] text-white font-semibold py-2 rounded-lg text-lg shadow text-center">
-                <div className="flex flex-col items-center justify-center">
-                  <div className="flex items-center">
-                    <FaCheck className="mr-2" />
-                    <span>
-                      {success.replace(/\d+ giây/, `${countdown} giây`)}
-                    </span>
-                  </div>
-                </div>
+              <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300 font-semibold py-3 px-4 rounded-lg text-lg text-center">
+                <span>{success.replace(/\d+ giây/, `${countdown} giây`)}</span>
               </div>
             ) : (
               <button

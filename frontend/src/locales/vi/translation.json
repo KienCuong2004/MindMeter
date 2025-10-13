@@ -1979,5 +1979,24 @@
       },
       "noPosts": "Không tìm thấy bài viết nào"
     }
+  },
+  "accountLinking": {
+    "title": "Tài khoản đã được liên kết thành công",
+    "subtitle": "Tài khoản của bạn đã được liên kết với Google",
+    "accountInfo": "Thông tin tài khoản",
+    "email": "Email:",
+    "loginMethod": "Phương thức đăng nhập:",
+    "loginMethodValue": "Google + Mật khẩu",
+    "howItWorks": "Cách thức hoạt động của hệ thống",
+    "explanation1": "Bạn đã tạo tài khoản bằng email và mật khẩu truyền thống",
+    "explanation2": "Hệ thống đã tự động liên kết tài khoản này với Google",
+    "explanation3": "Bây giờ bạn có thể đăng nhập bằng cả hai phương thức:",
+    "explanation4": "Email và mật khẩu truyền thống",
+    "explanation5": "Tài khoản Google (nút đăng nhập Google)",
+    "explanation6": "Tất cả dữ liệu và lịch sử của bạn được giữ nguyên",
+    "continueToHome": "Tiếp tục đến trang chủ",
+    "goToLogin": "Về trang đăng nhập",
+    "autoRedirect": "Tự động chuyển hướng sau {{count}} giây",
+    "loadingInfo": "Đang tải thông tin..."
   }
 }
