@@ -29,7 +29,6 @@ const AccountLinkingNotification = () => {
       // Lưu token vào localStorage để đăng nhập
       if (token) {
         localStorage.setItem("token", token);
-        console.log("[AccountLinking] Token saved to localStorage:", token);
       }
     }
 

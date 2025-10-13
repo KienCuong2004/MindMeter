@@ -46,6 +46,63 @@ public class AuthController {
     @Autowired
     private AdminService adminService;
 
+    // Debug endpoint để kiểm tra user trong database
+    @GetMapping("/debug/user/{email}")
+    public ResponseEntity<Map<String, Object>> debugUser(@PathVariable String email) {
+        try {
+            User user = userRepository.findByEmail(email.toLowerCase().trim()).orElse(null);
+            if (user == null) {
+                return ResponseEntity.ok(Map.of(
+                    "exists", false,
+                    "message", "User not found with email: " + email
+                ));
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "exists", true,
+                "email", user.getEmail(),
+                "firstName", user.getFirstName(),
+                "lastName", user.getLastName(),
+                "oauthProvider", user.getOauthProvider() != null ? user.getOauthProvider() : "null",
+                "isTemporaryPassword", user.isTemporaryPassword(),
+                "tempPasswordUsed", user.isTempPasswordUsed(),
+                "hasPassword", user.getPassword() != null && !user.getPassword().isEmpty(),
+                "createdAt", user.getCreatedAt(),
+                "role", user.getRole().name()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                "error", true,
+                "message", e.getMessage()
+            ));
+        }
+    }
+
+    // Debug endpoint để xóa user (chỉ để test)
+    @DeleteMapping("/debug/user/{email}")
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable String email) {
+        try {
+            User user = userRepository.findByEmail(email.toLowerCase().trim()).orElse(null);
+            if (user == null) {
+                return ResponseEntity.ok(Map.of(
+                    "deleted", false,
+                    "message", "User not found with email: " + email
+                ));
+            }
+            
+            userRepository.delete(user);
+            return ResponseEntity.ok(Map.of(
+                "deleted", true,
+                "message", "User deleted successfully: " + email
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                "error", true,
+                "message", e.getMessage()
+            ));
+        }
+    }
+
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));

@@ -81,10 +81,8 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
                 }
                 userRepository.save(user);
                 isAccountLinking = true;
-                System.out.println("[OAuth2] Linked existing local account with Google: " + email);
             } else if ("GOOGLE".equals(user.getOauthProvider())) {
                 // User đã đăng nhập bằng Google trước đó
-                System.out.println("[OAuth2] Existing Google account logged in: " + email);
             }
             
             // Cập nhật avatar nếu user chưa có hoặc muốn cập nhật từ Google
@@ -145,8 +143,6 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
         // Redirect về frontend kèm token và thông tin về temporary password
         String redirectUrl;
         
-        System.out.println("[OAuth2] isAccountLinking: " + isAccountLinking);
-        
         if (isAccountLinking) {
             // Nếu là account linking, redirect đến trang thông báo liên kết
             redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl)
@@ -157,23 +153,14 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
                     .build()
                     .encode()
                     .toUriString();
-            System.out.println("[OAuth2] Account linking redirect URL: " + redirectUrl);
         } else {
-            // Redirect bình thường
-            UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(frontendUrl)
-                    .queryParam("token", token);
-            
-            // Nếu là user mới với temporary password, thêm flag để frontend hiển thị modal
-            if (user.isTemporaryPassword() && !user.isTempPasswordUsed()) {
-                builder.queryParam("requiresPasswordChange", "true");
-                builder.queryParam("message", "Chao mung! Vui long dat mat khau moi cho tai khoan cua ban.");
-            }
-            
-            redirectUrl = builder.build().toUriString();
-            System.out.println("[OAuth2] Normal redirect URL: " + redirectUrl);
+            // Redirect bình thường - không cần password change cho Google OAuth
+            redirectUrl = UriComponentsBuilder.fromUriString(frontendUrl)
+                    .path("/auth/callback")
+                    .queryParam("token", token)
+                    .build()
+                    .toUriString();
         }
-        
-        System.out.println("[OAuth2] Final redirect URL: " + redirectUrl);
         response.sendRedirect(redirectUrl);
     }
 } 
