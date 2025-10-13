@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
@@ -50,6 +56,7 @@ export default function AppRoutes() {
   const [avatarUpdateKey, setAvatarUpdateKey] = useState(0);
   const isProcessingUser = useRef(false); // Prevent concurrent user processing
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
 
   // Function để cập nhật avatar
@@ -308,7 +315,7 @@ export default function AppRoutes() {
         navigate("/home", { replace: true });
       }
     }
-  }, [navigate, t]); // Added 't' back to dependency array
+  }, [navigate, t, location.pathname]); // Use location.pathname to detect route changes
 
   const handleLogin = (data) => {
     // Tạo user object với đầy đủ thông tin
@@ -406,6 +413,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/home" replace />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/introduce-mindmeter" element={<IntroduceMindMeterPage />} />
       <Route path="/introduce" element={<IntroduceMindMeterPage />} />
       <Route path="/user-guide" element={<UserGuidePage />} />
@@ -822,6 +830,7 @@ export default function AppRoutes() {
           />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/student/test" element={<StudentTestPage />} />
           <Route path="/student/profile" element={<StudentProfilePage />} />
           <Route

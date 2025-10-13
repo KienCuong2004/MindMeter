@@ -17,17 +17,17 @@ export default function AuthCallback() {
 
     // Nếu có email và name params, đây là account linking - không redirect
     if (email && name) {
-      console.log("[AuthCallback] Account linking detected, staying on page");
       return;
     }
 
     if (token) {
       localStorage.setItem("token", token);
       let role = "";
+      let user = null;
       try {
         const decoded = jwtDecode(token);
         // Lưu user vào localStorage
-        const user = {
+        user = {
           email: decoded.sub,
           role: decoded.role,
           firstName: decoded.firstName || "",
@@ -51,14 +51,16 @@ export default function AuthCallback() {
         console.error("[AuthCallback] Error decoding token:", error);
       }
 
-      // Redirect dựa trên role
-      if (role === "EXPERT") {
-        navigate("/expert/dashboard");
-      } else if (role === "ADMIN") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/home"); // Redirect to home instead of "/"
-      }
+      // Redirect dựa trên role với delay nhỏ để đảm bảo localStorage được lưu
+      setTimeout(() => {
+        if (role === "EXPERT") {
+          navigate("/expert/dashboard", { replace: true });
+        } else if (role === "ADMIN") {
+          navigate("/admin/dashboard", { replace: true });
+        } else {
+          navigate("/home", { replace: true }); // Redirect to home instead of "/"
+        }
+      }, 100); // Delay 100ms để đảm bảo localStorage được lưu
     } else {
       navigate("/login");
     }
