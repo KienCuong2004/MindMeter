@@ -12,6 +12,14 @@ export default function AuthCallback() {
     const requiresPasswordChange =
       params.get("requiresPasswordChange") === "true";
     const message = params.get("message");
+    const email = params.get("email");
+    const name = params.get("name");
+
+    // Nếu có email và name params, đây là account linking - không redirect
+    if (email && name) {
+      console.log("[AuthCallback] Account linking detected, staying on page");
+      return;
+    }
 
     if (token) {
       localStorage.setItem("token", token);

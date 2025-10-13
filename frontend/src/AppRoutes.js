@@ -42,12 +42,12 @@ import PricingPage from "./pages/PricingPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ExpertAppointmentsPage from "./pages/ExpertAppointmentsPage";
 import ExpertSchedulePage from "./pages/ExpertSchedulePage";
+import AccountLinkingNotification from "./components/AccountLinkingNotification";
 
 export default function AppRoutes() {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [avatarUpdateKey, setAvatarUpdateKey] = useState(0);
-  const hasLoadedUser = useRef(false); // Force re-render khi avatar thay đổi
   const isProcessingUser = useRef(false); // Prevent concurrent user processing
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -166,6 +166,7 @@ export default function AppRoutes() {
       "/login",
       "/register",
       "/forgot-password",
+      "/account-linking",
     ];
 
     // Check if current path is a blog post detail page
@@ -253,8 +254,6 @@ export default function AppRoutes() {
     } else if (anonymousToken) {
       // Xử lý anonymous user - chỉ khi không có token thông thường
       try {
-        const decoded = jwtDecode(anonymousToken);
-
         setUser({
           email: "anonymous",
           role: "ANONYMOUS",
@@ -309,7 +308,7 @@ export default function AppRoutes() {
         navigate("/home", { replace: true });
       }
     }
-  }, [navigate]); // Removed 't' to prevent infinite loop
+  }, [navigate, t]); // Added 't' back to dependency array
 
   const handleLogin = (data) => {
     // Tạo user object với đầy đủ thông tin
@@ -447,6 +446,7 @@ export default function AppRoutes() {
         }
       />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/account-linking" element={<AccountLinkingNotification />} />
       {!user || (user && user.role === "ANONYMOUS") ? (
         <>
           <Route path="/home" element={<StudentHomePage />} />
