@@ -24,25 +24,13 @@ const DynamicPrice = ({
   // Nếu có data từ API, hiển thị giá động
   const planData = pricingVnd[plan.toLowerCase()];
   if (planData) {
-    // Hiển thị giá theo ngôn ngữ
-    let displayPrice;
-    if (language === "en") {
-      // Tiếng Anh: hiển thị giá USD
-      displayPrice = `$${planData.usd}`;
-    } else {
-      // Tiếng Việt: hiển thị giá VND
-      displayPrice = planData.vndFormatted;
-    }
+    // Luôn hiển thị giá USD thay vì VND
+    const displayPrice = `$${planData.usd}`;
 
     return (
       <div className={className}>
         <span>{displayPrice}</span>
-        {/* Chỉ hiển thị "(ước tính)" cho tiếng Việt và không phải gói Free */}
-        {pricingVnd.fallback &&
-          language === "vi" &&
-          plan.toLowerCase() !== "free" && (
-            <span className="text-xs text-gray-400 ml-1">(ước tính)</span>
-          )}
+        {/* Không hiển thị "(ước tính)" nữa vì đã chuyển sang USD */}
       </div>
     );
   }

@@ -65,18 +65,10 @@ spring.security.oauth2.client.registration.google.client-name=Google
 feedback.receiver=your_feedback_email@gmail.com
 contact.receiver.email=your_contact_email@gmail.com
 
-# Stripe Configuration
-stripe.api.key.test=sk_test_your_stripe_test_key
-stripe.public.key.test=pk_test_your_stripe_public_test_key
-stripe.webhook.secret.test=whsec_your_stripe_webhook_secret
-
-# Stripe Mode: test | prod
-stripe.mode=test
-
-# Fallback keys (for backward compatibility)
-stripe.api.key=${stripe.api.key.${stripe.mode}}
-stripe.public.key=${stripe.public.key.${stripe.mode}}
-stripe.webhook.secret=${stripe.webhook.secret.${stripe.mode}}
+# PayPal Configuration
+paypal.client.id=your_paypal_client_id_here
+paypal.client.secret=your_paypal_client_secret_here
+paypal.mode=sandbox
 
 # App URLs
 app.base.url=http://localhost:3000

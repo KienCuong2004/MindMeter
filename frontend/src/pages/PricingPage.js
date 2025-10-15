@@ -6,9 +6,7 @@ import { useTranslation } from "react-i18next";
 import { FaBrain, FaSync, FaCheck } from "react-icons/fa";
 import { useTheme } from "../hooks/useTheme";
 import { getCurrentUser, refreshToken } from "../services/anonymousService";
-import currencyService from "../services/currencyService";
-import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import NotificationModal from "../components/NotificationModal";
 import RateLimitModal from "../components/RateLimitModal";
@@ -17,13 +15,12 @@ export default function PricingPage() {
   const { t, i18n } = useTranslation();
   const user = getCurrentUser();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [loadingPlan, setLoadingPlan] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [currentPlan, setCurrentPlan] = useState(user?.plan || "FREE");
   const [planExpiryInfo, setPlanExpiryInfo] = useState(null);
   const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
-  const [pricingVnd, setPricingVnd] = useState(null);
-  const [loadingPricing, setLoadingPricing] = useState(true);
   const location = useLocation();
   const [notificationModal, setNotificationModal] = useState({
     isOpen: false,
@@ -72,31 +69,6 @@ export default function PricingPage() {
         // Error parsing stored user data
       }
     }
-  }, []);
-
-  // Lấy giá VND từ API
-  useEffect(() => {
-    const fetchPricingVnd = async () => {
-      try {
-        setLoadingPricing(true);
-        const data = await currencyService.getPricingVnd();
-        setPricingVnd(data);
-      } catch (error) {
-        console.error("Error fetching VND pricing:", error);
-        // Sử dụng giá fallback nếu API lỗi
-        setPricingVnd({
-          free: { usd: 0.0, vnd: 0, vndFormatted: "0đ" },
-          plus: { usd: 3.99, vnd: 109604, vndFormatted: "109.604đ" },
-          pro: { usd: 9.99, vnd: 274422, vndFormatted: "274.422đ" },
-          rate: 27469.67,
-          fallback: true,
-        });
-      } finally {
-        setLoadingPricing(false);
-      }
-    };
-
-    fetchPricingVnd();
   }, []);
 
   // Khi nâng cấp thành công, fetch lại profile để cập nhật plan mới nhất
@@ -185,11 +157,15 @@ export default function PricingPage() {
   };
 
   const handleBuyPlan = async (plan) => {
+    console.log("handleBuyPlan called with plan:", plan);
+    console.log("Current plan:", currentPlan);
+
     // 🚫 Chống spam: Kiểm tra cooldown period (3 giây)
     const now = Date.now();
     const COOLDOWN_PERIOD = 3000; // 3 giây
 
     if (now - lastClickTime < COOLDOWN_PERIOD) {
+      console.log("Rate limited - too soon since last click");
       setNotificationModal({
         isOpen: true,
         type: "warning",
@@ -202,6 +178,7 @@ export default function PricingPage() {
 
     // 🚫 Chống spam: Kiểm tra đang xử lý
     if (isProcessing) {
+      console.log("Already processing a request");
       return;
     }
 
@@ -210,7 +187,16 @@ export default function PricingPage() {
     const currentPlanLevel = planHierarchy[currentPlan] || 0;
     const targetPlanLevel = planHierarchy[plan.toUpperCase()] || 0;
 
+    console.log(
+      "Plan levels - current:",
+      currentPlanLevel,
+      "target:",
+      targetPlanLevel
+    );
+
+    // Chỉ cho phép nâng cấp lên plan cao hơn
     if (targetPlanLevel <= currentPlanLevel) {
+      console.log("Cannot upgrade - target level not higher than current");
       setNotificationModal({
         isOpen: true,
         type: "warning",
@@ -227,53 +213,18 @@ export default function PricingPage() {
     setLoadingPlan(plan);
 
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        "/api/payment/create-checkout-session",
-        { plan },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (res.data.url) {
-        window.location.href = res.data.url;
-      } else {
-        setNotificationModal({
-          isOpen: true,
-          type: "error",
-          title: t("common.error"),
-          message: t("pricing.paymentLinkError"),
-          onConfirm: null,
-        });
-      }
+      console.log("Navigating to payment method page...");
+      // Navigate to payment method selection page
+      navigate(`/payment-method?plan=${plan}`);
     } catch (err) {
-      // Xử lý lỗi rate limit đặc biệt
-      if (
-        err.response?.status === 429 ||
-        err.response?.data?.error?.includes("Rate limit")
-      ) {
-        // Extract retry-after from response headers or use default
-        const retryAfter =
-          err.response?.headers?.["retry-after"] ||
-          err.response?.data?.retryAfter ||
-          60; // Default 60 seconds
-
-        setRateLimitModal({
-          isOpen: true,
-          retryAfterSeconds: parseInt(retryAfter),
-        });
-      } else {
-        setNotificationModal({
-          isOpen: true,
-          type: "error",
-          title: t("common.error"),
-          message: err.response?.data?.error || t("pricing.createSessionError"),
-          onConfirm: null,
-        });
-      }
+      console.error("Navigation error:", err);
+      setNotificationModal({
+        isOpen: true,
+        type: "error",
+        title: t("common.error"),
+        message: err.message || t("pricing.createSessionError"),
+        onConfirm: null,
+      });
     } finally {
       setLoadingPlan(null);
       setIsProcessing(false);
@@ -348,32 +299,6 @@ export default function PricingPage() {
         <h1 className="text-4xl md:text-5xl font-extrabold text-center text-blue-700 dark:text-indigo-300 mb-8">
           {t("pricing.title")}
         </h1>
-        {pricingVnd && !pricingVnd.fallback && i18n.language === "vi" && (
-          <div className="mb-4 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
-            <span>Tỷ giá: 1 USD = {pricingVnd.rate?.toLocaleString()} VND</span>
-            {loadingPricing && <span>(Đang cập nhật...)</span>}
-            <button
-              onClick={async () => {
-                setLoadingPricing(true);
-                currencyService.clearCache();
-                try {
-                  const data = await currencyService.getPricingVnd();
-                  setPricingVnd(data);
-                } catch (error) {
-                  console.error("Error refreshing pricing:", error);
-                } finally {
-                  setLoadingPricing(false);
-                }
-              }}
-              className="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-              disabled={loadingPricing}
-            >
-              <FaSync
-                className={`w-4 h-4 ${loadingPricing ? "animate-spin" : ""}`}
-              />
-            </button>
-          </div>
-        )}
         <div className="flex flex-col md:flex-row gap-8 w-full max-w-5xl justify-center items-stretch">
           {/* Free Plan */}
           <div
@@ -390,10 +315,7 @@ export default function PricingPage() {
               <div className="text-3xl font-extrabold text-blue-600 dark:text-blue-400 mb-2">
                 <DynamicPrice
                   plan="free"
-                  pricingVnd={pricingVnd}
-                  loadingPricing={loadingPricing}
                   fallbackPrice={t("pricing.freePrice")}
-                  language={i18n.language}
                 />
               </div>
               <div className="text-sm text-gray-500 mb-6">
@@ -469,10 +391,7 @@ export default function PricingPage() {
               <div className="text-3xl font-extrabold text-green-600 dark:text-green-400 mb-2">
                 <DynamicPrice
                   plan="plus"
-                  pricingVnd={pricingVnd}
-                  loadingPricing={loadingPricing}
                   fallbackPrice={t("pricing.plusPrice")}
-                  language={i18n.language}
                 />
               </div>
               <div className="text-sm text-gray-500 mb-6">
@@ -528,7 +447,6 @@ export default function PricingPage() {
               onClick={() => handleBuyPlan("plus")}
               disabled={
                 loadingPlan !== null ||
-                loadingPricing ||
                 currentPlan === "PLUS" ||
                 currentPlan === "PRO" ||
                 isProcessing
@@ -559,10 +477,7 @@ export default function PricingPage() {
               <div className="text-3xl font-extrabold text-purple-600 dark:text-purple-400 mb-2">
                 <DynamicPrice
                   plan="pro"
-                  pricingVnd={pricingVnd}
-                  loadingPricing={loadingPricing}
                   fallbackPrice={t("pricing.proPrice")}
-                  language={i18n.language}
                 />
               </div>
               <div className="text-sm text-gray-500 mb-6">
@@ -612,10 +527,7 @@ export default function PricingPage() {
               }`}
               onClick={() => handleBuyPlan("pro")}
               disabled={
-                loadingPlan !== null ||
-                loadingPricing ||
-                currentPlan === "PRO" ||
-                isProcessing
+                loadingPlan !== null || currentPlan === "PRO" || isProcessing
               }
             >
               {loadingPlan === "pro"

@@ -3,20 +3,26 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import en from "./locales/en/translation.json";
 import vi from "./locales/vi/translation.json";
+import enPayment from "./locales/en/payment.json";
+import viPayment from "./locales/vi/payment.json";
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
-      en: { translation: en },
-      vi: { translation: vi },
+      en: {
+        translation: en,
+        payment: enPayment,
+      },
+      vi: {
+        translation: vi,
+        payment: viPayment,
+      },
     },
     fallbackLng: "en",
     interpolation: {
       escapeValue: false,
-      prefix: "{",
-      suffix: "}",
     },
     detection: {
       order: ["localStorage", "navigator"],

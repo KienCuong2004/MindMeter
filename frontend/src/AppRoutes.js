@@ -49,6 +49,8 @@ import NotFoundPage from "./pages/NotFoundPage";
 import ExpertAppointmentsPage from "./pages/ExpertAppointmentsPage";
 import ExpertSchedulePage from "./pages/ExpertSchedulePage";
 import AccountLinkingNotification from "./components/AccountLinkingNotification";
+import PaymentMethodPage from "./pages/PaymentMethodPage";
+import PayPalPaymentPage from "./pages/PayPalPaymentPage";
 
 export default function AppRoutes() {
   const [user, setUser] = useState(null);
@@ -167,6 +169,8 @@ export default function AppRoutes() {
       "/consult-therapy",
       "/contact",
       "/pricing",
+      "/payment-method",
+      "/payment/paypal",
       "/blog",
       "/blog/create",
       "/saved-articles",
@@ -426,6 +430,8 @@ export default function AppRoutes() {
       <Route path="/disclaimer" element={<Disclaimer />} />
       <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
       <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/payment-method" element={<PaymentMethodPage />} />
+      <Route path="/payment/paypal" element={<PayPalPaymentPage />} />
       <Route
         path="/saved-articles"
         element={
@@ -471,6 +477,8 @@ export default function AppRoutes() {
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/payment-method" element={<PaymentMethodPage />} />
+          <Route path="/payment/paypal" element={<PayPalPaymentPage />} />
           <Route
             path="/saved-articles"
             element={
@@ -801,6 +809,8 @@ export default function AppRoutes() {
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/payment-method" element={<PaymentMethodPage />} />
+          <Route path="/payment/paypal" element={<PayPalPaymentPage />} />
           <Route
             path="/saved-articles"
             element={
