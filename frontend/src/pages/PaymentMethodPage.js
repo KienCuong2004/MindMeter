@@ -52,12 +52,12 @@ const PaymentMethodPage = () => {
       name: "VNPay",
       description: getTranslation(
         "vnpayDescription",
-        "Pay with VNPay (unavailable)."
+        "Pay securely with VNPay - Vietnam's leading payment gateway."
       ),
       icon: FaWallet,
-      available: false,
-      color: "bg-gray-300",
-      textColor: "text-gray-600",
+      available: true,
+      color: "bg-red-500",
+      textColor: "text-white",
     },
     {
       id: "momo",

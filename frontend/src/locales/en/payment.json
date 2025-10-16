@@ -3,7 +3,7 @@
   "selectMethodDescription": "Choose your preferred payment method for the {{plan}} plan.",
   "paypal": "PayPal",
   "paypalDescription": "Pay securely with your PayPal account.",
-  "vnpayDescription": "Pay with VNPay (unavailable).",
+  "vnpayDescription": "Pay securely with VNPay - Vietnam's leading payment gateway.",
   "momoDescription": "Pay with MoMo (unavailable).",
   "zalopayDescription": "Pay with ZaloPay (unavailable).",
   "unavailable": "Unavailable",
@@ -21,5 +21,18 @@
   "createErrorMessage": "Failed to create PayPal payment. Please try again.",
   "loginRequired": "You must be logged in to make a payment.",
   "currentUser": "Current User",
-  "tryAgain": "Try Again"
+  "tryAgain": "Try Again",
+  "vnpayTitle": "VNPay Payment",
+  "redirectingToVNPay": "Redirecting to VNPay...",
+  "redirectingMessage": "You will be redirected to VNPay payment page.",
+  "processingPaymentResult": "Processing payment result...",
+  "verifyingPayment": "Please wait while we verify your payment.",
+  "paymentSuccessMessage": "Your payment has been processed successfully. You will be redirected to the pricing page shortly.",
+  "paymentErrorMessage": "Your payment could not be processed. Please try again or contact support.",
+  "continue": "Continue",
+  "backToPricing": "Back to Pricing",
+  "paymentSuccessful": "Payment Successful!",
+  "paymentFailed": "Payment Failed",
+  "failedToCreatePayment": "Failed to create payment. Please try again.",
+  "failedToProcessPayment": "Failed to process payment result. Please contact support."
 }

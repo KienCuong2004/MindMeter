@@ -51,6 +51,7 @@ import ExpertSchedulePage from "./pages/ExpertSchedulePage";
 import AccountLinkingNotification from "./components/AccountLinkingNotification";
 import PaymentMethodPage from "./pages/PaymentMethodPage";
 import PayPalPaymentPage from "./pages/PayPalPaymentPage";
+import VNPayPaymentPage from "./pages/VNPayPaymentPage";
 
 export default function AppRoutes() {
   const [user, setUser] = useState(null);
@@ -171,6 +172,8 @@ export default function AppRoutes() {
       "/pricing",
       "/payment-method",
       "/payment/paypal",
+      "/payment/vnpay",
+      "/payment/vnpay/return",
       "/blog",
       "/blog/create",
       "/saved-articles",
@@ -432,6 +435,8 @@ export default function AppRoutes() {
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/payment-method" element={<PaymentMethodPage />} />
       <Route path="/payment/paypal" element={<PayPalPaymentPage />} />
+      <Route path="/payment/vnpay" element={<VNPayPaymentPage />} />
+      <Route path="/payment/vnpay/return" element={<VNPayPaymentPage />} />
       <Route
         path="/saved-articles"
         element={
@@ -479,6 +484,8 @@ export default function AppRoutes() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/payment-method" element={<PaymentMethodPage />} />
           <Route path="/payment/paypal" element={<PayPalPaymentPage />} />
+          <Route path="/payment/vnpay" element={<VNPayPaymentPage />} />
+          <Route path="/payment/vnpay/return" element={<VNPayPaymentPage />} />
           <Route
             path="/saved-articles"
             element={
@@ -811,6 +818,8 @@ export default function AppRoutes() {
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/payment-method" element={<PaymentMethodPage />} />
           <Route path="/payment/paypal" element={<PayPalPaymentPage />} />
+          <Route path="/payment/vnpay" element={<VNPayPaymentPage />} />
+          <Route path="/payment/vnpay/return" element={<VNPayPaymentPage />} />
           <Route
             path="/saved-articles"
             element={
