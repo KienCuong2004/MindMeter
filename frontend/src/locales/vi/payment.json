@@ -3,7 +3,7 @@
   "selectMethodDescription": "Chọn phương thức thanh toán ưa thích của bạn cho gói {{plan}}.",
   "paypal": "PayPal",
   "paypalDescription": "Thanh toán an toàn bằng tài khoản PayPal của bạn.",
-  "vnpayDescription": "Thanh toán bằng VNPay (chưa khả dụng).",
+  "vnpayDescription": "Thanh toán an toàn bằng VNPay - cổng thanh toán hàng đầu Việt Nam.",
   "momoDescription": "Thanh toán bằng MoMo (chưa khả dụng).",
   "zalopayDescription": "Thanh toán bằng ZaloPay (chưa khả dụng).",
   "unavailable": "Chưa khả dụng",
@@ -21,5 +21,18 @@
   "createErrorMessage": "Không thể tạo thanh toán PayPal. Vui lòng thử lại.",
   "loginRequired": "Bạn phải đăng nhập để thực hiện thanh toán.",
   "currentUser": "Người Dùng Hiện Tại",
-  "tryAgain": "Thử Lại"
+  "tryAgain": "Thử Lại",
+  "vnpayTitle": "Thanh Toán VNPay",
+  "redirectingToVNPay": "Đang chuyển hướng đến VNPay...",
+  "redirectingMessage": "Bạn sẽ được chuyển hướng đến trang thanh toán VNPay.",
+  "processingPaymentResult": "Đang xử lý kết quả thanh toán...",
+  "verifyingPayment": "Vui lòng chờ trong khi chúng tôi xác minh thanh toán của bạn.",
+  "paymentSuccessMessage": "Thanh toán của bạn đã được xử lý thành công. Bạn sẽ được chuyển hướng đến trang giá trong giây lát.",
+  "paymentErrorMessage": "Thanh toán của bạn không thể được xử lý. Vui lòng thử lại hoặc liên hệ hỗ trợ.",
+  "continue": "Tiếp Tục",
+  "backToPricing": "Quay Lại Trang Giá",
+  "paymentSuccessful": "Thanh Toán Thành Công!",
+  "paymentFailed": "Thanh Toán Thất Bại",
+  "failedToCreatePayment": "Không thể tạo thanh toán. Vui lòng thử lại.",
+  "failedToProcessPayment": "Không thể xử lý kết quả thanh toán. Vui lòng liên hệ hỗ trợ."
 }
