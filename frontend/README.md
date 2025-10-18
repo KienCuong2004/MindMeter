@@ -1,74 +1,81 @@
-# 🧠 MindMeter Frontend
+# MindMeter Frontend
 
 [![React](https://img.shields.io/badge/React-18.2.0-blue.svg)](https://reactjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.3.0-38B2AC.svg)](https://tailwindcss.com/)
 [![i18next](https://img.shields.io/badge/i18next-23.7.16-green.svg)](https://www.i18next.com/)
 [![Chart.js](https://img.shields.io/badge/Chart.js-4.5.0-orange.svg)](https://www.chartjs.org/)
 
-## 📋 Overview
+## Overview
 
-**MindMeter Frontend** is a modern React application that provides an intelligent mental health assessment platform. Built with React 18, Tailwind CSS, and advanced features like AI chatbot integration, automatic appointment booking, and multi-language support.
+MindMeter Frontend is a modern React application providing an intelligent mental health assessment platform interface. Built with React 18, Tailwind CSS, and featuring AI chatbot integration, automatic appointment booking, and comprehensive multi-language support.
 
-## ✨ Features
+## Features
 
-### 🧪 Psychological Assessment Interface
+### Psychological Assessment Interface
 
-- **Interactive Test Taking**: Beautiful, responsive interface for DASS-21/42, BDI, RADS, EPDS, and SAS tests
-- **Real-time Progress**: Visual progress indicators and question navigation
-- **Result Visualization**: Comprehensive charts and detailed analysis of test results
-- **Test History**: Complete history of all taken tests with trend analysis
+- Interactive test-taking interface for DASS-21/42, BDI, RADS, EPDS, and SAS assessments
+- Real-time progress tracking with visual indicators
+- Comprehensive result visualization using Chart.js
+- Complete test history with trend analysis and comparison
+- Export functionality for test results and reports
 
-### 🤖 AI Chatbot Integration
+### AI Chatbot Integration
 
-- **Intelligent Conversations**: OpenAI-powered chatbot with mental health expertise
-- **Automatic Test Recommendations**: AI suggests appropriate tests based on user symptoms
-- **Smart Expert Suggestions**: Recommends suitable psychological experts
-- **Automatic Appointment Booking**: Process booking requests through natural language
-- **Multi-language Support**: Chat in Vietnamese or English
+- OpenAI-powered chatbot with mental health expertise
+- Intelligent test recommendations based on user symptoms
+- Smart expert matching and suggestions
+- Natural language appointment booking
+- Multi-language chat support (Vietnamese and English)
+- Context-aware conversation flow
 
-### 📅 Appointment Management
+### Appointment Management
 
-- **Smart Booking Interface**: Intuitive calendar and time slot selection
-- **Expert Profiles**: Browse and select from available psychological experts
-- **Automatic Scheduling**: AI-powered appointment suggestions
-- **Cancellation Handling**: Beautiful modals for managing appointments
-- **Real-time Updates**: Live status updates and notifications
+- Intuitive calendar-based booking interface
+- Expert profile browsing and selection
+- Real-time availability checking
+- Appointment lifecycle management
+- Cancellation handling with reason tracking
+- WebSocket-based live updates
 
-### 👥 User Management
+### User Management
 
-- **Role-based Dashboards**: Customized interfaces for Admin, Expert, and Student roles
-- **Profile Management**: Comprehensive user profile editing and management
-- **Authentication**: Secure JWT-based authentication system
-- **Responsive Design**: Optimized for all devices and screen sizes
+- Role-based dashboards (Admin, Expert, Student)
+- Comprehensive profile management with avatar support
+- JWT-based secure authentication
+- Google OAuth2 social login
+- Responsive design optimized for all devices
+- Anonymous user support with limited access
 
-### 🌐 Internationalization (i18n)
+### Internationalization
 
-- **Vietnamese & English**: Full language support with smooth switching
-- **Dynamic Content**: All text, dates, and formats localized
-- **Fallback System**: Intelligent fallback to English for missing translations
-- **Locale-aware Formatting**: Dates, times, and numbers formatted according to language
+- Full Vietnamese and English language support
+- Dynamic language switching without page reload
+- Locale-aware date, time, and number formatting
+- Intelligent fallback for missing translations
+- Persistent language preference
 
-### 📊 Advanced Analytics
+### Data Visualization
 
-- **Interactive Charts**: Chart.js powered visualizations
-- **Real-time Statistics**: Live updates of user activity and test results
-- **Data Export**: Excel export functionality for reports
-- **Trend Analysis**: Historical data visualization and comparison
+- Interactive charts powered by Chart.js and Recharts
+- Real-time statistics and metrics
+- Excel export functionality for reports
+- Trend analysis with historical data comparison
+- Responsive charts for all screen sizes
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Core Framework
 
-- **React 18.2.0**: Latest React with Hooks, Context API, and Functional Components
-- **React Router**: Client-side routing and navigation
-- **React Icons**: Comprehensive icon library
+- **React 18.2.0**: Hooks, Context API, Functional Components
+- **React Router DOM 7.6.1**: Client-side routing and navigation
+- **React Icons 5.5.0**: Comprehensive icon library
 
 ### Styling & UI
 
 - **Tailwind CSS 3.3.0**: Utility-first CSS framework
 - **Custom Components**: Reusable, accessible UI components
-- **Responsive Design**: Mobile-first approach with breakpoint optimization
-- **Dark/Light Mode**: Theme switching with state persistence
+- **Responsive Design**: Mobile-first approach
+- **Dark/Light Mode**: Theme switching with persistence
 
 ### State Management
 
@@ -79,138 +86,168 @@
 
 ### Internationalization
 
-- **i18next**: Powerful internationalization framework
-- **React i18next**: React integration for i18next
-- **Dynamic Loading**: Language switching without page reload
-- **Fallback Management**: Graceful handling of missing translations
+- **i18next 23.7.16**: Internationalization framework
+- **React i18next**: React integration
+- **Dynamic Loading**: Runtime language switching
+- **Fallback Management**: Graceful missing translation handling
 
 ### Data Visualization
 
-- **Chart.js**: Interactive charts and graphs
-- **React Chart.js**: React wrapper for Chart.js
-- **Responsive Charts**: Auto-resizing charts for all screen sizes
-- **Custom Themes**: Consistent styling with application theme
+- **Chart.js 4.5.0**: Interactive charts and graphs
+- **React Chart.js 2**: React wrapper for Chart.js
+- **Recharts 3.0.2**: Additional charting capabilities
+- **Responsive Charts**: Auto-resizing for all viewports
 
 ### HTTP & API
 
-- **Axios**: HTTP client with interceptors
-- **Custom Fetch Wrapper**: authFetch for authenticated requests
+- **Axios 1.9.0**: HTTP client with interceptors
+- **Custom authFetch**: Wrapper for authenticated requests
 - **Error Handling**: Comprehensive error management
-- **Request/Response Interceptors**: Automatic token management
+- **Interceptors**: Automatic token management
 
 ### Utilities
 
-- **XLSX**: Excel file generation and export
-- **Date-fns**: Date manipulation and formatting
-- **Lodash**: Utility functions for data manipulation
+- **XLSX 0.18.5**: Excel file generation and export
+- **React Quill 2.0.0**: Rich text editor
 - **Validator.js**: Input validation and sanitization
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 frontend/
 ├── public/                    # Static assets
 │   ├── index.html            # Main HTML template
-│   ├── favicon.ico           # App icon
+│   ├── favicon.ico           # Application icon
 │   └── manifest.json         # PWA manifest
 ├── src/
-│   ├── components/           # Reusable components
-│   │   ├── common/          # Shared components
-│   │   ├── forms/           # Form components
-│   │   ├── modals/          # Modal components
-│   │   └── layout/          # Layout components
-│   ├── pages/               # Page components
-│   │   ├── admin/           # Admin pages
-│   │   ├── expert/          # Expert pages
-│   │   ├── student/         # Student pages
-│   │   └── auth/            # Authentication pages
+│   ├── components/           # Reusable components (30+)
+│   │   ├── LoginForm.js
+│   │   ├── RegisterForm.js
+│   │   ├── ForgotPasswordForm.js
+│   │   ├── ChatBotModal.js
+│   │   ├── AppointmentBookingModal.js
+│   │   └── ...
+│   ├── pages/               # Page components (33+)
+│   │   ├── AdminDashboardPage.js
+│   │   ├── ExpertDashboardPage.js
+│   │   ├── StudentHomePage.js
+│   │   ├── StudentTestPage.js
+│   │   ├── ForgotPasswordPage.js
+│   │   └── ...
 │   ├── hooks/               # Custom React hooks
+│   │   ├── useAuth.js
+│   │   ├── useTheme.js
+│   │   └── ...
 │   ├── utils/               # Utility functions
 │   ├── services/            # API services
-│   ├── contexts/            # React contexts
+│   │   ├── authService.js
+│   │   ├── testService.js
+│   │   └── ...
 │   ├── locales/             # i18n translations
-│   │   ├── en/             # English translations
-│   │   └── vi/             # Vietnamese translations
+│   │   ├── en/
+│   │   │   ├── translation.json
+│   │   │   └── payment.json
+│   │   └── vi/
+│   │       ├── translation.json
+│   │       └── payment.json
 │   ├── styles/              # Global styles
+│   ├── authFetch.js         # Authenticated HTTP client
 │   ├── App.js               # Main app component
+│   ├── AppRoutes.js         # Route configuration
 │   ├── index.js             # App entry point
 │   └── i18n.js              # i18n configuration
 ├── package.json              # Dependencies and scripts
 ├── tailwind.config.js        # Tailwind CSS configuration
-├── jsconfig.json             # JavaScript configuration
+├── craco.config.js           # CRACO configuration
+├── webpack.config.js         # Webpack configuration
 └── README.md                 # This file
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- **Node.js 18+** and npm
-- **Git** for version control
-- **Backend API** running (see main project README)
+- Node.js 18 or higher
+- npm or yarn package manager
+- Backend API running on http://localhost:8080
 
 ### Installation
 
-1. **Clone the repository**
+```bash
+# Clone repository
+git clone https://github.com/KienCuong2004/MindMeter.git
+cd MindMeter/frontend
 
-   ```bash
-   git clone https://github.com/your-username/MindMeter.git
-   cd MindMeter/frontend
-   ```
+# Install dependencies
+npm install
 
-2. **Install dependencies**
+# Start development server
+npm start
+```
 
-   ```bash
-   npm install
-   ```
+Application will be available at http://localhost:3000
 
-3. **Environment Configuration**
-   Create a `.env` file in the frontend directory:
+### Environment Configuration
 
-   ```bash
-   REACT_APP_API_URL=http://localhost:8080/api
-   REACT_APP_OPENAI_API_KEY=your_openai_key
-   REACT_APP_APP_NAME=MindMeter
-   ```
+Create `.env` file in the frontend root directory:
 
-4. **Start development server**
+```bash
+REACT_APP_API_URL=http://localhost:8080
+REACT_APP_APP_NAME=MindMeter
+```
 
-   ```bash
-   npm start
-   ```
-
-   The app will open at [http://localhost:3000](http://localhost:3000)
-
-## 📱 Available Scripts
+## Available Scripts
 
 ### Development
 
-- **`npm start`**: Start development server with hot reload
-- **`npm run dev`**: Alias for npm start
-- **`npm run build:dev`**: Build for development environment
+```bash
+# Start development server with hot reload
+npm start
 
-### Testing
-
-- **`npm test`**: Run tests in watch mode
-- **`npm run test:coverage`**: Run tests with coverage report
-- **`npm run test:ci`**: Run tests for CI/CD pipeline
+# Start with host binding (for network access)
+npm run start:host
+```
 
 ### Building
 
-- **`npm run build`**: Build for production
-- **`npm run build:analyze`**: Build with bundle analysis
-- **`npm run build:preview`**: Preview production build locally
+```bash
+# Create production build
+npm run build
+
+# Build for specific environment
+npm run build:dev
+npm run build:prod
+```
+
+### Testing
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests in CI mode
+npm run test:ci
+```
 
 ### Code Quality
 
-- **`npm run lint`**: Run ESLint
-- **`npm run lint:fix`**: Fix ESLint errors automatically
-- **`npm run format`**: Format code with Prettier
-- **`npm run type-check`**: Run TypeScript type checking
+```bash
+# Run ESLint
+npm run lint
 
-## 🔧 Configuration
+# Fix ESLint errors automatically
+npm run lint:fix
 
-### Tailwind CSS
+# Format code with Prettier
+npm run format
+```
+
+## Configuration
+
+### Tailwind CSS Configuration
 
 ```javascript
 // tailwind.config.js
@@ -220,11 +257,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: "#eff6ff",
-          // ... custom color palette
-        },
+        primary: {...},
+        secondary: {...},
       },
+      animation: {...},
     },
   },
   plugins: [],
@@ -239,65 +275,48 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
 i18n.use(initReactI18next).init({
+  resources: {
+    en: { translation: enTranslation },
+    vi: { translation: viTranslation },
+  },
+  lng: "vi",
   fallbackLng: "en",
-  debug: process.env.NODE_ENV === "development",
   interpolation: {
     escapeValue: false,
   },
 });
 ```
 
-### Environment Variables
+### Proxy Configuration
 
-```bash
-# Development
-REACT_APP_API_URL=http://localhost:8080/api
-REACT_APP_OPENAI_API_KEY=your_development_key
-
-# Production
-REACT_APP_API_URL=https://api.mindmeter.com
-REACT_APP_OPENAI_API_KEY=your_production_key
+```json
+// package.json
+{
+  "proxy": "http://localhost:8080"
+}
 ```
 
-## 🎨 Component Development
+## Component Development
 
-### Creating New Components
+### Creating Components
 
 ```jsx
-// src/components/common/Button.js
 import React from "react";
 import { useTranslation } from "react-i18next";
 
 const Button = ({
   children,
   variant = "primary",
-  size = "md",
   onClick,
   disabled = false,
-  className = "",
-  ...props
 }) => {
   const { t } = useTranslation();
 
-  const baseClasses =
-    "inline-flex items-center justify-center font-medium rounded-lg transition-colors";
-  const variantClasses = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700",
-    secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300",
-    danger: "bg-red-600 text-white hover:bg-red-700",
-  };
-  const sizeClasses = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-4 py-2 text-base",
-    lg: "px-6 py-3 text-lg",
-  };
-
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`btn btn-${variant}`}
       onClick={onClick}
       disabled={disabled}
-      {...props}
     >
       {children}
     </button>
@@ -317,31 +336,44 @@ const MyComponent = () => {
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
+    localStorage.setItem("language", lng);
   };
 
   return (
     <div>
       <h1>{t("welcome.title")}</h1>
       <p>{t("welcome.description")}</p>
-      <button onClick={() => changeLanguage("vi")}>
-        {t("language.vietnamese")}
-      </button>
-      <button onClick={() => changeLanguage("en")}>
-        {t("language.english")}
-      </button>
+      <button onClick={() => changeLanguage("vi")}>Vietnamese</button>
+      <button onClick={() => changeLanguage("en")}>English</button>
     </div>
   );
 };
 ```
 
-## 🧪 Testing
+### Using authFetch
+
+```javascript
+import { authFetch } from "./authFetch";
+
+const fetchUserData = async () => {
+  try {
+    const response = await authFetch("/api/user/profile");
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
+  }
+};
+```
+
+## Testing
 
 ### Component Testing
 
 ```jsx
-// src/components/__tests__/Button.test.js
 import { render, screen, fireEvent } from "@testing-library/react";
-import Button from "../Button";
+import Button from "./Button";
 
 describe("Button Component", () => {
   test("renders with correct text", () => {
@@ -355,6 +387,11 @@ describe("Button Component", () => {
     fireEvent.click(screen.getByText("Click me"));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
+
+  test("is disabled when disabled prop is true", () => {
+    render(<Button disabled>Click me</Button>);
+    expect(screen.getByText("Click me")).toBeDisabled();
+  });
 });
 ```
 
@@ -367,80 +404,116 @@ npm test
 # Run tests with coverage
 npm run test:coverage
 
+# Run specific test file
+npm test Button.test.js
+
 # Run tests in CI mode
 npm run test:ci
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Production Build
 
 ```bash
-# Create production build
+# Create optimized production build
 npm run build
 
-# The build folder contains optimized files ready for deployment
+# Output directory: build/
+# Contains optimized, minified files ready for deployment
 ```
 
-### Environment-Specific Builds
+### Deployment Platforms
+
+**Netlify**
 
 ```bash
-# Development build
-npm run build:dev
+# Build command
+npm run build
 
-# Staging build
-npm run build:staging
-
-# Production build
-npm run build:prod
+# Publish directory
+build
 ```
 
-### Deployment Options
+**Vercel**
 
-- **Netlify**: Drag and drop build folder
-- **Vercel**: Connect GitHub repository
-- **AWS S3**: Upload build folder to S3 bucket
-- **Docker**: Use provided Dockerfile
+```bash
+# Vercel will auto-detect React app
+# Just connect GitHub repository
+```
 
-## 🔒 Security Considerations
+**AWS S3 + CloudFront**
 
-- **Environment Variables**: Never commit sensitive keys
-- **Input Validation**: Validate all user inputs
-- **XSS Prevention**: Use proper escaping and sanitization
-- **CORS Configuration**: Configure backend CORS properly
-- **HTTPS**: Always use HTTPS in production
+```bash
+# Build locally
+npm run build
 
-## 📊 Performance Optimization
+# Upload build/ directory to S3 bucket
+aws s3 sync build/ s3://your-bucket-name
 
-- **Code Splitting**: Lazy load components and routes
-- **Bundle Analysis**: Monitor bundle size with webpack-bundle-analyzer
-- **Image Optimization**: Use WebP format and lazy loading
-- **Caching**: Implement proper caching strategies
-- **Tree Shaking**: Remove unused code from production builds
+# Invalidate CloudFront cache
+aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
+```
 
-## 🤝 Contributing
+**Docker**
+
+```dockerfile
+FROM node:18-alpine as build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+## Security Considerations
+
+- Never commit `.env` files with sensitive data
+- Validate all user inputs on both client and server
+- Use HTTPS in production environments
+- Implement proper CORS configuration
+- Sanitize user-generated content (XSS prevention)
+- Use Content Security Policy (CSP) headers
+- Keep dependencies updated regularly
+- Implement rate limiting for API requests
+
+## Performance Optimization
+
+- Code splitting with React.lazy() and Suspense
+- Image optimization with WebP format and lazy loading
+- Minimize bundle size with tree shaking
+- Use memoization (useMemo, useCallback) for expensive operations
+- Implement virtual scrolling for large lists
+- Optimize re-renders with React.memo()
+- Use production build for deployment
+- Enable gzip/brotli compression
+
+## Contributing
 
 ### Development Workflow
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes and commit: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Create a Pull Request
+2. Create feature branch: `git checkout -b feature/your-feature`
+3. Make changes and commit: `git commit -m 'feat: add your feature'`
+4. Push to branch: `git push origin feature/your-feature`
+5. Create Pull Request
 
 ### Code Standards
 
-- **ESLint**: Follow configured ESLint rules
-- **Prettier**: Use Prettier for code formatting
-- **Component Structure**: Follow established component patterns
-- **Naming Conventions**: Use consistent naming for files and components
-- **Documentation**: Document complex components and functions
+- **ESLint**: Follow configured rules
+- **Prettier**: Use for code formatting
+- **Component Structure**: Use functional components with hooks
+- **Naming**: Use PascalCase for components, camelCase for functions
+- **Documentation**: Document complex logic and components
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
-### Common Issues
-
-**Build fails with memory error**
+### Build Fails with Memory Error
 
 ```bash
 # Increase Node.js memory limit
@@ -448,41 +521,56 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 npm run build
 ```
 
-**Dependencies installation issues**
+### Dependencies Installation Issues
 
 ```bash
 # Clear npm cache
 npm cache clean --force
 
-# Delete node_modules and reinstall
+# Remove node_modules and reinstall
 rm -rf node_modules package-lock.json
 npm install
 ```
 
-**i18n not working**
+### i18n Not Working
 
 ```bash
-# Check if translation files exist
-ls src/locales/
+# Verify translation files exist
+ls -la src/locales/en/
+ls -la src/locales/vi/
 
-# Verify i18n configuration
+# Check i18n configuration
 cat src/i18n.js
+
+# Clear browser cache and localStorage
 ```
 
-## 📚 Additional Resources
+### Proxy Issues
+
+```bash
+# Ensure backend is running on port 8080
+# Check proxy configuration in package.json
+# Restart development server
+npm start
+```
+
+## Additional Resources
 
 - [React Documentation](https://reactjs.org/docs/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [i18next Documentation](https://www.i18next.com/)
 - [Chart.js Documentation](https://www.chartjs.org/docs/)
-- [Create React App Documentation](https://create-react-app.dev/)
+- [React Router Documentation](https://reactrouter.com/)
 
-## 📞 Support
+## Support
 
-- **Issues**: [GitHub Issues](https://github.com/your-username/MindMeter/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/MindMeter/discussions)
-- **Documentation**: [Project Wiki](https://github.com/your-username/MindMeter/wiki)
+- **Issues**: [GitHub Issues](https://github.com/KienCuong2004/MindMeter/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/KienCuong2004/MindMeter/discussions)
+- **Documentation**: Project wiki and inline code comments
 
 ---
 
-**MindMeter Frontend** - Built with ❤️ using React, Tailwind CSS, and modern web technologies for better mental health support. 🧠✨
+**MindMeter Frontend** - Modern React application for mental health assessment and support.
+
+**Version**: 1.0.0  
+**Last Updated**: 2025-01-18
