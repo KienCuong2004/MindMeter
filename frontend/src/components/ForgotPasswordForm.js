@@ -1,14 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { authFetch } from "../authFetch";
 
-export default function ForgotPasswordForm({ onSent }) {
+export default function ForgotPasswordForm({ initialEmail = "", onSent }) {
   const { t } = useTranslation();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [focused, setFocused] = useState(false);
+
+  // Cập nhật email khi initialEmail thay đổi (từ query param)
+  useEffect(() => {
+    if (initialEmail) {
+      setEmail(initialEmail);
+    }
+  }, [initialEmail]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

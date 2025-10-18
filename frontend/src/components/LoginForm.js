@@ -259,7 +259,7 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
                 <button
                   type="button"
                   className="text-[#2563eb] dark:text-[#7bb0ff] hover:underline text-sm font-medium"
-                  onClick={() => onForgotPassword && onForgotPassword()}
+                  onClick={() => onForgotPassword && onForgotPassword(email)}
                 >
                   {t("forgotPassword")}
                 </button>

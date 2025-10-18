@@ -451,7 +451,12 @@ export default function AppRoutes() {
           <LoginForm
             onLogin={handleLogin}
             onSwitchForm={() => navigate("/register")}
-            onForgotPassword={() => navigate("/forgot-password")}
+            onForgotPassword={(email) => {
+              const queryParam = email
+                ? `?email=${encodeURIComponent(email)}`
+                : "";
+              navigate(`/forgot-password${queryParam}`);
+            }}
           />
         }
       />
