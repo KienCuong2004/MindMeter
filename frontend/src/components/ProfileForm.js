@@ -158,6 +158,30 @@ export default function ProfileForm({
     }
   };
 
+  // Function để xử lý Google avatar URL (tương tự DashboardHeader)
+  const processAvatarUrl = (avatarUrl, timestamp = null) => {
+    if (!avatarUrl) return null;
+
+    let optimizedUrl = avatarUrl;
+
+    // Nếu là Google Profile Image, optimize nó
+    if (avatarUrl.includes("googleusercontent.com")) {
+      // Remove size parameters và add our own để có control tốt hơn
+      const baseUrl = avatarUrl.split("=")[0];
+      optimizedUrl = `${baseUrl}=s96-c`;
+    }
+
+    // Add cache-busting parameter nếu timestamp được provide
+    if (timestamp) {
+      const separator = optimizedUrl.includes("?") ? "&" : "?";
+      // Sử dụng timestamp + random number để đảm bảo URL luôn khác nhau
+      const randomId = Math.random().toString(36).substring(7);
+      optimizedUrl = `${optimizedUrl}${separator}t=${timestamp}&r=${randomId}`;
+    }
+
+    return optimizedUrl;
+  };
+
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-10 flex flex-col items-center border border-blue-100 dark:border-gray-700 min-w-[340px] max-w-md w-full mx-4">
       {/* Header */}
@@ -202,13 +226,37 @@ export default function ProfileForm({
           />
         ) : profile?.avatar || profile?.avatarUrl ? (
           // Hiển thị avatar hiện tại
-          <img
-            src={profile?.avatar || profile?.avatarUrl}
-            alt="avatar"
-            className={`w-24 h-24 border-2 shadow hover:scale-105 transition mb-4 ${getAvatarBorderClass(
-              profile?.plan
-            )}`}
-          />
+          <div className="relative">
+            <img
+              src={processAvatarUrl(
+                profile?.avatar || profile?.avatarUrl,
+                Date.now()
+              )}
+              alt="avatar"
+              className={`w-24 h-24 border-2 shadow hover:scale-105 transition mb-4 ${getAvatarBorderClass(
+                profile?.plan
+              )}`}
+              onError={(e) => {
+                // Hiển thị placeholder khi load lỗi
+                e.target.style.display = "none";
+                // Tìm và hiển thị fallback div
+                const fallbackDiv =
+                  e.target.parentElement.querySelector(".avatar-fallback");
+                if (fallbackDiv) {
+                  fallbackDiv.style.display = "flex";
+                }
+              }}
+            />
+            {/* Fallback avatar khi load lỗi */}
+            <div
+              className={`avatar-fallback w-24 h-24 border-2 shadow hover:scale-105 transition mb-4 flex items-center justify-center text-4xl text-indigo-400 dark:text-indigo-300 bg-white dark:bg-gray-800 ${getAvatarBorderClass(
+                profile?.plan
+              )}`}
+              style={{ display: "none", position: "absolute", top: 0, left: 0 }}
+            >
+              <FaUser className="text-white" size={20} />
+            </div>
+          </div>
         ) : (
           // Hiển thị avatar mặc định
           <div

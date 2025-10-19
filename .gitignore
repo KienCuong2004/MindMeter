@@ -176,10 +176,14 @@ db-credentials.txt
 
 # Spring Boot Configuration Files (EXCEPT example files)
 backend/src/main/resources/application.properties
+backend/src/main/resources/application.yml
+backend/src/main/resources/application.yaml
 backend/src/main/resources/application-*.properties
-!backend/src/main/resources/application.properties.example
 backend/src/main/resources/application-*.yml
 backend/src/main/resources/application-*.yaml
+!backend/src/main/resources/application.properties.example
+!backend/src/main/resources/application.yml.example
+!backend/src/main/resources/application.yaml.example
 
 # Environment Files (EXCEPT example files)
 backend/.env
@@ -402,4 +406,3 @@ health-checks/
 # 5. Use .env.example for template files 
 backend/spring.out
 backend/users.json 
-backend/src/main/resources/application.properties 

@@ -1,0 +1,295 @@
+# MindMeter Backend Configuration Template
+# Copy this file to application.yml and fill in your actual values
+# YAML format for better readability and deployment
+
+spring:
+  application:
+    name: MindMeter Backend
+
+  # HTTP & Encoding Configuration
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
+
+  # Jackson JSON Configuration
+  jackson:
+    default-property-inclusion: NON_NULL
+    serialization:
+      write-dates-as-timestamps: false
+    encoding:
+      charset: UTF-8
+
+  # Database Configuration
+  datasource:
+    url: jdbc:mysql://localhost:3306/mindmeter?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8
+    username: your_db_username
+    password: your_strong_db_password
+    
+    # HikariCP Connection Pool Configuration
+    hikari:
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      maximum-pool-size: 50
+      minimum-idle: 5
+      leak-detection-threshold: 60000
+      connection-test-query: SELECT 1
+      validation-timeout: 5000
+      initialization-fail-timeout: 1
+      auto-commit: true
+      pool-name: MindMeterHikariCP
+      connection-init-sql: SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci
+      
+      # DDoS Protection
+      register-mbeans: true
+      allow-pool-suspension: false
+      isolate-internal-queries: false
+      keepalive-time: 120000
+      
+      # Performance Tuning
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
+  # JPA / Hibernate Configuration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false  # Set to true for development
+    properties:
+      hibernate:
+        connection:
+          characterEncoding: utf8
+          useUnicode: true
+          charSet: utf8
+
+  # Email Configuration (Gmail SMTP)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your_email@gmail.com
+    password: your_gmail_app_password_here
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  # OAuth2 Configuration
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: your_google_client_id_here.apps.googleusercontent.com
+            client-secret: your_google_client_secret_here
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            client-name: Google
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
+            jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+            user-name-attribute: sub
+
+  # Cache Configuration
+  cache:
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=1h
+    cache-names:
+      - users
+      - testResults
+      - appointments
+      - blogPosts
+      - statistics
+      - testQuestions
+      - expertSchedules
+
+  # Redis Configuration (Optional - for distributed caching)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 2000ms
+      jedis:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+
+  # Bean Override
+  main:
+    allow-bean-definition-overriding: true
+
+# Server Configuration
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: false
+        secure: false  # Set to true in production with HTTPS
+        same-site: lax
+
+# JWT Configuration
+jwt:
+  secret: your_jwt_secret_key_here_minimum_256_bits_replace_this_with_strong_random_key
+  expiration: 86400000  # 24 hours in milliseconds
+
+# Application URLs
+app:
+  frontend-url: http://localhost:3000
+  base:
+    url: http://localhost:3000
+  backend:
+    url: http://localhost:8080
+
+# Feedback & Contact
+feedback:
+  receiver: your_feedback_email@gmail.com
+
+contact:
+  receiver:
+    email: your_contact_email@gmail.com
+
+# PayPal Configuration
+paypal:
+  client:
+    id: your_paypal_client_id_here
+    secret: your_paypal_client_secret_here
+  mode: sandbox  # Change to 'live' for production
+
+# VNPay Configuration
+# Get your credentials from: https://sandbox.vnpayment.vn/
+vnpay:
+  tmnCode: your_vnpay_terminal_code_here
+  hashSecret: your_vnpay_hash_secret_here
+  payUrl: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  returnUrl: http://localhost:3000/payment/vnpay/return
+  ipnUrl: http://localhost:8080/api/payment/vnpay/ipn
+
+# OpenAI API Configuration
+OPENAI_API_KEY: sk-proj-your_openai_api_key_here
+
+# Cache Configuration
+cache:
+  enabled: true
+  type: local  # Options: local, redis
+  local:
+    max-size: 1000
+    expire-after-write: 3600  # seconds
+  redis:
+    default-ttl: 1800  # seconds
+
+# IP Filtering & Security Configuration
+# For development: set enabled to false
+# For production: set enabled to true and configure allowed/blocked countries
+security:
+  ip-filtering:
+    enabled: false
+    block-tor: true
+    block-vpn: false
+    allowed-countries: VN,US,GB,CA,AU,DE,FR,JP,KR,SG
+    blocked-countries: CN,RU,KP,IR
+  headers:
+    frame-options: DENY
+    content-type-options: nosniff
+    xss-protection: 1; mode=block
+    strict-transport-security: max-age=31536000; includeSubDomains
+
+# Management & Monitoring Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,hikaricp,caches
+      base-path: /actuator
+      cors:
+        allowed-origins: "*"
+        allowed-methods: GET,POST
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    hikaricp:
+      enabled: true
+      show-details: always
+  health:
+    db:
+      enabled: true
+    hikari:
+      enabled: true
+    redis:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: mindmeter
+      environment: ${SPRING_PROFILES_ACTIVE:dev}
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+      sla:
+        http:
+          server:
+            requests: 100ms,500ms,1s,2s,5s
+
+# Logging Configuration
+# For development: DEBUG level for HikariCP and IP Filtering
+# For production: INFO level
+logging:
+  level:
+    com:
+      zaxxer:
+        hikari:
+          HikariConfig: INFO
+          pool:
+            HikariPool: INFO
+      shop:
+        backend:
+          service:
+            IpFilteringService: INFO
+          interceptor:
+            IpFilteringInterceptor: INFO
+
+# Java System Properties
+java:
+  net:
+    preferIPv4Stack: true
+
