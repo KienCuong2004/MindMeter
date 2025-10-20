@@ -27,6 +27,12 @@ public class PayPalService {
     @Value("${paypal.mode}")
     private String mode;
     
+    @Value("${app.payment.paypal.cancel-url}")
+    private String cancelUrl;
+    
+    @Value("${app.payment.paypal.return-url}")
+    private String returnUrl;
+    
     private APIContext getAPIContext() {
         return new APIContext(clientId, clientSecret, mode);
     }
@@ -65,8 +71,8 @@ public class PayPalService {
         payer.setPaymentMethod("paypal");
         
         RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl("http://localhost:3000/payment/paypal?canceled=true&plan=" + plan.toLowerCase());
-        redirectUrls.setReturnUrl("http://localhost:3000/payment/paypal?success=true&plan=" + plan.toLowerCase());
+        redirectUrls.setCancelUrl(cancelUrl + "&plan=" + plan.toLowerCase());
+        redirectUrls.setReturnUrl(returnUrl + "&plan=" + plan.toLowerCase());
         
         Payment payment = new Payment();
         payment.setIntent("sale");

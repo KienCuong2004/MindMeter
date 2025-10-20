@@ -55,14 +55,17 @@ const ChangePasswordModal = ({
         ? { newPassword }
         : { currentPassword, newPassword };
 
-      const response = await fetch(`http://localhost:8080${endpoint}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}${endpoint}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
 
       const data = await response.json();
 
@@ -80,7 +83,7 @@ const ChangePasswordModal = ({
 
               // Auto login with new password
               const loginResponse = await fetch(
-                "http://localhost:8080/api/auth/login",
+                `${process.env.REACT_APP_API_URL}/api/auth/login`,
                 {
                   method: "POST",
                   headers: {

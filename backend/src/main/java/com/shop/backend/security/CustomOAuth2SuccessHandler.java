@@ -37,7 +37,7 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
-    @Value("${app.frontend-url}")
+    @Value("${app.frontend.url}")
     private String frontendUrl;
 
     public CustomOAuth2SuccessHandler(UserRepository userRepository, 

@@ -79,7 +79,7 @@ Keep responses professional but accessible. Focus on student mental health impac
 `;
 
     const response = await fetch(
-      "http://localhost:8080/api/ai/analyze-statistics",
+      `${process.env.REACT_APP_API_URL}/api/ai/analyze-statistics`,
       {
         method: "POST",
         headers: {
@@ -187,7 +187,7 @@ IMPORTANT:
 `;
 
     const response = await fetch(
-      "http://localhost:8080/api/ai/predict-trends",
+      `${process.env.REACT_APP_API_URL}/api/ai/predict-trends`,
       {
         method: "POST",
         headers: {
@@ -253,7 +253,7 @@ Format as JSON array.
 `;
 
     const response = await fetch(
-      "http://localhost:8080/api/ai/generate-recommendations",
+      `${process.env.REACT_APP_API_URL}/api/ai/generate-recommendations`,
       {
         method: "POST",
         headers: {
@@ -310,7 +310,7 @@ Tone: Professional, data-driven, action-oriented.
 `;
 
     const response = await fetch(
-      "http://localhost:8080/api/ai/executive-summary",
+      `${process.env.REACT_APP_API_URL}/api/ai/executive-summary`,
       {
         method: "POST",
         headers: {

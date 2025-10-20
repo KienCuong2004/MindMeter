@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 public class PaymentController {
     private static final Logger logger = Logger.getLogger(PaymentController.class.getName());
 
-    @Value("${app.base.url:http://localhost:3000}")
+    @Value("${app.frontend.url}")
     private String appBaseUrl;
 
     @Value("${paypal.client.id}")

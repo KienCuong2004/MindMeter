@@ -1,5 +1,4 @@
 # MindMeter Backend Configuration Template
-# Copy this file to application.yml and fill in your actual values
 # YAML format for better readability and deployment
 
 spring:
@@ -108,7 +107,7 @@ spring:
           google:
             client-id: your_google_client_id_here.apps.googleusercontent.com
             client-secret: your_google_client_secret_here
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            redirect-uri: ${app.oauth.google.redirect-uri}
             client-name: Google
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
@@ -168,13 +167,39 @@ jwt:
   secret: your_jwt_secret_key_here_minimum_256_bits_replace_this_with_strong_random_key
   expiration: 86400000  # 24 hours in milliseconds
 
-# Application URLs
+# Application URLs Configuration
 app:
-  frontend-url: http://localhost:3000
-  base:
+  # Frontend URLs
+  frontend:
     url: http://localhost:3000
+    base-url: http://localhost:3000
+    # Additional development ports (comma-separated)
+    dev-ports: http://localhost:3001
+    # Production domains (comma-separated)
+    production-domains: https://your-production-domain.com
+  
+  # Backend URLs  
   backend:
     url: http://localhost:8080
+    base-url: http://localhost:8080
+    
+  # API Configuration
+  api:
+    base-url: http://localhost:8080/api
+    
+  # OAuth Configuration
+  oauth:
+    google:
+      redirect-uri: http://localhost:8080/login/oauth2/code/google
+      
+  # Payment Configuration
+  payment:
+    paypal:
+      cancel-url: http://localhost:3000/payment/paypal?canceled=true
+      return-url: http://localhost:3000/payment/paypal?success=true
+    vnpay:
+      return-url: http://localhost:3000/payment/vnpay/return
+      ipn-url: http://localhost:8080/api/payment/vnpay/ipn
 
 # Feedback & Contact
 feedback:
@@ -197,8 +222,8 @@ vnpay:
   tmnCode: your_vnpay_terminal_code_here
   hashSecret: your_vnpay_hash_secret_here
   payUrl: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-  returnUrl: http://localhost:3000/payment/vnpay/return
-  ipnUrl: http://localhost:8080/api/payment/vnpay/ipn
+  returnUrl: ${app.payment.vnpay.return-url}
+  ipnUrl: ${app.payment.vnpay.ipn-url}
 
 # OpenAI API Configuration
 OPENAI_API_KEY: sk-proj-your_openai_api_key_here

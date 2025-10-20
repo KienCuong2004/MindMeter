@@ -2,6 +2,7 @@ package com.shop.backend.config;
 
 import com.shop.backend.security.CustomOAuth2SuccessHandler;
 import com.shop.backend.security.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,13 +13,24 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+    
+    @Value("${app.frontend.dev-ports:}")
+    private String devPortsString;
+    
+    @Value("${app.frontend.production-domains:}")
+    private String productionDomainsString;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2SuccessHandler customOAuth2SuccessHandler;
@@ -72,7 +84,7 @@ public class SecurityConfig {
             .oauth2Login(oauth2 -> oauth2
                 .successHandler(customOAuth2SuccessHandler)
                 .failureHandler((request, response, exception) -> {
-                    response.sendRedirect("http://localhost:3000/login?error=oauth_failed");
+                    response.sendRedirect(frontendUrl + "/login?error=oauth_failed");
                 })
             )
             .exceptionHandling(exceptionHandling ->
@@ -91,11 +103,26 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // SECURITY FIX: Restrict origins instead of using wildcards
-        configuration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:3000",
-            "http://localhost:3001",
-            "https://your-production-domain.com" // Add your production domain
-        ));
+        List<String> allowedOrigins = new ArrayList<>();
+        allowedOrigins.add(frontendUrl);
+        
+        // Parse dev ports from comma-separated string
+        if (devPortsString != null && !devPortsString.trim().isEmpty()) {
+            String[] devPorts = devPortsString.split(",");
+            for (String port : devPorts) {
+                allowedOrigins.add(port.trim());
+            }
+        }
+        
+        // Parse production domains from comma-separated string
+        if (productionDomainsString != null && !productionDomainsString.trim().isEmpty()) {
+            String[] productionDomains = productionDomainsString.split(",");
+            for (String domain : productionDomains) {
+                allowedOrigins.add(domain.trim());
+            }
+        }
+        
+        configuration.setAllowedOrigins(allowedOrigins);
         
         // SECURITY FIX: Specify allowed headers instead of wildcard
         configuration.setAllowedHeaders(Arrays.asList(
