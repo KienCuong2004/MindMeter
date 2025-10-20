@@ -78,11 +78,14 @@ function RegisterForm({ onRegister, onSwitchForm }) {
 
     try {
       console.log("=== MAKING API CALL ===");
-      const res = await authFetch("http://localhost:8080/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await authFetch(
+        `${process.env.REACT_APP_API_URL}/api/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        }
+      );
       console.log("=== API CALL COMPLETED ===");
       if (!res.ok) {
         let errorMessage = t("registerFailed");
@@ -253,7 +256,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
   }
 
   const handleGoogleRegister = () => {
-    window.location.href = "http://localhost:8080/oauth2/authorization/google";
+    window.location.href = `${process.env.REACT_APP_API_URL}/oauth2/authorization/google`;
   };
 
   const { theme } = useTheme();

@@ -5,6 +5,7 @@ import com.shop.backend.model.*;
 import com.shop.backend.repository.*;
 import com.shop.backend.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class BlogService {
+    
+    @Value("${app.backend.url}")
+    private String backendUrl;
     
     @Autowired
     private BlogPostRepository blogPostRepository;
@@ -658,7 +662,7 @@ public class BlogService {
         String featuredImage = post.getFeaturedImage();
         if (featuredImage != null && !featuredImage.startsWith("http")) {
             // Add base URL for relative paths
-            featuredImage = "http://localhost:8080" + featuredImage;
+            featuredImage = backendUrl + featuredImage;
         }
         dto.setFeaturedImage(featuredImage);
         

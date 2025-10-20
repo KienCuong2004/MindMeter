@@ -73,7 +73,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8080/oauth2/authorization/google";
+    window.location.href = `${process.env.REACT_APP_API_URL}/oauth2/authorization/google`;
   };
 
   useEffect(() => {

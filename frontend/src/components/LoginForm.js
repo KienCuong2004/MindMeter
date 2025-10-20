@@ -57,11 +57,14 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
     }
     setLoading(true);
     try {
-      const res = await authFetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await authFetch(
+        `${process.env.REACT_APP_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || t("loginFailed"));
@@ -107,7 +110,7 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8080/oauth2/authorization/google";
+    window.location.href = `${process.env.REACT_APP_API_URL}/oauth2/authorization/google`;
   };
 
   const requiredErrors = Object.values(fieldError).filter((e) =>
