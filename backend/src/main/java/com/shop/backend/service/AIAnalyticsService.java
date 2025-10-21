@@ -223,20 +223,19 @@ public class AIAnalyticsService {
         double severeRatio = totalTests > 0 ? (double) severeCount / totalTests * 100 : 0;
         double riskRatio = totalTests > 0 ? (double) (severeCount + moderateCount) / totalTests * 100 : 0;
         
-        return String.format("""
-        {
-          "insights": [
-            {"message": "Total assessments: %d with %.1f%% severe cases", "confidence": 100},
-            {"message": "High-risk cases (severe + moderate): %.1f%% of total", "confidence": 100},
-            {"message": "Recommended focus: %s", "confidence": 90}
-          ],
-          "alerts": %s,
-          "recommendations": [
-            {"action": "Monitor severe cases daily", "urgency": "High", "assignee": "Mental Health Team"},
-            {"action": "Review expert capacity", "urgency": "Medium", "assignee": "Admin"}
-          ]
-        }
-        """, 
+        return String.format(
+        "{" +
+        "  \"insights\": [" +
+        "    {\"message\": \"Total assessments: %d with %.1f%% severe cases\", \"confidence\": 100}," +
+        "    {\"message\": \"High-risk cases (severe + moderate): %.1f%% of total\", \"confidence\": 100}," +
+        "    {\"message\": \"Recommended focus: %s\", \"confidence\": 90}" +
+        "  ]," +
+        "  \"alerts\": %s," +
+        "  \"recommendations\": [" +
+        "    {\"action\": \"Monitor severe cases daily\", \"urgency\": \"High\", \"assignee\": \"Mental Health Team\"}," +
+        "    {\"action\": \"Review expert capacity\", \"urgency\": \"Medium\", \"assignee\": \"Admin\"}" +
+        "  ]" +
+        "}", 
         totalTests, 
         severeRatio,
         riskRatio,
@@ -249,25 +248,21 @@ public class AIAnalyticsService {
      * Generate fallback trend predictions
      */
     public String generateFallbackTrendPredictions(List<Map<String, Object>> historicalData) {
-        return """
-        {
-          "nextWeek": "Trend analysis requires more historical data",
-          "risks": ["Monitor severe cases carefully"],
-          "confidence": 75,
-          "lastUpdated": "Manual analysis"
-        }
-        """;
+        return "{" +
+        "  \"nextWeek\": \"Trend analysis requires more historical data\"," +
+        "  \"risks\": [\"Monitor severe cases carefully\"]," +
+        "  \"confidence\": 75," +
+        "  \"lastUpdated\": \"Manual analysis\"" +
+        "}";
     }
     
     /**
      * Generate fallback recommendations
      */
     public String generateFallbackRecommendations(Map<String, Object> currentStats) {
-        return """
-        [
-          {"action": "Monitor severe depression cases", "urgency": "High", "assignee": "Mental Health Team", "deadline": "Daily"},
-          {"action": "Review expert capacity", "urgency": "Medium", "assignee": "Admin", "deadline": "Weekly"}
-        ]
-        """;
+        return "[" +
+        "  {\"action\": \"Monitor severe depression cases\", \"urgency\": \"High\", \"assignee\": \"Mental Health Team\", \"deadline\": \"Daily\"}," +
+        "  {\"action\": \"Review expert capacity\", \"urgency\": \"Medium\", \"assignee\": \"Admin\", \"deadline\": \"Weekly\"}" +
+        "]";
     }
 }
