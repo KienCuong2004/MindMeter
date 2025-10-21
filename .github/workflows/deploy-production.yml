@@ -75,9 +75,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-           - name: Build production package
-             working-directory: ./backend
-             run: mvn clean package -DskipTests
+      - name: Build production package
+        working-directory: ./backend
+        run: mvn clean package -DskipTests
 
       - name: Upload JAR artifacts
         uses: actions/upload-artifact@v4
