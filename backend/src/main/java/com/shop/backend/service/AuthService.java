@@ -279,36 +279,37 @@ public class AuthService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setTo(to);
         helper.setSubject("[MindMeter] Mã OTP đặt lại mật khẩu");
-        String html = String.format(
-            "<div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>" +
-            "<div style='font-size:1.7rem;font-weight:700;color:#2563eb;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>" +
-            "<div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>" +
-            "<div style='margin-bottom:18px;line-height:1.7;'>" +
-            "Chúng tôi nhận được yêu cầu <b>đặt lại mật khẩu</b> cho tài khoản MindMeter của bạn.<br>" +
-            "Để hoàn tất quá trình này, vui lòng sử dụng mã xác thực (OTP) bên dưới để xác nhận yêu cầu:" +
-            "</div>" +
-            "<div style='background:#f1f5f9;border:2px dashed #2563eb;border-radius:10px;padding:28px 0;margin:28px 0;text-align:center;'>" +
-            "<span style='font-size:2.7rem;font-weight:700;color:#2563eb;letter-spacing:10px;'>%s</span>" +
-            "</div>" +
-            "<div style='color:#64748b;font-size:1.01rem;margin-bottom:18px;line-height:1.6;'>" +
-            "<ul style='padding-left:18px;margin:0;'>" +
-            "<li><b>Mã OTP có hiệu lực trong 5 phút</b> kể từ thời điểm nhận email này.</li>" +
-            "<li>Vui lòng <b>không chia sẻ mã OTP</b> cho bất kỳ ai, kể cả nhân viên MindMeter.</li>" +
-            "<li>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email. Tài khoản của bạn sẽ không bị ảnh hưởng.</li>" +
-            "<li>Nếu mã OTP hết hạn, bạn có thể gửi lại yêu cầu đặt lại mật khẩu để nhận mã mới.</li>" +
-            "</ul>" +
-            "</div>" +
-            "<div style='margin-bottom:18px;font-size:1.01rem;line-height:1.6;'>" +
-            "<b>Lưu ý bảo mật:</b><br>" +
-            "- MindMeter <b>không bao giờ</b> yêu cầu bạn cung cấp mật khẩu hoặc mã OTP qua email, điện thoại hay bất kỳ hình thức nào khác.<br>" +
-            "- Nếu phát hiện dấu hiệu lừa đảo hoặc nghi ngờ tài khoản bị truy cập trái phép, hãy liên hệ ngay với chúng tôi để được hỗ trợ kịp thời." +
-            "</div>" +
-            "<div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>" +
-            "Trân trọng,<br>" +
-            "<b>Đội ngũ MindMeter</b><br>" +
-            "<span style='font-size:0.95rem;'>Hotline CSKH: <a href='tel:19001234' style='color:#2563eb;text-decoration:none;'>1900 1234</a> &nbsp;|&nbsp; Email: <a href='mailto:support@mindmeter.com' style='color:#2563eb;text-decoration:none;'>support@mindmeter.com</a></span>" +
-            "</div>" +
-            "</div>", customerName, otp);
+            String html = String.format("""
+                <div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>
+                  <div style='font-size:1.7rem;font-weight:700;color:#2563eb;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>
+                  <div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>
+                  <div style='margin-bottom:18px;line-height:1.7;'>
+                    Chúng tôi nhận được yêu cầu <b>đặt lại mật khẩu</b> cho tài khoản MindMeter của bạn.<br>
+                    Để hoàn tất quá trình này, vui lòng sử dụng mã xác thực (OTP) bên dưới để xác nhận yêu cầu:
+                  </div>
+                  <div style='background:#f1f5f9;border:2px dashed #2563eb;border-radius:10px;padding:28px 0;margin:28px 0;text-align:center;'>
+                    <span style='font-size:2.7rem;font-weight:700;color:#2563eb;letter-spacing:10px;'>%s</span>
+                  </div>
+                  <div style='color:#64748b;font-size:1.01rem;margin-bottom:18px;line-height:1.6;'>
+                    <ul style='padding-left:18px;margin:0;'>
+                      <li><b>Mã OTP có hiệu lực trong 5 phút</b> kể từ thời điểm nhận email này.</li>
+                      <li>Vui lòng <b>không chia sẻ mã OTP</b> cho bất kỳ ai, kể cả nhân viên MindMeter.</li>
+                      <li>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email. Tài khoản của bạn sẽ không bị ảnh hưởng.</li>
+                      <li>Nếu mã OTP hết hạn, bạn có thể gửi lại yêu cầu đặt lại mật khẩu để nhận mã mới.</li>
+                    </ul>
+                  </div>
+                  <div style='margin-bottom:18px;font-size:1.01rem;line-height:1.6;'>
+                    <b>Lưu ý bảo mật:</b><br>
+                    - MindMeter <b>không bao giờ</b> yêu cầu bạn cung cấp mật khẩu hoặc mã OTP qua email, điện thoại hay bất kỳ hình thức nào khác.<br>
+                    - Nếu phát hiện dấu hiệu lừa đảo hoặc nghi ngờ tài khoản bị truy cập trái phép, hãy liên hệ ngay với chúng tôi để được hỗ trợ kịp thời.
+                  </div>
+                  <div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>
+                    Trân trọng,<br>
+                    <b>Đội ngũ MindMeter</b><br>
+                    <span style='font-size:0.95rem;'>Hotline CSKH: <a href='tel:19001234' style='color:#2563eb;text-decoration:none;'>1900 1234</a> &nbsp;|&nbsp; Email: <a href='mailto:support@mindmeter.com' style='color:#2563eb;text-decoration:none;'>support@mindmeter.com</a></span>
+                  </div>
+                </div>
+                """, customerName, otp);
         helper.setText(html, true);
         mailSender.send(message);
     }
@@ -319,37 +320,38 @@ public class AuthService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
             helper.setSubject("[MindMeter] Chào mừng bạn đến với MindMeter - Đăng ký tài khoản thành công");
-            String html = String.format(
-                "<div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>" +
-                "<div style='font-size:1.7rem;font-weight:700;color:#22c55e;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>" +
-                "<div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>" +
-                "<div style='margin-bottom:18px;line-height:1.7;'>" +
-                "Chúc mừng bạn đã đăng ký tài khoản thành công tại <b>MindMeter</b>!<br><br>" +
-                "Tài khoản của bạn đã được tạo thành công với email này. Từ bây giờ, bạn có thể:" +
-                "<ul style='margin: 12px 0 12px 18px; padding: 0;'>" +
-                "<li>Thực hiện bài test đánh giá trầm cảm để kiểm tra tình trạng tâm lý.</li>" +
-                "<li>Xem lịch sử kết quả test và theo dõi tiến trình.</li>" +
-                "<li>Nhận tư vấn từ chuyên gia tâm lý khi cần thiết.</li>" +
-                "<li>Truy cập các tài liệu hướng dẫn về sức khỏe tâm thần.</li>" +
-                "</ul>" +
-                "<b>Hướng dẫn tiếp theo:</b><br>" +
-                "- Đăng nhập vào hệ thống bằng email này.<br>" +
-                "- Thực hiện bài test đầu tiên để đánh giá tình trạng hiện tại.<br>" +
-                "- Nếu bạn không thực hiện đăng ký này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.<br>" +
-                "</div>" +
-                "<div style='background:#f1f5f9;border-radius:10px;padding:18px 20px;margin:24px 0 18px 0;font-size:1.01rem;color:#2563eb;'>" +
-                "<b>Đội ngũ MindMeter luôn sẵn sàng hỗ trợ bạn 24/7.</b><br>" +
-                "Nếu có bất kỳ thắc mắc hoặc cần trợ giúp, hãy liên hệ với chúng tôi qua:" +
-                "<ul style='margin: 8px 0 8px 18px; padding: 0;'>" +
-                "<li>Hotline CSKH: <a href='tel:0369702376' style='color:#22c55e;text-decoration:none;'>0369 702 376</a></li>" +
-                "<li>Email: <a href='mailto:support@mindmeter.com' style='color:#22c55e;text-decoration:none;'>support@mindmeter.com</a></li>" +
-                "</ul>" +
-                "</div>" +
-                "<div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>" +
-                "Trân trọng,<br>" +
-                "<b>Đội ngũ MindMeter</b><br>" +
-                "</div>" +
-                "</div>", name);
+            String html = String.format("""
+                <div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>
+                  <div style='font-size:1.7rem;font-weight:700;color:#22c55e;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>
+                  <div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>
+                  <div style='margin-bottom:18px;line-height:1.7;'>
+                    Chúc mừng bạn đã đăng ký tài khoản thành công tại <b>MindMeter</b>!<br><br>
+                    Tài khoản của bạn đã được tạo thành công với email này. Từ bây giờ, bạn có thể:
+                    <ul style='margin: 12px 0 12px 18px; padding: 0;'>
+                      <li>Thực hiện bài test đánh giá trầm cảm để kiểm tra tình trạng tâm lý.</li>
+                      <li>Xem lịch sử kết quả test và theo dõi tiến trình.</li>
+                      <li>Nhận tư vấn từ chuyên gia tâm lý khi cần thiết.</li>
+                      <li>Truy cập các tài liệu hướng dẫn về sức khỏe tâm thần.</li>
+                    </ul>
+                    <b>Hướng dẫn tiếp theo:</b><br>
+                    - Đăng nhập vào hệ thống bằng email này.<br>
+                    - Thực hiện bài test đầu tiên để đánh giá tình trạng hiện tại.<br>
+                    - Nếu bạn không thực hiện đăng ký này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.<br>
+                  </div>
+                  <div style='background:#f1f5f9;border-radius:10px;padding:18px 20px;margin:24px 0 18px 0;font-size:1.01rem;color:#2563eb;'>
+                    <b>Đội ngũ MindMeter luôn sẵn sàng hỗ trợ bạn 24/7.</b><br>
+                    Nếu có bất kỳ thắc mắc hoặc cần trợ giúp, hãy liên hệ với chúng tôi qua:
+                    <ul style='margin: 8px 0 8px 18px; padding: 0;'>
+                      <li>Hotline CSKH: <a href='tel:0369702376' style='color:#22c55e;text-decoration:none;'>0369 702 376</a></li>
+                      <li>Email: <a href='mailto:support@mindmeter.com' style='color:#22c55e;text-decoration:none;'>support@mindmeter.com</a></li>
+                    </ul>
+                  </div>
+                  <div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>
+                    Trân trọng,<br>
+                    <b>Đội ngũ MindMeter</b><br>
+                  </div>
+                </div>
+                """, name);
             helper.setText(html, true);
             mailSender.send(message);
         } catch (Exception e) {
@@ -363,20 +365,21 @@ public class AuthService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
             helper.setSubject("[MindMeter] Mật khẩu của bạn đã được thay đổi");
-            String html = String.format(
-                "<div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>" +
-                "<div style='font-size:1.7rem;font-weight:700;color:#2563eb;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>" +
-                "<div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>" +
-                "<div style='margin-bottom:18px;line-height:1.7;'>" +
-                "Mật khẩu tài khoản MindMeter của bạn vừa được thay đổi thành công.<br>" +
-                "Nếu bạn không thực hiện thay đổi này, vui lòng liên hệ ngay với chúng tôi để được hỗ trợ kịp thời.<br>" +
-                "Nếu đây là bạn, bạn có thể bỏ qua email này." +
-                "</div>" +
-                "<div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>" +
-                "Trân trọng,<br>" +
-                "<b>Đội ngũ MindMeter</b><br>" +
-                "</div>" +
-                "</div>", name);
+            String html = String.format("""
+                <div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>
+                  <div style='font-size:1.7rem;font-weight:700;color:#2563eb;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>
+                  <div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>
+                  <div style='margin-bottom:18px;line-height:1.7;'>
+                    Mật khẩu tài khoản MindMeter của bạn vừa được thay đổi thành công.<br>
+                    Nếu bạn không thực hiện thay đổi này, vui lòng liên hệ ngay với chúng tôi để được hỗ trợ kịp thời.<br>
+                    Nếu đây là bạn, bạn có thể bỏ qua email này.
+                  </div>
+                  <div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>
+                    Trân trọng,<br>
+                    <b>Đội ngũ MindMeter</b><br>
+                  </div>
+                </div>
+                """, name);
             helper.setText(html, true);
             mailSender.send(message);
         } catch (Exception e) {

@@ -180,29 +180,22 @@ public class ChatBotService {
             Map responseBody = response.getBody();
             if (responseBody != null && responseBody.containsKey("choices")) {
                 Object choicesObj = responseBody.get("choices");
-                if (choicesObj instanceof java.util.List) {
-                    java.util.List<?> choices = (java.util.List<?>) choicesObj;
-                    if (!choices.isEmpty()) {
-                        Object firstObj = choices.get(0);
-                        if (firstObj instanceof Map) {
-                            Map<?, ?> first = (Map<?, ?>) firstObj;
-                            Object messageObj = first.get("message");
-                            if (messageObj instanceof Map) {
-                                Map<?, ?> messageMap = (Map<?, ?>) messageObj;
-                                if (messageMap.containsKey("content")) {
-                                    String aiResponse = messageMap.get("content").toString();
-                                    logger.info("AI Response: " + aiResponse);
-                                    
-                                    // Kiểm tra xem AI có trả về format AUTO_BOOK không
-                                    if (aiResponse.contains("AUTO_BOOK:")) {
-                                        logger.info("[SUCCESS] AI đã trả về format AUTO_BOOK đúng!");
-                                    } else {
-                                        logger.info("[ERROR] AI KHÔNG trả về format AUTO_BOOK");
-                                    }
-                                    
-                                    return aiResponse;
-                                }
+                if (choicesObj instanceof java.util.List<?> choices && !choices.isEmpty()) {
+                    Object firstObj = choices.get(0);
+                    if (firstObj instanceof Map<?, ?> first) {
+                        Object messageObj = first.get("message");
+                        if (messageObj instanceof Map<?, ?> messageMap && messageMap.containsKey("content")) {
+                            String aiResponse = messageMap.get("content").toString();
+                            logger.info("AI Response: " + aiResponse);
+                            
+                            // Kiểm tra xem AI có trả về format AUTO_BOOK không
+                            if (aiResponse.contains("AUTO_BOOK:")) {
+                                logger.info("[SUCCESS] AI đã trả về format AUTO_BOOK đúng!");
+                            } else {
+                                logger.info("[ERROR] AI KHÔNG trả về format AUTO_BOOK");
                             }
+                            
+                            return aiResponse;
                         }
                     }
                 }

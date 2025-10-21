@@ -9,7 +9,7 @@ on:
 
 env:
   NODE_VERSION: "18"
-  JAVA_VERSION: "11"
+  JAVA_VERSION: "17"
 
 jobs:
   # Build and Deploy Frontend
@@ -75,9 +75,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build production package
-        working-directory: ./backend
-        run: mvn clean package -DskipTests -Dmaven.compiler.release=11
+           - name: Build production package
+             working-directory: ./backend
+             run: mvn clean package -DskipTests
 
       - name: Upload JAR artifacts
         uses: actions/upload-artifact@v4
