@@ -420,6 +420,7 @@
     "emailInvalid": "Email không hợp lệ",
     "passwordRequired": "Mật khẩu không được để trống",
     "passwordMinLength": "Mật khẩu tối thiểu 6 ký tự",
+    "passwordStrongRule": "Mật khẩu phải có ít nhất 8 ký tự, gồm 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt",
     "confirmPasswordRequired": "Nhập lại mật khẩu không được để trống",
     "passwordMismatch": "Mật khẩu không khớp",
     "agreeRequired": "Bạn phải đồng ý với điều khoản sử dụng",

@@ -422,6 +422,7 @@
     "emailInvalid": "Invalid email format",
     "passwordRequired": "Password is required",
     "passwordMinLength": "Password must be at least 6 characters",
+    "passwordStrongRule": "Password must be at least 8 characters, include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character",
     "confirmPasswordRequired": "Confirm password is required",
     "passwordMismatch": "Passwords do not match",
     "agreeRequired": "You must agree to the terms of use",
