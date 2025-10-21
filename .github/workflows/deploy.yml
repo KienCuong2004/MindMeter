@@ -1,10 +1,11 @@
 name: Deploy to Production
 
-on:
-  push:
-    branches: [ master ]
-    tags:
-      - 'v*'
+# Temporarily disabled - use simple-test.yml instead
+# on:
+#   push:
+#     branches: [ master ]
+#     tags:
+#       - 'v*'
 
 env:
   NODE_VERSION: '18'

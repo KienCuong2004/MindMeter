@@ -1,10 +1,11 @@
 name: Full Stack CI
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+# Temporarily disabled - use simple-test.yml instead
+# on:
+#   push:
+#     branches: [ master ]
+#   pull_request:
+#     branches: [ master ]
 
 jobs:
   frontend:
