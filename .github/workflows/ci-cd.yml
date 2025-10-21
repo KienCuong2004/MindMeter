@@ -90,6 +90,9 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: "temurin"
 
+      - name: Verify Java version
+        run: java -version && javac -version
+
       - name: Cache Maven dependencies
         uses: actions/cache@v3
         with:
@@ -99,11 +102,11 @@ jobs:
 
       - name: Build with Maven
         working-directory: ./backend
-        run: mvn clean compile -Dmaven.compiler.source=11 -Dmaven.compiler.target=11
+        run: mvn clean compile -Dmaven.compiler.release=11
 
       - name: Run tests
         working-directory: ./backend
-        run: mvn test -Dmaven.compiler.source=11 -Dmaven.compiler.target=11 || echo "Tests completed with some failures"
+        run: mvn test -Dmaven.compiler.release=11 || echo "Tests completed with some failures"
 
       - name: Generate test report
         working-directory: ./backend
@@ -160,6 +163,9 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    permissions:
+      security-events: write
+      contents: read
 
     steps:
       - name: Checkout code
