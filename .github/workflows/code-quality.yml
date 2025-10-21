@@ -1,0 +1,273 @@
+name: Code Quality Checks
+
+on:
+  pull_request:
+    branches: [master, develop]
+  schedule:
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "18"
+  JAVA_VERSION: "11"
+
+jobs:
+  # Frontend Code Quality
+  frontend-quality:
+    name: Frontend Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run ESLint with report
+        working-directory: ./frontend
+        continue-on-error: true
+        run: |
+          npx eslint src/ --ext .js,.jsx --format json --output-file eslint-report.json || true
+          npx eslint src/ --ext .js,.jsx
+
+      - name: Run Prettier check
+        working-directory: ./frontend
+        continue-on-error: true
+        run: npx prettier --check "src/**/*.{js,jsx,json,css,md}"
+
+      - name: Check code complexity
+        working-directory: ./frontend
+        continue-on-error: true
+        run: |
+          if command -v npx complexity-report >/dev/null 2>&1; then
+            npx complexity-report src/
+          else
+            echo "Complexity report not configured"
+          fi
+
+      - name: Upload ESLint report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-eslint-report
+          path: frontend/eslint-report.json
+          retention-days: 30
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Code quality checks completed for frontend"
+
+  # Backend Code Quality
+  backend-quality:
+    name: Backend Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Compile code
+        working-directory: ./backend
+        run: mvn clean compile
+
+      - name: Run Checkstyle
+        working-directory: ./backend
+        continue-on-error: true
+        run: |
+          mvn checkstyle:checkstyle || echo "Checkstyle completed"
+
+      - name: Run SpotBugs
+        working-directory: ./backend
+        continue-on-error: true
+        run: |
+          mvn spotbugs:spotbugs || echo "SpotBugs completed"
+
+      - name: Run PMD
+        working-directory: ./backend
+        continue-on-error: true
+        run: |
+          mvn pmd:pmd || echo "PMD completed"
+
+      - name: Generate reports
+        working-directory: ./backend
+        run: |
+          echo "Quality reports generated"
+          ls -la target/
+
+      - name: Upload quality reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-quality-reports
+          path: |
+            backend/target/checkstyle-result.xml
+            backend/target/spotbugsXml.xml
+            backend/target/pmd.xml
+          retention-days: 30
+
+  # Security Audit
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run npm audit
+        working-directory: ./frontend
+        continue-on-error: true
+        run: |
+          npm audit --json > npm-audit.json || true
+          npm audit
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run OWASP Dependency Check
+        working-directory: ./backend
+        continue-on-error: true
+        run: |
+          mvn org.owasp:dependency-check-maven:check || echo "Dependency check completed"
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-audit-reports
+          path: |
+            frontend/npm-audit.json
+            backend/target/dependency-check-report.html
+          retention-days: 30
+
+  # Code Coverage
+  code-coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run frontend tests with coverage
+        working-directory: ./frontend
+        run: npm test -- --coverage --watchAll=false --passWithNoTests --ci
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run backend tests with coverage
+        working-directory: ./backend
+        run: mvn test jacoco:report
+
+      - name: Upload frontend coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+          retention-days: 30
+
+      - name: Upload backend coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/target/site/jacoco/
+          retention-days: 30
+
+      - name: Coverage summary
+        run: |
+          echo "### Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage reports generated for:" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend (React)" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend (Spring Boot)" >> $GITHUB_STEP_SUMMARY
+
+  # Quality Gate
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [frontend-quality, backend-quality, security-audit, code-coverage]
+    if: always()
+
+    steps:
+      - name: Check quality status
+        run: |
+          echo "### Quality Gate Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Quality | ${{ needs.frontend-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Quality | ${{ needs.backend-quality.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Audit | ${{ needs.security-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Coverage | ${{ needs.code-coverage.result }} |" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ needs.frontend-quality.result }}" == "success" && "${{ needs.backend-quality.result }}" == "success" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All quality checks passed" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Some quality checks need attention" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi

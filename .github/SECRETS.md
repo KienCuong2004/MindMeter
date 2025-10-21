@@ -1,4 +1,4 @@
-# GitHub Secrets Configuration
+# GitHub Secrets and Variables Configuration
 
 This document outlines the required secrets and environment variables for the MindMeter GitHub Actions workflows.
 
@@ -6,10 +6,15 @@ This document outlines the required secrets and environment variables for the Mi
 
 Add these secrets to your GitHub repository settings (Settings > Secrets and variables > Actions):
 
-### Application Configuration
+### Deployment Configuration
 
-- `REACT_APP_API_URL` - Backend API URL for production builds
+- `DEPLOYMENT_URL` - Production frontend deployment URL (optional)
+  - Example: `https://mindmeter.com`
+- `BACKEND_URL` - Production backend deployment URL (optional)
   - Example: `https://api.mindmeter.com`
+- `SSH_PRIVATE_KEY` - SSH private key for server deployment (optional)
+- `SERVER_HOST` - Production server hostname (optional)
+- `SERVER_USER` - Production server username (optional)
 
 ### Database Configuration
 
@@ -83,6 +88,16 @@ SPRING_PROFILES_ACTIVE: test
 4. Use different secrets for different environments
 5. Monitor secret usage in GitHub Actions logs
 
+## GitHub Variables (Non-sensitive)
+
+Add these variables to your GitHub repository (Settings > Secrets and variables > Actions > Variables):
+
+- `REACT_APP_API_URL` - Backend API URL for production builds
+  - Example: `https://api.mindmeter.com`
+  - For development: `http://localhost:8080`
+
+Note: Variables are not encrypted and can be viewed by anyone with repository access. Only use for non-sensitive configuration.
+
 ## Setting up Secrets
 
 1. Go to your repository on GitHub
@@ -91,6 +106,16 @@ SPRING_PROFILES_ACTIVE: test
 4. Click "New repository secret"
 5. Add each secret with the exact name specified above
 6. Save the secret
+
+## Setting up Variables
+
+1. Go to your repository on GitHub
+2. Click on Settings tab
+3. In the left sidebar, click "Secrets and variables" > "Actions"
+4. Click on "Variables" tab
+5. Click "New repository variable"
+6. Add each variable with the exact name specified above
+7. Save the variable
 
 ## Verification
 

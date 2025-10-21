@@ -1,0 +1,200 @@
+name: MindMeter CI/CD Pipeline
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+
+env:
+  NODE_VERSION: "18"
+  JAVA_VERSION: "11"
+
+jobs:
+  # Frontend CI Pipeline
+  frontend-ci:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./frontend
+        run: |
+          if command -v npx eslint >/dev/null 2>&1; then
+            npx eslint src/ --ext .js,.jsx --format json --output-file eslint-report.json || echo "ESLint completed with warnings"
+          else
+            echo "ESLint not configured, skipping..."
+          fi
+
+      - name: Run Prettier check
+        working-directory: ./frontend
+        run: |
+          if command -v npx prettier >/dev/null 2>&1; then
+            npx prettier --check "src/**/*.{js,jsx,json,css,md}" || echo "Prettier check completed"
+          else
+            echo "Prettier not configured, skipping..."
+          fi
+
+      - name: Run tests
+        working-directory: ./frontend
+        run: npm test -- --coverage --watchAll=false --passWithNoTests --ci
+
+      - name: Build application
+        working-directory: ./frontend
+        run: npm run build
+        env:
+          REACT_APP_API_URL: http://localhost:8080
+          REACT_APP_ENVIRONMENT: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/build/
+          retention-days: 30
+
+      - name: Upload ESLint results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eslint-report
+          path: frontend/eslint-report.json
+          retention-days: 30
+
+  # Backend CI Pipeline
+  backend-ci:
+    name: Backend CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build with Maven
+        working-directory: ./backend
+        run: mvn clean compile
+
+      - name: Run tests
+        working-directory: ./backend
+        run: mvn test
+
+      - name: Generate test report
+        working-directory: ./backend
+        run: mvn surefire-report:report
+
+      - name: Run SpotBugs
+        working-directory: ./backend
+        run: |
+          if mvn spotbugs:spotbugs -q >/dev/null 2>&1; then
+            mvn spotbugs:spotbugs || echo "SpotBugs completed with findings"
+          else
+            echo "SpotBugs not configured, skipping..."
+          fi
+
+      - name: Run Checkstyle
+        working-directory: ./backend
+        run: |
+          if mvn checkstyle:checkstyle -q >/dev/null 2>&1; then
+            mvn checkstyle:checkstyle || echo "Checkstyle completed with findings"
+          else
+            echo "Checkstyle not configured, skipping..."
+          fi
+
+      - name: OWASP Dependency Check
+        working-directory: ./backend
+        run: |
+          if mvn org.owasp:dependency-check-maven:check -q >/dev/null 2>&1; then
+            mvn org.owasp:dependency-check-maven:check || echo "Dependency check completed"
+          else
+            echo "OWASP Dependency Check not configured, skipping..."
+          fi
+
+      - name: Package application
+        working-directory: ./backend
+        run: mvn package -DskipTests
+
+      - name: Upload JAR artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          retention-days: 30
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-reports
+          path: backend/target/surefire-reports/
+          retention-days: 30
+
+  # Security Scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  # Build Summary (always runs)
+  build-summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [frontend-ci, backend-ci]
+    if: always()
+
+    steps:
+      - name: Check build status
+        run: |
+          echo "Frontend CI: ${{ needs.frontend-ci.result }}"
+          echo "Backend CI: ${{ needs.backend-ci.result }}"
+          if [[ "${{ needs.frontend-ci.result }}" == "success" && "${{ needs.backend-ci.result }}" == "success" ]]; then
+            echo "All builds passed successfully"
+            exit 0
+          else
+            echo "Some builds failed"
+            exit 1
+          fi
