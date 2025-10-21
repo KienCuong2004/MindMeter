@@ -77,7 +77,7 @@ jobs:
 
       - name: Build production package
         working-directory: ./backend
-        run: mvn clean package -DskipTests -Pprod
+        run: mvn clean package -DskipTests -Dmaven.compiler.source=11 -Dmaven.compiler.target=11
 
       - name: Upload JAR artifacts
         uses: actions/upload-artifact@v4
