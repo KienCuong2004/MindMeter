@@ -319,38 +319,37 @@ public class AuthService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
             helper.setSubject("[MindMeter] Chào mừng bạn đến với MindMeter - Đăng ký tài khoản thành công");
-            String html = String.format("""
-                <div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>
-                  <div style='font-size:1.7rem;font-weight:700;color:#22c55e;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>
-                  <div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>
-                  <div style='margin-bottom:18px;line-height:1.7;'>
-                    Chúc mừng bạn đã đăng ký tài khoản thành công tại <b>MindMeter</b>!<br><br>
-                    Tài khoản của bạn đã được tạo thành công với email này. Từ bây giờ, bạn có thể:
-                    <ul style='margin: 12px 0 12px 18px; padding: 0;'>
-                      <li>Thực hiện bài test đánh giá trầm cảm để kiểm tra tình trạng tâm lý.</li>
-                      <li>Xem lịch sử kết quả test và theo dõi tiến trình.</li>
-                      <li>Nhận tư vấn từ chuyên gia tâm lý khi cần thiết.</li>
-                      <li>Truy cập các tài liệu hướng dẫn về sức khỏe tâm thần.</li>
-                    </ul>
-                    <b>Hướng dẫn tiếp theo:</b><br>
-                    - Đăng nhập vào hệ thống bằng email này.<br>
-                    - Thực hiện bài test đầu tiên để đánh giá tình trạng hiện tại.<br>
-                    - Nếu bạn không thực hiện đăng ký này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.<br>
-                  </div>
-                  <div style='background:#f1f5f9;border-radius:10px;padding:18px 20px;margin:24px 0 18px 0;font-size:1.01rem;color:#2563eb;'>
-                    <b>Đội ngũ MindMeter luôn sẵn sàng hỗ trợ bạn 24/7.</b><br>
-                    Nếu có bất kỳ thắc mắc hoặc cần trợ giúp, hãy liên hệ với chúng tôi qua:
-                    <ul style='margin: 8px 0 8px 18px; padding: 0;'>
-                      <li>Hotline CSKH: <a href='tel:0369702376' style='color:#22c55e;text-decoration:none;'>0369 702 376</a></li>
-                      <li>Email: <a href='mailto:support@mindmeter.com' style='color:#22c55e;text-decoration:none;'>support@mindmeter.com</a></li>
-                    </ul>
-                  </div>
-                  <div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>
-                    Trân trọng,<br>
-                    <b>Đội ngũ MindMeter</b><br>
-                  </div>
-                </div>
-            """, name);
+            String html = String.format(
+                "<div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>" +
+                "<div style='font-size:1.7rem;font-weight:700;color:#22c55e;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>" +
+                "<div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>" +
+                "<div style='margin-bottom:18px;line-height:1.7;'>" +
+                "Chúc mừng bạn đã đăng ký tài khoản thành công tại <b>MindMeter</b>!<br><br>" +
+                "Tài khoản của bạn đã được tạo thành công với email này. Từ bây giờ, bạn có thể:" +
+                "<ul style='margin: 12px 0 12px 18px; padding: 0;'>" +
+                "<li>Thực hiện bài test đánh giá trầm cảm để kiểm tra tình trạng tâm lý.</li>" +
+                "<li>Xem lịch sử kết quả test và theo dõi tiến trình.</li>" +
+                "<li>Nhận tư vấn từ chuyên gia tâm lý khi cần thiết.</li>" +
+                "<li>Truy cập các tài liệu hướng dẫn về sức khỏe tâm thần.</li>" +
+                "</ul>" +
+                "<b>Hướng dẫn tiếp theo:</b><br>" +
+                "- Đăng nhập vào hệ thống bằng email này.<br>" +
+                "- Thực hiện bài test đầu tiên để đánh giá tình trạng hiện tại.<br>" +
+                "- Nếu bạn không thực hiện đăng ký này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.<br>" +
+                "</div>" +
+                "<div style='background:#f1f5f9;border-radius:10px;padding:18px 20px;margin:24px 0 18px 0;font-size:1.01rem;color:#2563eb;'>" +
+                "<b>Đội ngũ MindMeter luôn sẵn sàng hỗ trợ bạn 24/7.</b><br>" +
+                "Nếu có bất kỳ thắc mắc hoặc cần trợ giúp, hãy liên hệ với chúng tôi qua:" +
+                "<ul style='margin: 8px 0 8px 18px; padding: 0;'>" +
+                "<li>Hotline CSKH: <a href='tel:0369702376' style='color:#22c55e;text-decoration:none;'>0369 702 376</a></li>" +
+                "<li>Email: <a href='mailto:support@mindmeter.com' style='color:#22c55e;text-decoration:none;'>support@mindmeter.com</a></li>" +
+                "</ul>" +
+                "</div>" +
+                "<div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>" +
+                "Trân trọng,<br>" +
+                "<b>Đội ngũ MindMeter</b><br>" +
+                "</div>" +
+                "</div>", name);
             helper.setText(html, true);
             mailSender.send(message);
         } catch (Exception e) {
