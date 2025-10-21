@@ -38,46 +38,55 @@ function RegisterForm({ onRegister, onSwitchForm }) {
   const [emailFocus, setEmailFocus] = useState(false);
   const [passwordFocus, setPasswordFocus] = useState(false);
   const [confirmPasswordFocus, setConfirmPasswordFocus] = useState(false);
+  const [bannerMessage, setBannerMessage] = useState("");
 
   const validate = () => {
     const err = {};
     if (!form.email) err.email = t("validation.emailRequired");
     else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email))
       err.email = t("validation.emailInvalid");
+
+    // Strong password: >=8 chars, 1 upper, 1 lower, 1 number, 1 special
+    const strongPwRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     if (!form.password) err.password = t("validation.passwordRequired");
-    else if (form.password.length < 6)
-      err.password = t("validation.passwordMinLength");
+    else if (!strongPwRegex.test(form.password))
+      err.password = t("validation.passwordStrongRule");
+
     if (!form.confirmPassword)
       err.confirmPassword = t("validation.confirmPasswordRequired");
     else if (form.password !== form.confirmPassword)
       err.confirmPassword = t("validation.passwordMismatch");
+
     if (!agree) err.agree = t("validation.agreeRequired");
     setFieldError(err);
     return Object.keys(err).length === 0;
   };
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    // Xóa lỗi của field đang nhập để không còn viền đỏ
+    if (fieldError[name]) {
+      setFieldError({ ...fieldError, [name]: "" });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("=== REGISTRATION START ===");
-    // Form submitted
     setError("");
     setSuccess("");
     if (!validate()) {
-      console.log("=== VALIDATION FAILED ===");
-      // Validation failed
+      const firstError = Object.values(fieldError)[0];
+      if (firstError) {
+        setBannerMessage(firstError);
+        setTimeout(() => setBannerMessage(""), 3000);
+      }
       return;
     }
-    console.log("=== VALIDATION PASSED ===");
-    // Validation passed, starting registration
     setLoading(true);
-    console.log("=== LOADING SET TO TRUE ===");
 
     try {
-      console.log("=== MAKING API CALL ===");
       const res = await authFetch(
         `${process.env.REACT_APP_API_URL}/api/auth/register`,
         {
@@ -86,15 +95,12 @@ function RegisterForm({ onRegister, onSwitchForm }) {
           body: JSON.stringify(form),
         }
       );
-      console.log("=== API CALL COMPLETED ===");
       if (!res.ok) {
         let errorMessage = t("registerFailed");
         try {
           const data = await res.json();
           errorMessage = data.message || errorMessage;
         } catch (parseError) {
-          // If response is not JSON (like HTML error page), use status text
-          console.error("Failed to parse error response:", parseError);
           errorMessage = `Server error: ${res.status} ${res.statusText}`;
         }
         throw new Error(errorMessage);
@@ -102,21 +108,13 @@ function RegisterForm({ onRegister, onSwitchForm }) {
 
       // Parse response data
       let responseData;
-      console.log("Response status:", res.status);
-      console.log("Response headers:", res.headers);
-
       try {
         const responseText = await res.text();
-        console.log("Response text:", responseText);
-
         if (responseText) {
           responseData = JSON.parse(responseText);
         } else {
           responseData = { message: "Registration completed" };
         }
-
-        // Registration successful
-        console.log("Parsed response data:", responseData);
 
         // Store token and user data if available
         if (responseData.token) {
@@ -126,13 +124,9 @@ function RegisterForm({ onRegister, onSwitchForm }) {
           localStorage.setItem("user", JSON.stringify(responseData.user));
         }
       } catch (parseError) {
-        console.error("Failed to parse success response:", parseError);
         // Even if we can't parse the response, registration might have succeeded
         responseData = { message: "Registration completed" };
       }
-
-      // Skip mount check - handle response immediately
-      console.log("=== SKIPPING MOUNT CHECK - HANDLING RESPONSE ===");
 
       // Store token and user data if available
       if (responseData.token) {
@@ -157,32 +151,19 @@ function RegisterForm({ onRegister, onSwitchForm }) {
       }
 
       // Set success state and start countdown
-      console.log("=== SETTING SUCCESS STATE ===");
-      console.log("Success message:", successMessage);
-      console.log("Countdown time:", countdownTime);
-
       setLoading(false);
       setSuccess(successMessage);
       setCountdown(countdownTime);
-
-      console.log("=== SUCCESS STATE SET ===");
 
       // Start countdown timer
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev === 1) {
             clearInterval(timer);
-            // Use setTimeout to ensure the navigation happens after state update
             setTimeout(() => {
-              console.log("=== ATTEMPTING NAVIGATION ===");
-              console.log("isMountedRef.current:", isMountedRef.current);
-              console.log("onSwitchForm:", onSwitchForm);
               if (onSwitchForm) {
-                console.log("=== CALLING onSwitchForm('login') ===");
                 onSwitchForm("login");
               } else {
-                console.log("=== onSwitchForm is not available ===");
-                // Fallback: redirect manually
                 window.location.href = "/login";
               }
             }, 100);
@@ -195,7 +176,6 @@ function RegisterForm({ onRegister, onSwitchForm }) {
       // Store timer reference for cleanup
       countdownTimerRef.current = timer;
     } catch (err) {
-      console.error("Registration error:", err);
       if (isMountedRef.current) {
         setError(err.message || "Có lỗi xảy ra khi đăng ký. Vui lòng thử lại.");
       }
@@ -207,19 +187,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
     }
   };
 
-  // Hàm đánh giá strength trả về cả level và text
-  const getPasswordStrength = (pw) => {
-    if (!pw) return { level: "", text: "" };
-    let score = 0;
-    if (pw.length >= 6) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-    if (score <= 1) return { level: "weak", text: t("otpReset.weak") };
-    if (score === 2) return { level: "medium", text: t("otpReset.medium") };
-    if (score >= 3) return { level: "strong", text: t("otpReset.strong") };
-    return { level: "", text: "" };
-  };
+  // Removed password strength meter (no longer used)
 
   const requiredErrors = Object.values(fieldError).filter((e) =>
     e.includes(t("validation.fieldRequired"))
@@ -238,22 +206,9 @@ function RegisterForm({ onRegister, onSwitchForm }) {
     };
   }, []);
 
-  // Cleaned up unnecessary useEffect hooks
-
-  // Tạo thông báo gom lỗi
-  let errorMsg = "";
-  if (requiredErrors.length === 1) {
-    errorMsg = requiredErrors[0];
-  } else if (requiredErrors.length > 1) {
-    // Lấy tên trường từ lỗi
-    const fields = requiredErrors.map((e) =>
-      e.split(t("validation.fieldRequired"))[0].trim()
-    );
-    const last = fields.pop();
-    errorMsg = fields.length
-      ? `${fields.join(", ")} và ${last} không được để trống`
-      : `${last} không được để trống`;
-  }
+  // Hiển thị lỗi đầu tiên (tránh tự ghép câu hardcode)
+  const allErrors = Object.values(fieldError);
+  const errorMsg = allErrors.length ? allErrors[0] : "";
 
   const handleGoogleRegister = () => {
     window.location.href = `${process.env.REACT_APP_API_URL}/oauth2/authorization/google`;
@@ -279,12 +234,23 @@ function RegisterForm({ onRegister, onSwitchForm }) {
             className="w-full px-10 pt-8 pb-10"
             autoComplete="off"
           >
-            {errorMsg && (
-              <div className="mb-4 flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg shadow animate-shake">
+            {/* Giữ chỗ cố định để không bị nhảy layout khi có thông báo */}
+            <div
+              className={`mb-4 transition-opacity duration-200 ${
+                bannerMessage ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ minHeight: 44 }}
+              aria-live="polite"
+            >
+              <div
+                className={`flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg shadow ${
+                  bannerMessage ? "" : "invisible"
+                }`}
+              >
                 <FaExclamationCircle className="text-xl mr-2 text-red-500 dark:text-red-300" />
-                <div className="font-semibold">{errorMsg}</div>
+                <div className="font-semibold">{bannerMessage || "\u00A0"}</div>
               </div>
-            )}
+            </div>
             <div className="flex flex-col items-center mb-6">
               <FaUserPlus className="text-4xl text-green-500 dark:text-[#22c55e] mb-2" />
               <h2 className="text-3xl font-extrabold text-green-700 dark:text-[#22c55e] tracking-tight">
@@ -304,8 +270,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                 onFocus={() => setEmailFocus(true)}
                 onBlur={() => setEmailFocus(false)}
                 className={`peer border border-gray-300 dark:border-[#353c4a] rounded-xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-green-500 dark:focus:border-[#22c55e] focus:ring-2 focus:ring-green-100 dark:focus:ring-[#22c55e]/30 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
-                  fieldError.email &&
-                  fieldError.email.includes(t("validation.fieldRequired"))
+                  fieldError.email
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600 dark:focus:border-red-500 dark:focus:ring-red-900"
                     : ""
                 }`}
@@ -338,8 +303,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                 onFocus={() => setPasswordFocus(true)}
                 onBlur={() => setPasswordFocus(false)}
                 className={`peer border border-gray-300 dark:border-[#353c4a] rounded-xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-green-500 dark:focus:border-[#22c55e] focus:ring-2 focus:ring-green-100 dark:focus:ring-[#22c55e]/30 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
-                  fieldError.password &&
-                  fieldError.password.includes(t("validation.fieldRequired"))
+                  fieldError.password
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600 dark:focus:border-red-500 dark:focus:ring-red-900"
                     : ""
                 }`}
@@ -358,36 +322,16 @@ function RegisterForm({ onRegister, onSwitchForm }) {
               >
                 {t("passwordLabel")}
               </label>
-              {form.password &&
-                (() => {
-                  const { level, text } = getPasswordStrength(form.password);
-                  let color = "";
-                  let icon = "";
-                  let iconClass = "text-base";
-                  if (level === "weak") {
-                    color = "text-red-500";
-                    icon = <FaTimes className="text-lg" />;
-                    iconClass = "text-lg";
-                  } else if (level === "medium") {
-                    color = "text-yellow-600";
-                    icon = <FaExclamationTriangle className="text-lg" />;
-                    iconClass = "text-lg";
-                  } else if (level === "strong") {
-                    color = "text-green-600";
-                    icon = <FaExclamationCircle className="text-lg" />;
-                    iconClass = "text-lg";
-                  }
-                  return (
-                    <div
-                      className={`mt-1 text-xs font-semibold ${color} flex items-baseline gap-1`}
-                    >
-                      <span className={iconClass}>{icon}</span>
-                      <span>
-                        {t("otpReset.passwordStrength")}: {text}
-                      </span>
-                    </div>
-                  );
-                })()}
+              {/* Rule chỉ hiển thị khi đang focus và chưa đạt yêu cầu */}
+              {passwordFocus &&
+                form.password &&
+                !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(
+                  form.password
+                ) && (
+                  <div className="mt-1 text-xs font-semibold text-gray-500 dark:text-gray-300">
+                    {t("validation.passwordStrongRule")}
+                  </div>
+                )}
             </div>
             <div className="mb-5 relative">
               <span className="absolute left-3 top-3 text-gray-200 dark:text-gray-200 text-base pointer-events-none">
@@ -401,10 +345,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                 onFocus={() => setConfirmPasswordFocus(true)}
                 onBlur={() => setConfirmPasswordFocus(false)}
                 className={`peer border border-gray-300 dark:border-[#353c4a] rounded-xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-green-500 dark:focus:border-[#22c55e] focus:ring-2 focus:ring-green-100 dark:focus:ring-[#22c55e]/30 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
-                  fieldError.confirmPassword &&
-                  fieldError.confirmPassword.includes(
-                    t("validation.fieldRequired")
-                  )
+                  fieldError.confirmPassword
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600 dark:focus:border-red-500 dark:focus:ring-red-900"
                     : ""
                 }`}
@@ -425,6 +366,14 @@ function RegisterForm({ onRegister, onSwitchForm }) {
               >
                 {t("confirmPasswordLabel")}
               </label>
+              {/* Hiển thị cảnh báo không khớp khi người dùng gõ confirm */}
+              {confirmPasswordFocus &&
+                form.confirmPassword &&
+                form.password !== form.confirmPassword && (
+                  <div className="mt-1 text-xs font-semibold text-red-600 dark:text-red-400">
+                    {t("validation.passwordMismatch")}
+                  </div>
+                )}
               <div className="flex items-center mb-3">
                 <input
                   type="checkbox"
