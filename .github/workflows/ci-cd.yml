@@ -100,13 +100,13 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-           - name: Build with Maven
-             working-directory: ./backend
-             run: mvn clean compile
+      - name: Build with Maven
+        working-directory: ./backend
+        run: mvn clean compile
 
-           - name: Run tests
-             working-directory: ./backend
-             run: mvn test || echo "Tests completed with some failures"
+      - name: Run tests
+        working-directory: ./backend
+        run: mvn test || echo "Tests completed with some failures"
 
       - name: Generate test report
         working-directory: ./backend
