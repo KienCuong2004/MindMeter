@@ -363,21 +363,20 @@ public class AuthService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
             helper.setSubject("[MindMeter] Mật khẩu của bạn đã được thay đổi");
-            String html = String.format("""
-                <div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>
-                  <div style='font-size:1.7rem;font-weight:700;color:#2563eb;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>
-                  <div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>
-                  <div style='margin-bottom:18px;line-height:1.7;'>
-                    Mật khẩu tài khoản MindMeter của bạn vừa được thay đổi thành công.<br>
-                    Nếu bạn không thực hiện thay đổi này, vui lòng liên hệ ngay với chúng tôi để được hỗ trợ kịp thời.<br>
-                    Nếu đây là bạn, bạn có thể bỏ qua email này.
-                  </div>
-                  <div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>
-                    Trân trọng,<br>
-                    <b>Đội ngũ MindMeter</b><br>
-                  </div>
-                </div>
-            """, name);
+            String html = String.format(
+                "<div style='max-width:520px;margin:40px auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:36px 28px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>" +
+                "<div style='font-size:1.7rem;font-weight:700;color:#2563eb;letter-spacing:1px;margin-bottom:18px;text-align:center;'>MindMeter</div>" +
+                "<div style='font-size:1.15rem;margin-bottom:18px;'><b>Xin chào %s,</b></div>" +
+                "<div style='margin-bottom:18px;line-height:1.7;'>" +
+                "Mật khẩu tài khoản MindMeter của bạn vừa được thay đổi thành công.<br>" +
+                "Nếu bạn không thực hiện thay đổi này, vui lòng liên hệ ngay với chúng tôi để được hỗ trợ kịp thời.<br>" +
+                "Nếu đây là bạn, bạn có thể bỏ qua email này." +
+                "</div>" +
+                "<div style='color:#94a3b8;font-size:0.98rem;text-align:center;margin-top:36px;line-height:1.5;'>" +
+                "Trân trọng,<br>" +
+                "<b>Đội ngũ MindMeter</b><br>" +
+                "</div>" +
+                "</div>", name);
             helper.setText(html, true);
             mailSender.send(message);
         } catch (Exception e) {
