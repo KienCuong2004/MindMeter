@@ -3,23 +3,11 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
-import {
-  FaFileContract,
-  FaCheck,
-  FaTimes,
-  FaExclamationTriangle,
-  FaHandshake,
-  FaGavel,
-  FaBrain,
-} from "react-icons/fa";
+import { FaFileContract, FaBrain } from "react-icons/fa";
 import { useTheme } from "../hooks/useTheme";
 import { handleLogout } from "../utils/logoutUtils";
 import { jwtDecode } from "jwt-decode";
-import {
-  getCurrentUser,
-  getCurrentToken,
-  clearAnonymousData,
-} from "../services/anonymousService";
+import { getCurrentUser, getCurrentToken } from "../services/anonymousService";
 
 export default function TermsOfUse() {
   const { t } = useTranslation();

@@ -16,14 +16,8 @@ const AI_STATISTICS_CONFIG = {
  */
 export const generateStatisticsInsights = async (statisticsData) => {
   try {
-    const {
-      totalTests,
-      depressionRatio,
-      userCountByRole,
-      testCountByLevel,
-      recentTrends,
-      weeklyGrowth,
-    } = statisticsData;
+    const { totalTests, depressionRatio, userCountByRole, recentTrends } =
+      statisticsData;
 
     // Calculate key metrics
     const severePercentage = (
@@ -409,9 +403,11 @@ const generateFallbackRecommendations = (stats) => [
 const generateFallbackSummary = (data) =>
   `Platform Overview: ${data.totalUsers} users with ${data.monthlyTests} monthly assessments. Current focus on ${data.highRiskCount} high-risk cases requiring attention.`;
 
-export default {
+const aiStatisticsService = {
   generateStatisticsInsights,
   generateTrendPrediction,
   generateActionRecommendations,
   generateExecutiveSummary,
 };
+
+export default aiStatisticsService;

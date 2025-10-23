@@ -5,11 +5,7 @@ import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { FaBookOpen, FaBrain } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
-import {
-  getCurrentUser,
-  getCurrentToken,
-  clearAnonymousData,
-} from "../services/anonymousService";
+import { getCurrentUser, getCurrentToken } from "../services/anonymousService";
 import { useTheme } from "../hooks/useTheme";
 import { handleLogout } from "../utils/logoutUtils";
 import { sanitizeHtmlSafe } from "../utils/sanitizeHtml";
