@@ -6,7 +6,7 @@ import com.shop.backend.repository.UserRepository;
 import com.shop.backend.service.PasswordGeneratorService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,9 +20,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Optional;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
+import javax.crypto.SecretKey;
 
 @Component
 public class CustomOAuth2SuccessHandler implements org.springframework.security.web.authentication.AuthenticationSuccessHandler {
@@ -124,9 +122,9 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
         }
 
         // Sinh JWT với đầy đủ thông tin
-        Key key = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         String token = Jwts.builder()
-                .setSubject(user.getEmail())
+                .subject(user.getEmail())
                 .claim("role", user.getRole().name())
                 .claim("firstName", user.getFirstName())
                 .claim("lastName", user.getLastName())
@@ -135,9 +133,9 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
                 .claim("avatarUrl", user.getAvatarUrl())
                 .claim("planStartDate", user.getPlanStartDate() != null ? user.getPlanStartDate().toString() : null) // Thêm planStartDate
                 .claim("planExpiryDate", user.getPlanExpiryDate() != null ? user.getPlanExpiryDate().toString() : null) // Thêm planExpiryDate
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(key)
                 .compact();
 
         // Redirect về frontend kèm token và thông tin về temporary password
