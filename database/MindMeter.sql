@@ -4375,9 +4375,6 @@ CREATE INDEX idx_test_results_severity ON depression_test_results(severity_level
 -- Index cho test date queries
 CREATE INDEX idx_test_results_tested_at ON depression_test_results(tested_at);
 
--- Composite index cho user's tests by date
-CREATE INDEX idx_test_results_user_date ON depression_test_results(user_id, tested_at);
-
 -- Composite index cho severity statistics
 CREATE INDEX idx_test_results_severity_date ON depression_test_results(severity_level, tested_at);
 
@@ -4386,6 +4383,9 @@ CREATE INDEX idx_test_results_test_type ON depression_test_results(test_type);
 
 -- Composite index cho admin dashboard queries
 CREATE INDEX idx_test_results_user_severity_date ON depression_test_results(user_id, severity_level, tested_at);
+
+-- RENAME: Changed to avoid duplicate index name (was idx_test_results_user_date)
+CREATE INDEX idx_test_results_user_tested_at ON depression_test_results(user_id, tested_at);
 
 -- ========================================
 -- 3. DEPRESSION TEST ANSWERS OPTIMIZATION
@@ -4572,68 +4572,19 @@ CREATE INDEX idx_question_options_en_question_order ON depression_question_optio
 -- ========================================
 
 -- Advanced Performance Indexes for Critical Queries
-CREATE INDEX idx_test_results_user_date ON depression_test_results(user_id, created_at);
-CREATE INDEX idx_test_results_test_type ON depression_test_results(test_type, created_at);
-CREATE INDEX idx_test_results_score_range ON depression_test_results(score_range, created_at);
-
--- Appointments Performance Optimization
-CREATE INDEX idx_appointments_expert_date ON appointments(expert_id, appointment_date);
-CREATE INDEX idx_appointments_student_date ON appointments(student_id, appointment_date);
-CREATE INDEX idx_appointments_status_date ON appointments(status, appointment_date);
-CREATE INDEX idx_appointments_created_at ON appointments(created_at);
+-- FIXED: Changed created_at to tested_at (correct column name)
+CREATE INDEX idx_test_results_test_type_date ON depression_test_results(test_type, tested_at);
+-- REMOVED: score_range doesn't exist in depression_test_results (only severity_level exists)
 
 -- Blog Posts Performance Optimization
-CREATE INDEX idx_blog_posts_category_status ON blog_posts(category_id, status, created_at);
+-- FIXED: blog_posts doesn't have category_id column, using available columns
+CREATE INDEX idx_blog_posts_status_created ON blog_posts(status, created_at);
 CREATE INDEX idx_blog_posts_author_date ON blog_posts(author_id, created_at);
-CREATE INDEX idx_blog_posts_featured_date ON blog_posts(featured, created_at);
+CREATE INDEX idx_blog_posts_featured_date ON blog_posts(is_featured, created_at);
 CREATE INDEX idx_blog_posts_views ON blog_posts(view_count DESC);
 
--- User Activity Performance Optimization
-CREATE INDEX idx_users_role_status ON users(role, status);
-CREATE INDEX idx_users_plan_expiry ON users(plan, plan_expiry_date);
-CREATE INDEX idx_users_created_at ON users(created_at);
-
--- Expert Schedule Performance Optimization
-CREATE INDEX idx_expert_schedules_expert_date ON expert_schedules(expert_id, schedule_date);
-CREATE INDEX idx_expert_schedules_available ON expert_schedules(is_available, schedule_date);
-
--- Chat Messages Performance Optimization
-CREATE INDEX idx_chat_messages_user_date ON chat_messages(user_id, created_at);
-CREATE INDEX idx_chat_messages_session ON chat_messages(session_id, created_at);
-
 -- ========================================
--- 15. TABLE PARTITIONING FOR LARGE TABLES
--- ========================================
-
--- Partition depression_test_results by year for better performance
-ALTER TABLE depression_test_results 
-PARTITION BY RANGE (YEAR(created_at)) (
-    PARTITION p2023 VALUES LESS THAN (2024),
-    PARTITION p2024 VALUES LESS THAN (2025),
-    PARTITION p2025 VALUES LESS THAN (2026),
-    PARTITION p_future VALUES LESS THAN MAXVALUE
-);
-
--- Partition chat_messages by month for high volume data
-ALTER TABLE chat_messages 
-PARTITION BY RANGE (YEAR(created_at) * 100 + MONTH(created_at)) (
-    PARTITION p202401 VALUES LESS THAN (202402),
-    PARTITION p202402 VALUES LESS THAN (202403),
-    PARTITION p202403 VALUES LESS THAN (202404),
-    PARTITION p202404 VALUES LESS THAN (202405),
-    PARTITION p202405 VALUES LESS THAN (202406),
-    PARTITION p202406 VALUES LESS THAN (202407),
-    PARTITION p202407 VALUES LESS THAN (202408),
-    PARTITION p202408 VALUES LESS THAN (202409),
-    PARTITION p202409 VALUES LESS THAN (202410),
-    PARTITION p202410 VALUES LESS THAN (202411),
-    PARTITION p202411 VALUES LESS THAN (202412),
-    PARTITION p202412 VALUES LESS THAN (202501),
-    PARTITION p_future VALUES LESS THAN MAXVALUE
-);
-
--- ========================================
--- 16. PERFORMANCE MONITORING VIEWS
+-- 15. PERFORMANCE MONITORING VIEWS
 -- ========================================
 
 -- User Statistics View
@@ -4654,15 +4605,14 @@ CREATE VIEW test_statistics AS
 SELECT 
     test_type,
     COUNT(*) as total_tests,
-    COUNT(CASE WHEN score_range = 'NORMAL' THEN 1 END) as normal_count,
-    COUNT(CASE WHEN score_range = 'MILD' THEN 1 END) as mild_count,
-    COUNT(CASE WHEN score_range = 'MODERATE' THEN 1 END) as moderate_count,
-    COUNT(CASE WHEN score_range = 'SEVERE' THEN 1 END) as severe_count,
-    COUNT(CASE WHEN score_range = 'EXTREMELY_SEVERE' THEN 1 END) as extremely_severe_count,
+    COUNT(CASE WHEN severity_level = 'MINIMAL' THEN 1 END) as minimal_count,
+    COUNT(CASE WHEN severity_level = 'MILD' THEN 1 END) as mild_count,
+    COUNT(CASE WHEN severity_level = 'MODERATE' THEN 1 END) as moderate_count,
+    COUNT(CASE WHEN severity_level = 'SEVERE' THEN 1 END) as severe_count,
     AVG(total_score) as avg_score,
-    DATE(created_at) as test_date
+    DATE(tested_at) as test_date
 FROM depression_test_results 
-GROUP BY test_type, DATE(created_at);
+GROUP BY test_type, DATE(tested_at);
 
 -- Expert Performance View
 CREATE VIEW expert_performance AS
@@ -4673,7 +4623,6 @@ SELECT
     COUNT(DISTINCT a.id) as total_appointments,
     COUNT(DISTINCT CASE WHEN a.status = 'COMPLETED' THEN a.id END) as completed_appointments,
     COUNT(DISTINCT CASE WHEN a.status = 'CANCELLED' THEN a.id END) as cancelled_appointments,
-    AVG(CASE WHEN a.status = 'COMPLETED' THEN a.rating END) as avg_rating,
     COUNT(DISTINCT CASE WHEN a.appointment_date >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN a.id END) as appointments_last_30_days
 FROM users e
 LEFT JOIN appointments a ON e.id = a.expert_id
@@ -4681,7 +4630,7 @@ WHERE e.role = 'EXPERT'
 GROUP BY e.id, e.first_name, e.last_name;
 
 -- ========================================
--- 17. PERFORMANCE MONITORING QUERIES
+-- 16. PERFORMANCE MONITORING QUERIES
 -- ========================================
 
 -- Table Size Analysis
@@ -4709,7 +4658,7 @@ WHERE t.table_schema = 'mindmeter'
 ORDER BY t.table_name, s.index_name, s.seq_in_index;
 
 -- ========================================
--- 18. MAINTENANCE PROCEDURES
+-- 17. MAINTENANCE PROCEDURES
 -- ========================================
 
 -- Procedure to analyze and optimize tables
@@ -4743,7 +4692,7 @@ END //
 DELIMITER ;
 
 -- ========================================
--- 19. PERFORMANCE TESTING QUERIES
+-- 18. PERFORMANCE TESTING QUERIES
 -- ========================================
 
 -- Test query performance with EXPLAIN
@@ -4752,13 +4701,13 @@ EXPLAIN SELECT
     u.last_name,
     dtr.test_type,
     dtr.total_score,
-    dtr.score_range,
-    dtr.created_at
+    dtr.severity_level,
+    dtr.tested_at
 FROM users u
 JOIN depression_test_results dtr ON u.id = dtr.user_id
 WHERE u.role = 'STUDENT'
-    AND dtr.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-ORDER BY dtr.created_at DESC
+    AND dtr.tested_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+ORDER BY dtr.tested_at DESC
 LIMIT 100;
 
 -- Test appointment query performance with EXPLAIN
