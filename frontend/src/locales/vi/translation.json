@@ -1985,7 +1985,7 @@
     "title": "Tài khoản đã được liên kết thành công",
     "subtitle": "Tài khoản của bạn đã được liên kết với Google",
     "accountInfo": "Thông tin tài khoản",
-    "email": "Email:",
+    "email": "Email",
     "loginMethod": "Phương thức đăng nhập:",
     "loginMethodValue": "Google + Mật khẩu",
     "howItWorks": "Cách thức hoạt động của hệ thống",
@@ -1998,6 +1998,11 @@
     "continueToHome": "Tiếp tục đến trang chủ",
     "goToLogin": "Về trang đăng nhập",
     "autoRedirect": "Tự động chuyển hướng sau {{count}} giây",
-    "loadingInfo": "Đang tải thông tin..."
+    "loadingInfo": "Đang tải thông tin...",
+    "accountLinkedSuccess": "Liên kết tài khoản thành công!",
+    "processingLogin": "Đang xử lý đăng nhập...",
+    "welcomeMessage": "Chào mừng <0>{{name}}</0>! Tài khoản của bạn đã được liên kết thành công.",
+    "redirectingMessage": "Bạn sẽ được chuyển hướng trong giây lát...",
+    "pleaseWait": "Vui lòng đợi trong giây lát..."
   }
 }
