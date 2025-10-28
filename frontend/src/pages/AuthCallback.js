@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useTranslation, Trans } from "react-i18next";
 
 export default function AuthCallback() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -97,19 +99,21 @@ export default function AuthCallback() {
           {/* Title */}
           <h2 className="text-3xl font-extrabold text-center bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4 dark:from-indigo-400 dark:via-blue-400 dark:to-purple-400">
             {email && userName
-              ? "Liên kết tài khoản thành công!"
-              : "Đang xử lý đăng nhập..."}
+              ? t("accountLinking.accountLinkedSuccess")
+              : t("accountLinking.processingLogin")}
           </h2>
 
           {/* Message */}
           {email && userName ? (
             <div className="space-y-4">
               <p className="text-gray-600 dark:text-gray-300 text-center leading-relaxed">
-                Chào mừng{" "}
-                <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                  {userName}
-                </span>
-                ! Tài khoản của bạn đã được liên kết thành công.
+                <Trans
+                  i18nKey="accountLinking.welcomeMessage"
+                  values={{ name: userName }}
+                  components={[
+                    <span className="font-semibold text-indigo-600 dark:text-indigo-400" />
+                  ]}
+                />
               </p>
               <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-4 border border-indigo-200 dark:border-indigo-800">
                 <div className="flex items-center gap-3">
@@ -130,7 +134,7 @@ export default function AuthCallback() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Email
+                      {t("accountLinking.email")}
                     </p>
                     <p className="font-medium text-gray-900 dark:text-gray-100">
                       {email}
@@ -139,12 +143,12 @@ export default function AuthCallback() {
                 </div>
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400 text-center leading-relaxed">
-                Bạn sẽ được chuyển hướng trong giây lát...
+                {t("accountLinking.redirectingMessage")}
               </p>
             </div>
           ) : (
             <p className="text-gray-600 dark:text-gray-300 text-center leading-relaxed">
-              Vui lòng đợi trong giây lát...
+              {t("accountLinking.pleaseWait")}
             </p>
           )}
 

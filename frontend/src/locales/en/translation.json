@@ -1986,7 +1986,7 @@
     "title": "Account Successfully Linked",
     "subtitle": "Your account has been linked with Google",
     "accountInfo": "Account Information",
-    "email": "Email:",
+    "email": "Email",
     "loginMethod": "Login Method:",
     "loginMethodValue": "Google + Password",
     "howItWorks": "How the System Works",
@@ -1999,6 +1999,11 @@
     "continueToHome": "Continue to Home",
     "goToLogin": "Go to Login",
     "autoRedirect": "Auto redirect after {{count}} seconds",
-    "loadingInfo": "Loading information..."
+    "loadingInfo": "Loading information...",
+    "accountLinkedSuccess": "Account linked successfully!",
+    "processingLogin": "Processing login...",
+    "welcomeMessage": "Welcome <0>{{name}}</0>! Your account has been successfully linked.",
+    "redirectingMessage": "You will be redirected shortly...",
+    "pleaseWait": "Please wait a moment..."
   }
 }
