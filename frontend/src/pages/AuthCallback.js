@@ -6,17 +6,19 @@ export default function AuthCallback() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Get URL parameters for display
+  const params = new URLSearchParams(location.search);
+  const email = params.get("email");
+  const userName = params.get("name");
+
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
     const token = params.get("token");
     const requiresPasswordChange =
       params.get("requiresPasswordChange") === "true";
     const message = params.get("message");
-    const email = params.get("email");
-    const name = params.get("name");
 
-    // Nếu có email và name params, đây là account linking - không redirect
-    if (email && name) {
+    // Nếu có email và userName params, đây là account linking - không redirect
+    if (email && userName) {
       return;
     }
 
@@ -64,7 +66,7 @@ export default function AuthCallback() {
     } else {
       navigate("/login");
     }
-  }, [location, navigate]);
+  }, [location, navigate, email, params, userName]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -94,18 +96,18 @@ export default function AuthCallback() {
 
           {/* Title */}
           <h2 className="text-3xl font-extrabold text-center bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4 dark:from-indigo-400 dark:via-blue-400 dark:to-purple-400">
-            {email && name
+            {email && userName
               ? "Liên kết tài khoản thành công!"
               : "Đang xử lý đăng nhập..."}
           </h2>
 
           {/* Message */}
-          {email && name ? (
+          {email && userName ? (
             <div className="space-y-4">
               <p className="text-gray-600 dark:text-gray-300 text-center leading-relaxed">
                 Chào mừng{" "}
                 <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                  {name}
+                  {userName}
                 </span>
                 ! Tài khoản của bạn đã được liên kết thành công.
               </p>
