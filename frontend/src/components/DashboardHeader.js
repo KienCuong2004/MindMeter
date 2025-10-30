@@ -512,7 +512,7 @@ export default function DashboardHeader({
             onStartTour &&
             window.location.pathname === "/home" && (
               <button
-                className="px-3 py-1.5 xl:px-4 xl:py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-xs xl:text-sm whitespace-nowrap"
+                className="px-3 py-1.5 xl:px-4 xl:py-2 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-semibold rounded-full shadow-md hover:shadow-lg transition-colors duration-200 text-xs xl:text-sm whitespace-nowrap"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -698,7 +698,7 @@ export default function DashboardHeader({
               <>
                 <div className="w-full border-t border-gray-200 dark:border-gray-700 my-1" />
                 <button
-                  className="py-2 sm:py-3 w-full text-center font-semibold text-base sm:text-lg cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/20 text-purple-600 dark:text-purple-400 transition-colors"
+                  className="py-2 sm:py-3 w-full text-center font-semibold text-base sm:text-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 transition-colors"
                   onClick={() => {
                     onStartTour();
                     setShowMobileMenu(false);
