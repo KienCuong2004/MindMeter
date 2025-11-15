@@ -490,8 +490,8 @@ export default function DashboardHeader({
               {t("navTestList")}
             </span>
           )}
-          {/* Blog link - chỉ hiển thị cho user đã đăng nhập (không phải anonymous) */}
-          {user && !user.anonymous && (
+          {/* Blog link - chỉ hiển thị cho STUDENT (không phải anonymous) */}
+          {user && user.role === "STUDENT" && !user.anonymous && (
             <span
               className="cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-gray-700 dark:text-gray-200 transition-colors whitespace-nowrap"
               onClick={() => navigate("/blog")}
@@ -647,8 +647,8 @@ export default function DashboardHeader({
             {t("navTestList")}
           </span>
           <div className="w-full border-t border-gray-200 dark:border-gray-700 my-1" />
-          {/* Blog link - chỉ hiển thị cho user đã đăng nhập (không phải anonymous) */}
-          {user && !user.anonymous && (
+          {/* Blog link - chỉ hiển thị cho STUDENT (không phải anonymous) */}
+          {user && user.role === "STUDENT" && !user.anonymous && (
             <span
               className="py-2 sm:py-3 w-full text-center font-semibold text-base sm:text-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors"
               onClick={() => {
@@ -929,19 +929,21 @@ export default function DashboardHeader({
                     <span>{t("history")}</span>
                   </div>
                 )}
-                {/* Bài viết đã lưu - cho tất cả users */}
-                <div
-                  className="px-4 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer relative"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/saved-articles");
-                    setShowMenu(false);
-                  }}
-                >
-                  <FaBookmark className="text-yellow-500 dark:text-yellow-400" />
-                  <span>{t("navSavedArticles")}</span>
-                  <SavedArticlesBadge className="ml-auto" />
-                </div>
+                {/* Bài viết đã lưu - chỉ cho STUDENT */}
+                {user.role === "STUDENT" && (
+                  <div
+                    className="px-4 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer relative"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/saved-articles");
+                      setShowMenu(false);
+                    }}
+                  >
+                    <FaBookmark className="text-yellow-500 dark:text-yellow-400" />
+                    <span>{t("navSavedArticles")}</span>
+                    <SavedArticlesBadge className="ml-auto" />
+                  </div>
+                )}
                 {/* Lịch làm việc - chỉ cho EXPERT */}
                 {user.role === "EXPERT" && !isAnonymousUser(user) && (
                   <div

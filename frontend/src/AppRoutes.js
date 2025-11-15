@@ -155,9 +155,51 @@ export default function AppRoutes() {
       return;
     }
 
+    // Cho phép ADMIN/EXPERT truy cập /saved-articles, /blog, /blog/create, /blog/post/:id để hiển thị 404
+    const isSavedArticlesPath = window.location.pathname === "/saved-articles";
+    const isBlogPath =
+      window.location.pathname === "/blog" ||
+      window.location.pathname === "/blog/create" ||
+      window.location.pathname.startsWith("/blog/post/");
+    const token = localStorage.getItem("token");
+
+    // Nếu là ADMIN/EXPERT và đang ở /saved-articles hoặc các trang blog, không redirect
+    if (token && (isSavedArticlesPath || isBlogPath)) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.role === "ADMIN" || decoded.role === "EXPERT") {
+          // Chỉ set user, không redirect
+          const storedUser = localStorage.getItem("user");
+          let userData = {};
+          if (storedUser && storedUser !== "undefined") {
+            try {
+              userData = JSON.parse(storedUser);
+            } catch (e) {
+              userData = {};
+            }
+          }
+          const userObject = {
+            email: decoded.sub,
+            role: decoded.role,
+            firstName: decoded.firstName || userData.firstName || "",
+            lastName: decoded.lastName || userData.lastName || "",
+            plan: decoded.plan || userData.plan || "FREE",
+            phone: decoded.phone || userData.phone,
+            avatarUrl: decoded.avatarUrl || userData.avatarUrl,
+            anonymous: decoded.anonymous || userData.anonymous || false,
+          };
+          setUser(userObject);
+          setLoadingUser(false);
+          isProcessingUser.current = false;
+          return; // Return early, không chạy logic redirect
+        }
+      } catch (e) {
+        // Nếu decode fail, tiếp tục logic bình thường
+      }
+    }
+
     isProcessingUser.current = true;
     setLoadingUser(true);
-    const token = localStorage.getItem("token");
     const anonymousToken = localStorage.getItem("anonymousToken");
 
     const publicPaths = [
@@ -176,7 +218,6 @@ export default function AppRoutes() {
       "/payment/vnpay/return",
       "/blog",
       "/blog/create",
-      "/saved-articles",
       "/login",
       "/register",
       "/forgot-password",
@@ -185,9 +226,6 @@ export default function AppRoutes() {
 
     // Check if current path is a blog post detail page
     const isBlogPostPath = window.location.pathname.startsWith("/blog/post/");
-
-    // Check if current path is saved articles page
-    const isSavedArticlesPath = window.location.pathname === "/saved-articles";
 
     if (token) {
       try {
@@ -221,23 +259,36 @@ export default function AppRoutes() {
         isProcessingUser.current = false; // Reset flag
         // Logic redirect rõ ràng và chính xác hơn
 
+        // Không redirect nếu ADMIN/EXPERT truy cập /saved-articles hoặc các trang blog (để hiển thị 404)
+        const isSavedArticlesPath =
+          window.location.pathname === "/saved-articles";
+        const isBlogPathForRestriction =
+          window.location.pathname === "/blog" ||
+          window.location.pathname === "/blog/create" ||
+          window.location.pathname.startsWith("/blog/post/");
+        const shouldAllowRestrictedPagesForAdminExpert =
+          (isSavedArticlesPath || isBlogPathForRestriction) &&
+          (decoded.role === "ADMIN" || decoded.role === "EXPERT");
+
         if (decoded.role === "ADMIN") {
           // Admin chỉ được ở /admin/* hoặc public paths
+          // Không redirect nếu đang ở /saved-articles hoặc các trang blog (để hiển thị 404)
           if (
+            !shouldAllowRestrictedPagesForAdminExpert &&
             !window.location.pathname.startsWith("/admin") &&
             !publicPaths.includes(window.location.pathname) &&
-            !isBlogPostPath &&
-            !isSavedArticlesPath
+            !isBlogPostPath
           ) {
             navigate("/admin/dashboard", { replace: true });
           }
         } else if (decoded.role === "EXPERT") {
           // Expert chỉ được ở /expert/* hoặc public paths
+          // Không redirect nếu đang ở /saved-articles hoặc các trang blog (để hiển thị 404)
           if (
+            !shouldAllowRestrictedPagesForAdminExpert &&
             !window.location.pathname.startsWith("/expert") &&
             !publicPaths.includes(window.location.pathname) &&
-            !isBlogPostPath &&
-            !isSavedArticlesPath
+            !isBlogPostPath
           ) {
             navigate("/expert/dashboard", { replace: true });
           }
@@ -248,9 +299,9 @@ export default function AppRoutes() {
             (!window.location.pathname.startsWith("/student") &&
               window.location.pathname !== "/home" &&
               window.location.pathname !== "/appointments" &&
+              window.location.pathname !== "/saved-articles" &&
               !publicPaths.includes(window.location.pathname) &&
-              !isBlogPostPath &&
-              !isSavedArticlesPath)
+              !isBlogPostPath)
           ) {
             navigate("/home", { replace: true });
           }
@@ -313,7 +364,6 @@ export default function AppRoutes() {
         window.location.pathname !== "/" &&
         !publicPaths.includes(window.location.pathname) &&
         !isBlogPostPath &&
-        !isSavedArticlesPath &&
         !window.location.pathname.startsWith("/login") &&
         !window.location.pathname.startsWith("/register") &&
         !window.location.pathname.startsWith("/forgot-password") &&
@@ -491,14 +541,7 @@ export default function AppRoutes() {
           <Route path="/payment/paypal" element={<PayPalPaymentPage />} />
           <Route path="/payment/vnpay" element={<VNPayPaymentPage />} />
           <Route path="/payment/vnpay/return" element={<VNPayPaymentPage />} />
-          <Route
-            path="/saved-articles"
-            element={
-              <BlogErrorBoundary>
-                <SavedArticlesPage />
-              </BlogErrorBoundary>
-            }
-          />
+          <Route path="/saved-articles" element={<NotFoundPage />} />
           <Route path="/student/test" element={<StudentTestPage />} />
           <Route
             path="/student/test-result"
@@ -527,38 +570,10 @@ export default function AppRoutes() {
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route
-            path="/blog"
-            element={
-              <BlogErrorBoundary>
-                <BlogListPage />
-              </BlogErrorBoundary>
-            }
-          />
-          <Route
-            path="/blog/create"
-            element={
-              <BlogErrorBoundary>
-                <CreatePostPage />
-              </BlogErrorBoundary>
-            }
-          />
-          <Route
-            path="/blog/post/:id"
-            element={
-              <BlogErrorBoundary>
-                <BlogPostPage />
-              </BlogErrorBoundary>
-            }
-          />
-          <Route
-            path="/saved-articles"
-            element={
-              <BlogErrorBoundary>
-                <SavedArticlesPage />
-              </BlogErrorBoundary>
-            }
-          />
+          <Route path="/blog" element={<NotFoundPage />} />
+          <Route path="/blog/create" element={<NotFoundPage />} />
+          <Route path="/blog/post/:id" element={<NotFoundPage />} />
+          <Route path="/saved-articles" element={<NotFoundPage />} />
           <Route
             path="/login"
             element={
@@ -638,38 +653,10 @@ export default function AppRoutes() {
           <Route path="/disclaimer" element={<Disclaimer />} />
           <Route path="/consult-therapy" element={<ConsultTherapyPage />} />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route
-            path="/blog"
-            element={
-              <BlogErrorBoundary>
-                <BlogListPage />
-              </BlogErrorBoundary>
-            }
-          />
-          <Route
-            path="/blog/create"
-            element={
-              <BlogErrorBoundary>
-                <CreatePostPage />
-              </BlogErrorBoundary>
-            }
-          />
-          <Route
-            path="/blog/post/:id"
-            element={
-              <BlogErrorBoundary>
-                <BlogPostPage />
-              </BlogErrorBoundary>
-            }
-          />
-          <Route
-            path="/saved-articles"
-            element={
-              <BlogErrorBoundary>
-                <SavedArticlesPage />
-              </BlogErrorBoundary>
-            }
-          />
+          <Route path="/blog" element={<NotFoundPage />} />
+          <Route path="/blog/create" element={<NotFoundPage />} />
+          <Route path="/blog/post/:id" element={<NotFoundPage />} />
+          <Route path="/saved-articles" element={<NotFoundPage />} />
           <Route
             path="/login"
             element={
@@ -825,14 +812,7 @@ export default function AppRoutes() {
           <Route path="/payment/paypal" element={<PayPalPaymentPage />} />
           <Route path="/payment/vnpay" element={<VNPayPaymentPage />} />
           <Route path="/payment/vnpay/return" element={<VNPayPaymentPage />} />
-          <Route
-            path="/saved-articles"
-            element={
-              <BlogErrorBoundary>
-                <SavedArticlesPage />
-              </BlogErrorBoundary>
-            }
-          />
+          <Route path="/saved-articles" element={<NotFoundPage />} />
           <Route
             path="/login"
             element={
