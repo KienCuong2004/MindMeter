@@ -1055,17 +1055,19 @@ export default function QuestionManagementPage({
           {confirmDelete && (
             <div
               key="delete-confirm-modal"
-              className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50"
+              className="fixed inset-0 bg-black bg-opacity-30 dark:bg-opacity-70 flex items-center justify-center z-50"
             >
-              <div className="bg-white rounded-lg p-8 shadow-lg w-full max-w-sm text-center">
-                <h2 className="text-xl font-bold mb-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-lg w-full max-w-sm text-center">
+                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
                   {t("confirmDeleteQuestion")}
                 </h2>
-                <p>{t("confirmDeleteQuestionMessage")}</p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  {t("confirmDeleteQuestionMessage")}
+                </p>
                 <div className="flex justify-center gap-4 mt-6">
                   <button
                     key="delete-cancel-btn"
-                    className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold"
+                    className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold transition-colors"
                     onClick={() => setConfirmDelete(false)}
                     disabled={deleting}
                   >
@@ -1073,7 +1075,7 @@ export default function QuestionManagementPage({
                   </button>
                   <button
                     key="delete-confirm-btn"
-                    className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white font-semibold flex items-center justify-center gap-2 min-w-[100px]"
+                    className="px-4 py-2 rounded bg-red-500 dark:bg-red-700 hover:bg-red-600 dark:hover:bg-red-800 text-white font-semibold flex items-center justify-center gap-2 min-w-[100px] transition-colors"
                     onClick={handleDeleteConfirmed}
                     disabled={deleting}
                   >
