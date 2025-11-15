@@ -4,6 +4,7 @@ import { FaGoogle } from "react-icons/fa";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
 import { ThemeContext } from "../App";
+import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { theme } = React.useContext(ThemeContext);
+  const { t } = useTranslation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
