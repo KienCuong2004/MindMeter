@@ -983,15 +983,15 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
           </div>
         </div>
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-3xl shadow-2xl p-10 max-w-2xl w-full min-w-[320px] mx-4 transition-all duration-300">
+          <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-10 max-w-2xl w-full min-w-[320px] mx-4 transition-all duration-300">
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-extrabold text-blue-600 text-center w-full tracking-wide">
+                <h2 className="text-3xl font-extrabold text-blue-600 dark:text-blue-400 text-center w-full tracking-wide">
                   {isEdit ? t("editUser") : t("addUser")}
                 </h2>
                 <button
                   type="button"
-                  className="text-gray-400 hover:text-gray-500 text-2xl font-bold absolute right-8 top-8"
+                  className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 text-2xl font-bold absolute right-8 top-8"
                   onClick={() => {
                     setShowModal(false);
                     setFormErrors("");
@@ -1002,8 +1002,8 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
               </div>
 
               {formErrors && (
-                <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 rounded-lg">
-                  <p className="text-red-700 font-medium flex items-center text-base">
+                <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 rounded-lg">
+                  <p className="text-red-700 dark:text-red-300 font-medium flex items-center text-base">
                     <FaExclamationTriangle className="mr-2 text-xl" />
                     {formErrors}
                   </p>
@@ -1013,12 +1013,12 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
               <form onSubmit={handleSave}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div>
-                    <label className="block text-gray-700 text-base font-medium mb-2">
+                    <label className="block text-gray-700 dark:text-gray-300 text-base font-medium mb-2">
                       {t("emailHeader")}
                     </label>
                     <input
                       type="email"
-                      className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-base"
+                      className="w-full px-5 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 outline-none transition-colors text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       value={modalUser.email || ""}
                       onChange={(e) =>
                         setModalUser({ ...modalUser, email: e.target.value })
@@ -1027,12 +1027,12 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-base font-medium mb-2">
+                    <label className="block text-gray-700 dark:text-gray-300 text-base font-medium mb-2">
                       {t("phoneHeader")}
                     </label>
                     <input
                       type="tel"
-                      className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-base"
+                      className="w-full px-5 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 outline-none transition-colors text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       value={modalUser.phone || ""}
                       onChange={(e) =>
                         setModalUser({ ...modalUser, phone: e.target.value })
@@ -1041,12 +1041,12 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-base font-medium mb-2">
+                    <label className="block text-gray-700 dark:text-gray-300 text-base font-medium mb-2">
                       {t("firstNameHeader")}
                     </label>
                     <input
                       type="text"
-                      className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-base"
+                      className="w-full px-5 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 outline-none transition-colors text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       value={modalUser.firstName || ""}
                       onChange={(e) =>
                         setModalUser({
@@ -1058,12 +1058,12 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-base font-medium mb-2">
+                    <label className="block text-gray-700 dark:text-gray-300 text-base font-medium mb-2">
                       {t("lastNameHeader")}
                     </label>
                     <input
                       type="text"
-                      className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-base"
+                      className="w-full px-5 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 outline-none transition-colors text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       value={modalUser.lastName || ""}
                       onChange={(e) =>
                         setModalUser({ ...modalUser, lastName: e.target.value })
@@ -1073,12 +1073,12 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
                   </div>
                   {!isEdit && (
                     <div>
-                      <label className="block text-gray-700 text-base font-medium mb-2">
+                      <label className="block text-gray-700 dark:text-gray-300 text-base font-medium mb-2">
                         {t("passwordLabel")}
                       </label>
                       <input
                         type="password"
-                        className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-base"
+                        className="w-full px-5 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 outline-none transition-colors text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         value={modalUser.password || ""}
                         onChange={(e) =>
                           setModalUser({
@@ -1091,11 +1091,11 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
                     </div>
                   )}
                   <div>
-                    <label className="block text-gray-700 text-base font-medium mb-2">
+                    <label className="block text-gray-700 dark:text-gray-300 text-base font-medium mb-2">
                       {t("roleHeader")}
                     </label>
                     <select
-                      className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-base bg-white"
+                      className="w-full px-5 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 outline-none transition-colors text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       value={modalUser.role}
                       onChange={(e) =>
                         setModalUser({ ...modalUser, role: e.target.value })
@@ -1109,11 +1109,11 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-gray-700 text-base font-medium mb-2">
+                    <label className="block text-gray-700 dark:text-gray-300 text-base font-medium mb-2">
                       {t("statusHeader")}
                     </label>
                     <select
-                      className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors text-base bg-white"
+                      className="w-full px-5 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30 outline-none transition-colors text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       value={modalUser.status}
                       onChange={(e) =>
                         setModalUser({ ...modalUser, status: e.target.value })
@@ -1128,14 +1128,14 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
                 <div className="flex justify-end gap-4 mt-6">
                   <button
                     type="button"
-                    className="px-6 py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-all text-base shadow"
+                    className="px-6 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-base shadow"
                     onClick={() => setShowModal(false)}
                   >
                     {t("cancel")}
                   </button>
                   <button
                     type="submit"
-                    className="px-8 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all text-base shadow-lg"
+                    className="px-8 py-3 rounded-xl bg-blue-600 dark:bg-blue-700 text-white font-bold hover:bg-blue-700 dark:hover:bg-blue-800 transition-all text-base shadow-lg"
                     disabled={saving}
                   >
                     {isEdit ? t("update") : t("add")}
@@ -1146,20 +1146,24 @@ export default function UserManagementPage({ handleLogout: propHandleLogout }) {
           </div>
         )}
         {confirmDelete && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 shadow-lg w-full max-w-sm text-center">
-              <h2 className="text-xl font-bold mb-4">{t("confirmDelete")}</h2>
-              <p>{t("confirmDeleteMessage")}</p>
+          <div className="fixed inset-0 bg-black bg-opacity-30 dark:bg-opacity-70 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-lg w-full max-w-sm text-center">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                {t("confirmDelete")}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300">
+                {t("confirmDeleteMessage")}
+              </p>
               <div className="flex justify-center gap-4 mt-6">
                 <button
-                  className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold"
+                  className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold transition-colors"
                   onClick={() => setConfirmDelete(false)}
                   disabled={saving}
                 >
                   {t("cancel")}
                 </button>
                 <button
-                  className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white font-semibold"
+                  className="px-4 py-2 rounded bg-red-500 dark:bg-red-700 hover:bg-red-600 dark:hover:bg-red-800 text-white font-semibold transition-colors"
                   onClick={confirmDeleteUser}
                   disabled={saving}
                 >
