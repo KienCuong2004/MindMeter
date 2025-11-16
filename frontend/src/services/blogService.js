@@ -52,14 +52,8 @@ class BlogService {
   // Get all blog posts for admin (including pending)
   async getPostsForAdmin(params = {}) {
     try {
-      // Admin posts are served from /api/admin/blog, not /api/blog
-      const response = await axios.get(
-        `${API_BASE_URL}/api/admin/blog/posts`,
-        {
-          params,
-          headers: this.api.defaults.headers,
-        }
-      );
+      // Admin listing lives under /api/blog/admin/posts
+      const response = await this.api.get(`/admin/posts`, { params });
       return response.data;
     } catch (error) {
       console.error("Error fetching admin blog posts:", error);

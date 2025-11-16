@@ -112,7 +112,16 @@ const BlogManagementPage = ({ handleLogout }) => {
 
       const response = await blogService.getPostsForAdmin(params);
 
-      setPosts(response.content || []);
+      const allPosts = response.content || [];
+      const normalizedFilter = String(statusFilter).toLowerCase();
+      const filteredPosts =
+        normalizedFilter === "all"
+          ? allPosts
+          : allPosts.filter(
+              (p) => String(p.status || "").toLowerCase() === normalizedFilter
+            );
+
+      setPosts(filteredPosts);
       setTotalPages(response.totalPages || 0);
     } catch (error) {
       console.error("Error fetching posts:", error);
