@@ -243,7 +243,7 @@ const BlogManagementPage = ({ handleLogout }) => {
 
           {/* Filters */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-1">
                 <div className="relative">
                   <input
@@ -288,14 +288,6 @@ const BlogManagementPage = ({ handleLogout }) => {
                 >
                   <FilterIcon />
                   {t("blog.admin.clearFilters")}
-                </button>
-              </div>
-              <div className="md:col-span-1">
-                <button
-                  onClick={() => navigate("/blog/create")}
-                  className="w-full px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 font-medium"
-                >
-                  {t("blog.admin.createPost")}
                 </button>
               </div>
             </div>
