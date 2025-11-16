@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { useTheme as useCustomTheme } from "../hooks/useTheme";
 import { jwtDecode } from "jwt-decode";
 import {
@@ -70,7 +69,6 @@ const StatusChip = ({ status }) => {
 
 const BlogManagementPage = ({ handleLogout }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { theme: themeMode, setTheme } = useCustomTheme();
   const [user, setUser] = useState(null);
 
