@@ -245,7 +245,7 @@ const BlogManagementPage = ({ handleLogout }) => {
         onLogout={handleLogout}
       />
 
-      <div className="flex-1 px-4 py-8">
+      <div className="flex-1 px-4 py-8 pt-24">
         <div className="max-w-7xl mx-auto">
           {/* Title */}
           <h1 className="text-2xl font-bold mb-8 mt-8 text-blue-600 dark:text-blue-300 text-center">
