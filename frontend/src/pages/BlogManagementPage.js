@@ -103,7 +103,7 @@ const BlogManagementPage = ({ handleLogout }) => {
       };
 
       if (statusFilter !== "ALL") {
-        params.status = statusFilter;
+        params.status = String(statusFilter).toLowerCase();
       }
 
       if (searchQuery.trim()) {
