@@ -247,66 +247,57 @@ const BlogManagementPage = ({ handleLogout }) => {
 
       <div className="flex-1 px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-2">
-              {t("blog.admin.title")}
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              {t("blog.admin.subtitle")}
-            </p>
-          </div>
+          {/* Title */}
+          <h1 className="text-2xl font-bold mb-8 mt-8 text-blue-600 dark:text-blue-300 text-center">
+            {t("blog.admin.title")}
+          </h1>
 
-          {/* Filters */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-1">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder={t("blog.admin.search")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                    className="w-full px-4 py-3 pl-10 pr-12 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                  />
-                  <button
-                    onClick={handleSearch}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
-                  >
-                    <SearchIcon />
-                  </button>
-                </div>
-              </div>
-              <div className="md:col-span-1">
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-4 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                >
-                  <option value="ALL">{t("blog.admin.filter.all")}</option>
-                  <option value="PENDING">
-                    {t("blog.admin.status.pending")}
-                  </option>
-                  <option value="PUBLISHED">
-                    {t("blog.admin.status.published")}
-                  </option>
-                  <option value="DRAFT">{t("blog.admin.status.draft")}</option>
-                  <option value="REJECTED">
-                    {t("blog.admin.status.rejected")}
-                  </option>
-                </select>
-              </div>
-              <div className="md:col-span-1">
+          {/* Controls (search, status, clear) */}
+          <div className="flex flex-wrap gap-4 mb-6 items-center justify-center">
+            <div className="flex items-center justify-center min-w-[300px]">
+              <div className="relative w-full max-w-2xl">
+                <input
+                  type="text"
+                  className="w-full px-6 py-3 rounded-full shadow border outline-none focus:ring-2 focus:ring-blue-400 text-base dark:bg-gray-800 dark:text-white dark:border-gray-700 pl-12"
+                  placeholder={t("blog.admin.search")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                />
                 <button
-                  onClick={handleClearFilters}
-                  className="w-full px-4 py-3 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 flex items-center justify-center gap-2"
+                  onClick={handleSearch}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
                 >
-                  <FilterIcon />
-                  {t("blog.admin.clearFilters")}
+                  <SearchIcon />
                 </button>
               </div>
             </div>
+            <div className="min-w-[260px]">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-6 py-3 rounded-full shadow border outline-none focus:ring-2 focus:ring-blue-400 text-base dark:bg-gray-800 dark:text-white dark:border-gray-700"
+              >
+                <option value="ALL">{t("blog.admin.filter.all")}</option>
+                <option value="PENDING">
+                  {t("blog.admin.status.pending")}
+                </option>
+                <option value="PUBLISHED">
+                  {t("blog.admin.status.published")}
+                </option>
+                <option value="DRAFT">{t("blog.admin.status.draft")}</option>
+                <option value="REJECTED">
+                  {t("blog.admin.status.rejected")}
+                </option>
+              </select>
+            </div>
+            <button
+              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-full shadow transition min-w-[160px] h-[48px] dark:bg-indigo-700 dark:hover:bg-indigo-800"
+              onClick={handleClearFilters}
+            >
+              <FilterIcon />
+              {t("blog.admin.clearFilters")}
+            </button>
           </div>
 
           {/* Posts Table */}
