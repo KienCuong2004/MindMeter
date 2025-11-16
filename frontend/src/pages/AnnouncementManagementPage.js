@@ -730,20 +730,24 @@ export default function AnnouncementManagementPage({
           )}
           {/* Modal xác nhận xóa */}
           {confirmDelete && (
-            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-8 shadow-lg w-full max-w-sm text-center">
-                <h2 className="text-xl font-bold mb-4">{t("confirmDelete")}</h2>
-                <p>{t("confirmDeleteMessage")}</p>
-                <div className="flex justify-center gap-4 mt-6">
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="w-full max-w-sm rounded-2xl shadow-2xl text-center border border-gray-200 bg-white p-8 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
+                <h2 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
+                  {t("confirmDelete")}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-300">
+                  {t("confirmDeleteMessage")}
+                </p>
+                <div className="flex justify-center gap-3 mt-6">
                   <button
-                    className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold"
+                    className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold transition-colors dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
                     onClick={() => setConfirmDelete(false)}
                     disabled={deleting}
                   >
                     {t("cancel")}
                   </button>
                   <button
-                    className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white font-semibold"
+                    className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors dark:bg-red-600 dark:hover:bg-red-700"
                     onClick={handleDeleteConfirmed}
                     disabled={deleting}
                   >
