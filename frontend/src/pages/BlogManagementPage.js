@@ -90,6 +90,10 @@ const BlogManagementPage = ({ handleLogout }) => {
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  // Delete confirm modal state
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deletePostId, setDeletePostId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -196,19 +200,24 @@ const BlogManagementPage = ({ handleLogout }) => {
     }
   };
 
-  const handleDeletePost = async (postId) => {
-    if (window.confirm(t("blog.admin.confirm.deletePost"))) {
-      try {
-        setLoading(true);
-        await blogService.deletePost(postId);
-        setSuccess(t("blog.admin.success.postDeleted"));
-        fetchPosts();
-      } catch (error) {
-        console.error("Error deleting post:", error);
-        setError(t("blog.admin.error.deleteFailed"));
-      } finally {
-        setLoading(false);
-      }
+  const handleDeletePost = (postId) => {
+    setDeletePostId(postId);
+    setConfirmDeleteOpen(true);
+  };
+
+  const handleDeleteConfirmed = async () => {
+    try {
+      setDeleting(true);
+      await blogService.deletePost(deletePostId);
+      setSuccess(t("blog.admin.success.postDeleted"));
+      setConfirmDeleteOpen(false);
+      setDeletePostId(null);
+      fetchPosts();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      setError(t("blog.admin.error.deleteFailed"));
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -527,6 +536,38 @@ const BlogManagementPage = ({ handleLogout }) => {
           </div>
         </DialogActions>
       </Dialog>
+
+      {/* Delete confirmation modal */}
+      {confirmDeleteOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="w-full max-w-sm rounded-2xl shadow-2xl text-center border border-gray-200 bg-white p-8 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
+            <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">
+              {t("blog.admin.actions.delete")}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              {t("blog.admin.confirm.deletePost")}
+            </p>
+            <div className="flex justify-center gap-3 mt-6">
+              <button
+                className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold transition-colors dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                onClick={() => setConfirmDeleteOpen(false)}
+                disabled={deleting}
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                className="px-5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors dark:bg-red-600 dark:hover:bg-red-700"
+                onClick={handleDeleteConfirmed}
+                disabled={deleting}
+              >
+                {deleting
+                  ? t("common.deleting")
+                  : t("blog.admin.actions.delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Approve Post Dialog */}
       <Dialog
