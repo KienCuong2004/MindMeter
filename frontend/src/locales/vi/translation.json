@@ -456,6 +456,7 @@
   "common": {
     "notification": "Thông báo",
     "error": "Lỗi",
+    "loading": "Đang tải...",
     "cancel": "Hủy",
     "close": "Đóng",
     "retry": "Thử lại",
