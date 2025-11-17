@@ -452,63 +452,72 @@ export default function DashboardHeader({
                   </div>
                 )}
               </div>
-              <button
-                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                onClick={() => {
-                  function smoothScrollTo(element) {
-                    if (!element) return;
-                    const headerOffset = 90;
-                    const elementPosition =
-                      element.getBoundingClientRect().top + window.pageYOffset;
-                    const offsetPosition = elementPosition - headerOffset;
-                    const start = window.pageYOffset;
-                    const distance = offsetPosition - start;
-                    const duration = 900;
-                    let startTime = null;
-                    function animation(currentTime) {
-                      if (startTime === null) startTime = currentTime;
-                      const timeElapsed = currentTime - startTime;
-                      const run = ease(timeElapsed, start, distance, duration);
-                      window.scrollTo(0, run);
-                      if (timeElapsed < duration)
-                        requestAnimationFrame(animation);
+              {/* Danh sách bài test - chỉ hiển thị cho STUDENT và ANONYMOUS */}
+              {(!user || user.role === "STUDENT" || isAnonymousUser(user)) && (
+                <button
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  onClick={() => {
+                    function smoothScrollTo(element) {
+                      if (!element) return;
+                      const headerOffset = 90;
+                      const elementPosition =
+                        element.getBoundingClientRect().top +
+                        window.pageYOffset;
+                      const offsetPosition = elementPosition - headerOffset;
+                      const start = window.pageYOffset;
+                      const distance = offsetPosition - start;
+                      const duration = 900;
+                      let startTime = null;
+                      function animation(currentTime) {
+                        if (startTime === null) startTime = currentTime;
+                        const timeElapsed = currentTime - startTime;
+                        const run = ease(
+                          timeElapsed,
+                          start,
+                          distance,
+                          duration
+                        );
+                        window.scrollTo(0, run);
+                        if (timeElapsed < duration)
+                          requestAnimationFrame(animation);
+                      }
+                      function ease(t, b, c, d) {
+                        t /= d / 2;
+                        if (t < 1) return (c / 2) * t * t + b;
+                        t--;
+                        return (-c / 2) * (t * (t - 2) - 1) + b;
+                      }
+                      requestAnimationFrame(animation);
                     }
-                    function ease(t, b, c, d) {
-                      t /= d / 2;
-                      if (t < 1) return (c / 2) * t * t + b;
-                      t--;
-                      return (-c / 2) * (t * (t - 2) - 1) + b;
-                    }
-                    requestAnimationFrame(animation);
-                  }
-                  if (window.location.pathname === "/home") {
-                    const el = document.getElementById("test-section");
-                    smoothScrollTo(el);
-                  } else {
-                    navigate("/home#test-section");
-                    setTimeout(() => {
+                    if (window.location.pathname === "/home") {
                       const el = document.getElementById("test-section");
                       smoothScrollTo(el);
-                    }, 400);
-                  }
-                  setShowMobileMenu(false);
-                }}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+                    } else {
+                      navigate("/home#test-section");
+                      setTimeout(() => {
+                        const el = document.getElementById("test-section");
+                        smoothScrollTo(el);
+                      }, 400);
+                    }
+                    setShowMobileMenu(false);
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-                {t("navTestList")}
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                  {t("navTestList")}
+                </button>
+              )}
               {/* Blog link - chỉ hiển thị cho STUDENT (không phải anonymous) */}
               {user && user.role === "STUDENT" && !user.anonymous && (
                 <button
