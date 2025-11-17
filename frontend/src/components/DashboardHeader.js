@@ -309,7 +309,7 @@ export default function DashboardHeader({
         (className || "")
       }
     >
-      {/* Logo + Mobile menu button */}
+      {/* Logo */}
       <div className="flex items-center gap-2 sm:gap-3 lg:gap-5 select-none cursor-pointer flex-1 lg:flex-none min-w-0">
         <div
           className="flex items-center gap-2 sm:gap-3 lg:gap-5 select-none cursor-pointer min-w-0"
@@ -330,28 +330,6 @@ export default function DashboardHeader({
           <span className="text-sm sm:text-base lg:text-lg xl:text-xl font-extrabold bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 dark:from-indigo-300 dark:via-blue-300 dark:to-purple-400 bg-clip-text text-transparent tracking-wide whitespace-nowrap overflow-visible flex-shrink-0">
             {logoText}
           </span>
-        </div>
-        {/* Mobile menu button - responsive */}
-        <div className="flex justify-end lg:hidden ml-2 sm:ml-4">
-          <button
-            className="p-1.5 sm:p-2 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700 focus:outline-none transition-colors"
-            onClick={() => setShowMobileMenu((v) => !v)}
-            aria-label="Open menu"
-          >
-            <svg
-              className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-200"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
         </div>
       </div>
       {/* Menu ngang: chỉ hiện ở lg trở lên */}
@@ -713,6 +691,28 @@ export default function DashboardHeader({
       )}
       {/* Right section - responsive */}
       <div className="relative items-center gap-1 sm:gap-2 md:gap-4 lg:gap-6 select-none flex ml-2 sm:ml-4 xl:ml-6">
+        {/* Mobile menu button - responsive, positioned before user menu */}
+        <div className="flex items-center lg:hidden mr-2 sm:mr-3">
+          <button
+            className="p-1.5 sm:p-2 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700 focus:outline-none transition-colors"
+            onClick={() => setShowMobileMenu((v) => !v)}
+            aria-label="Open menu"
+          >
+            <svg
+              className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-200"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
         {/* Nếu không có user, hiển thị nút Đăng nhập/Đăng ký */}
         {!user ? (
           <div className="flex gap-1 sm:gap-2 md:gap-3">
