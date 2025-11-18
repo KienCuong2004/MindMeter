@@ -235,6 +235,7 @@
     "title": "Trang không tìm thấy",
     "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.",
     "goHome": "Về trang chủ",
+    "goToDashboard": "Về bảng điều khiển",
     "goBack": "Quay lại",
     "helpTitle": "Bạn có thể thử:",
     "help1": "Kiểm tra lại URL",

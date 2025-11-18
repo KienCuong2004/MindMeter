@@ -236,6 +236,7 @@
       "title": "Page Not Found",
       "description": "Sorry, the page you are looking for does not exist or has been moved.",
       "goHome": "Go Home",
+      "goToDashboard": "Go to Dashboard",
       "goBack": "Go Back",
       "helpTitle": "You can try:",
       "help1": "Check the URL again",
