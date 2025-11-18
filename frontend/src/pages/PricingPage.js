@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import NotificationModal from "../components/NotificationModal";
 import RateLimitModal from "../components/RateLimitModal";
+import NotFoundPage from "./NotFoundPage";
 
 export default function PricingPage() {
   const { t, i18n } = useTranslation();
@@ -231,42 +232,10 @@ export default function PricingPage() {
     }
   };
 
-  if (
-    !user ||
-    (user.role !== "STUDENT" && user.role !== "ADMIN" && user.role !== "EXPERT")
-  ) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-100 to-purple-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-        <DashboardHeader
-          logoIcon={
-            <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
-          }
-          logoText={t("pricing.title") || "Chọn gói dịch vụ"}
-          user={user}
-          i18n={i18n}
-          theme={theme}
-          setTheme={toggleTheme}
-          onLogout={handleLogout}
-        />
-        <div className="flex-1 flex flex-col items-center justify-center w-full">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 mt-32 text-center max-w-lg">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">
-              {t("pricing.noAccessTitle")}
-            </h2>
-            <p className="text-gray-700 dark:text-gray-200 mb-2">
-              {t("pricing.noAccessDesc")}
-            </p>
-            <button
-              className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow"
-              onClick={() => (window.location.href = "/login")}
-            >
-              {t("login")}
-            </button>
-          </div>
-        </div>
-        <FooterSection />
-      </div>
-    );
+  // Chỉ cho phép STUDENT truy cập trang pricing
+  // Nếu không phải STUDENT (bao gồm ADMIN, EXPERT, ANONYMOUS) thì hiển thị trang 404
+  if (!user || user.role !== "STUDENT") {
+    return <NotFoundPage />;
   }
 
   return (
