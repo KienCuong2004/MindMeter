@@ -1102,22 +1102,19 @@ export default function DashboardHeader({
                         <span>{t("appointments")}</span>
                       </div>
                     )}
-                  {(user.role === "STUDENT" ||
-                    user.role === "ADMIN" ||
-                    user.role === "EXPERT") &&
-                    !isAnonymousUser(user) && (
-                      <div
-                        className="px-4 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate("/pricing");
-                          setShowMenu(false);
-                        }}
-                      >
-                        <FaCreditCard className="text-green-500 dark:text-green-400" />
-                        <span>{t("pricingPackages")}</span>
-                      </div>
-                    )}
+                  {user.role === "STUDENT" && !isAnonymousUser(user) && (
+                    <div
+                      className="px-4 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/pricing");
+                        setShowMenu(false);
+                      }}
+                    >
+                      <FaCreditCard className="text-green-500 dark:text-green-400" />
+                      <span>{t("pricingPackages")}</span>
+                    </div>
+                  )}
                   <div
                     className="px-4 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer"
                     onClick={(e) => {
