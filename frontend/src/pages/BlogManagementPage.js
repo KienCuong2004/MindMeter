@@ -83,6 +83,10 @@ const BlogManagementPage = ({ handleLogout }) => {
   // Filters
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState([]);
+  const [tagFilter, setTagFilter] = useState([]);
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [availableTags, setAvailableTags] = useState([]);
 
   // Dialog states
   const [selectedPost, setSelectedPost] = useState(null);
@@ -94,6 +98,25 @@ const BlogManagementPage = ({ handleLogout }) => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deletePostId, setDeletePostId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Load categories and tags
+  useEffect(() => {
+    const loadCategoriesAndTags = async () => {
+      try {
+        const [categoriesData, tagsData] = await Promise.all([
+          blogService.getAllCategories(),
+          blogService.getAllTags(),
+        ]);
+        setAvailableCategories(
+          Array.isArray(categoriesData) ? categoriesData : []
+        );
+        setAvailableTags(Array.isArray(tagsData) ? tagsData : []);
+      } catch (error) {
+        console.error("Error loading categories and tags:", error);
+      }
+    };
+    loadCategoriesAndTags();
+  }, []);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -111,21 +134,21 @@ const BlogManagementPage = ({ handleLogout }) => {
       }
 
       if (searchQuery.trim()) {
-        params.search = searchQuery.trim();
+        params.keyword = searchQuery.trim();
       }
 
-      const response = await blogService.getPostsForAdmin(params);
+      if (categoryFilter.length > 0) {
+        params.categoryIds = categoryFilter;
+      }
+
+      if (tagFilter.length > 0) {
+        params.tagIds = tagFilter;
+      }
+
+      const response = await blogService.getAdminPosts(params);
 
       const allPosts = response.content || [];
-      const normalizedFilter = String(statusFilter).toLowerCase();
-      const filteredPosts =
-        normalizedFilter === "all"
-          ? allPosts
-          : allPosts.filter(
-              (p) => String(p.status || "").toLowerCase() === normalizedFilter
-            );
-
-      setPosts(filteredPosts);
+      setPosts(allPosts);
       setTotalPages(response.totalPages || 0);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -133,7 +156,7 @@ const BlogManagementPage = ({ handleLogout }) => {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, searchQuery, size, t]);
+  }, [page, statusFilter, searchQuery, categoryFilter, tagFilter, size, t]);
 
   useEffect(() => {
     // Get user info from token
@@ -229,6 +252,26 @@ const BlogManagementPage = ({ handleLogout }) => {
   const handleClearFilters = () => {
     setStatusFilter("ALL");
     setSearchQuery("");
+    setCategoryFilter([]);
+    setTagFilter([]);
+    setPage(0);
+  };
+
+  const toggleCategoryFilter = (categoryId) => {
+    setCategoryFilter((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+    setPage(0);
+  };
+
+  const toggleTagFilter = (tagId) => {
+    setTagFilter((prev) =>
+      prev.includes(tagId)
+        ? prev.filter((id) => id !== tagId)
+        : [...prev, tagId]
+    );
     setPage(0);
   };
 
@@ -252,52 +295,144 @@ const BlogManagementPage = ({ handleLogout }) => {
             {t("blog.admin.title")}
           </h1>
 
-          {/* Controls (search, status, clear) */}
-          <div className="flex flex-wrap gap-4 mb-6 items-center justify-center">
-            <div className="flex items-center justify-center min-w-[300px]">
-              <div className="relative w-full max-w-2xl">
-                <input
-                  type="text"
-                  className="w-full px-6 py-3 rounded-full shadow border outline-none focus:ring-2 focus:ring-blue-400 text-base dark:bg-gray-800 dark:text-white dark:border-gray-700 pl-12"
-                  placeholder={t("blog.admin.search")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                />
-                <button
-                  onClick={handleSearch}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
-                >
-                  <SearchIcon />
-                </button>
+          {/* Controls (search, status, category, tag, clear) */}
+          <div className="space-y-4 mb-6">
+            {/* Main filters row */}
+            <div className="flex flex-wrap gap-4 items-center justify-center">
+              <div className="flex items-center justify-center min-w-[300px]">
+                <div className="relative w-full max-w-2xl">
+                  <input
+                    type="text"
+                    className="w-full px-6 py-3 rounded-full shadow border outline-none focus:ring-2 focus:ring-blue-400 text-base dark:bg-gray-800 dark:text-white dark:border-gray-700 pl-12"
+                    placeholder={t("blog.admin.search")}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  />
+                  <button
+                    onClick={handleSearch}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+                  >
+                    <SearchIcon />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="min-w-[260px]">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-6 py-3 rounded-full shadow border outline-none focus:ring-2 focus:ring-blue-400 text-base dark:bg-gray-800 dark:text-white dark:border-gray-700"
+              <div className="min-w-[260px]">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full px-6 py-3 rounded-full shadow border outline-none focus:ring-2 focus:ring-blue-400 text-base dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                >
+                  <option value="ALL">{t("blog.admin.filter.all")}</option>
+                  <option value="PENDING">
+                    {t("blog.admin.status.pending")}
+                  </option>
+                  <option value="PUBLISHED">
+                    {t("blog.admin.status.published")}
+                  </option>
+                  <option value="DRAFT">{t("blog.admin.status.draft")}</option>
+                  <option value="REJECTED">
+                    {t("blog.admin.status.rejected")}
+                  </option>
+                </select>
+              </div>
+              <button
+                className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-full shadow transition min-w-[160px] h-[48px] dark:bg-indigo-700 dark:hover:bg-indigo-800"
+                onClick={handleClearFilters}
               >
-                <option value="ALL">{t("blog.admin.filter.all")}</option>
-                <option value="PENDING">
-                  {t("blog.admin.status.pending")}
-                </option>
-                <option value="PUBLISHED">
-                  {t("blog.admin.status.published")}
-                </option>
-                <option value="DRAFT">{t("blog.admin.status.draft")}</option>
-                <option value="REJECTED">
-                  {t("blog.admin.status.rejected")}
-                </option>
-              </select>
+                <FilterIcon />
+                {t("blog.admin.clearFilters")}
+              </button>
             </div>
-            <button
-              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-full shadow transition min-w-[160px] h-[48px] dark:bg-indigo-700 dark:hover:bg-indigo-800"
-              onClick={handleClearFilters}
-            >
-              <FilterIcon />
-              {t("blog.admin.clearFilters")}
-            </button>
+
+            {/* Category and Tag filters */}
+            <div className="flex flex-wrap gap-4 items-center justify-center">
+              {/* Category filter */}
+              <div className="min-w-[200px]">
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      toggleCategoryFilter(Number(e.target.value));
+                      e.target.value = "";
+                    }
+                  }}
+                  className="w-full px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-400 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                >
+                  <option value="">{t("blog.admin.filter.byCategory")}</option>
+                  {availableCategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Selected categories */}
+              {categoryFilter.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {categoryFilter.map((catId) => {
+                    const category = availableCategories.find(
+                      (c) => c.id === catId
+                    );
+                    return category ? (
+                      <span
+                        key={catId}
+                        onClick={() => toggleCategoryFilter(catId)}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer"
+                        style={{
+                          backgroundColor: `${category.color || "#10B981"}20`,
+                          color: category.color || "#10B981",
+                          border: `1px solid ${category.color || "#10B981"}`,
+                        }}
+                      >
+                        {category.name} ×
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              )}
+
+              {/* Tag filter */}
+              <div className="min-w-[200px]">
+                <select
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      toggleTagFilter(Number(e.target.value));
+                      e.target.value = "";
+                    }
+                  }}
+                  className="w-full px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-400 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                >
+                  <option value="">{t("blog.admin.filter.byTag")}</option>
+                  {availableTags.map((tag) => (
+                    <option key={tag.id} value={tag.id}>
+                      {tag.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Selected tags */}
+              {tagFilter.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {tagFilter.map((tagId) => {
+                    const tag = availableTags.find((t) => t.id === tagId);
+                    return tag ? (
+                      <span
+                        key={tagId}
+                        onClick={() => toggleTagFilter(tagId)}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer"
+                        style={{
+                          backgroundColor: `${tag.color || "#3B82F6"}20`,
+                          color: tag.color || "#3B82F6",
+                          border: `1px solid ${tag.color || "#3B82F6"}`,
+                        }}
+                      >
+                        {tag.name} ×
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Posts Table */}

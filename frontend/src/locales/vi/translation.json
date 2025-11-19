@@ -1931,7 +1931,9 @@
       "search": "Tìm kiếm bài viết...",
       "filter": {
         "status": "Lọc theo trạng thái",
-        "all": "Tất cả trạng thái"
+        "all": "Tất cả trạng thái",
+        "byCategory": "Lọc theo Danh mục",
+        "byTag": "Lọc theo Thẻ"
       },
       "clearFilters": "Xóa bộ lọc",
       "createPost": "Tạo Bài viết",

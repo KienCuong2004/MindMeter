@@ -170,23 +170,19 @@ public class BlogService {
         Page<BlogPost> posts;
         
         // Build query based on filters
+        BlogPost.BlogPostStatus filterStatus = status != null ? status : BlogPost.BlogPostStatus.published;
+        
         if (keyword != null && !keyword.trim().isEmpty()) {
-            posts = blogPostRepository.searchPosts(
-                status != null ? status : BlogPost.BlogPostStatus.published,
-                keyword.trim(),
-                pageable);
+            posts = blogPostRepository.searchPosts(filterStatus, keyword.trim(), pageable);
+        } else if (categoryIds != null && !categoryIds.isEmpty() && tagIds != null && !tagIds.isEmpty()) {
+            // Both category and tag filters - get all posts and filter in memory
+            posts = blogPostRepository.findByStatus(filterStatus, pageable);
         } else if (categoryIds != null && !categoryIds.isEmpty()) {
-            // Filter by categories (take first category for now - can be enhanced)
-            posts = blogPostRepository.findByCategoryIdAndStatus(
-                categoryIds.get(0),
-                status != null ? status : BlogPost.BlogPostStatus.published,
-                pageable);
+            // Filter by multiple categories
+            posts = blogPostRepository.findByCategoryIdsAndStatus(categoryIds, filterStatus, pageable);
         } else if (tagIds != null && !tagIds.isEmpty()) {
-            // Filter by tags (take first tag for now - can be enhanced)
-            posts = blogPostRepository.findByTagIdAndStatus(
-                tagIds.get(0),
-                status != null ? status : BlogPost.BlogPostStatus.published,
-                pageable);
+            // Filter by multiple tags
+            posts = blogPostRepository.findByTagIdsAndStatus(tagIds, filterStatus, pageable);
         } else if (status != null) {
             posts = blogPostRepository.findByStatus(status, pageable);
         } else {

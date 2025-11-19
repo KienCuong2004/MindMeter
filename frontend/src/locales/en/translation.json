@@ -1932,7 +1932,9 @@
       "search": "Search posts...",
       "filter": {
         "status": "Filter by status",
-        "all": "All statuses"
+        "all": "All statuses",
+        "byCategory": "Filter by Category",
+        "byTag": "Filter by Tag"
       },
       "clearFilters": "Clear filters",
       "createPost": "Create Post",

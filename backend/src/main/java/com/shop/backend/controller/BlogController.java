@@ -1,6 +1,7 @@
 package com.shop.backend.controller;
 
 import com.shop.dto.blog.*;
+import com.shop.backend.model.BlogPost;
 import com.shop.backend.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,8 +30,24 @@ public class BlogController {
     
     // Blog Post Endpoints
     @GetMapping("/posts")
-    public ResponseEntity<Page<BlogPostDTO>> getAllPosts(Pageable pageable, Authentication authentication) {
+    public ResponseEntity<Page<BlogPostDTO>> getAllPosts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) List<Long> tagIds,
+            Pageable pageable,
+            Authentication authentication) {
         String userEmail = authentication != null ? authentication.getName() : null;
+        
+        // If any filters are provided, use advanced search
+        if (keyword != null || (categoryIds != null && !categoryIds.isEmpty()) || 
+            (tagIds != null && !tagIds.isEmpty())) {
+            Page<BlogPostDTO> posts = blogService.searchPostsAdvanced(
+                keyword, categoryIds, tagIds, BlogPost.BlogPostStatus.published,
+                null, null, null, null, pageable, userEmail);
+            return ResponseEntity.ok(posts);
+        }
+        
+        // Otherwise, return all published posts
         Page<BlogPostDTO> posts = blogService.getAllPosts(pageable, userEmail);
         return ResponseEntity.ok(posts);
     }

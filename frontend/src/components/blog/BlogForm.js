@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
 import { useTheme as useCustomTheme } from "../../hooks/useTheme";
+import blogService from "../../services/blogService";
 
 const BlogForm = ({
   initialData = null,
@@ -20,36 +21,68 @@ const BlogForm = ({
     content: "",
     excerpt: "",
     featuredImage: null,
-    category: "",
-    tags: [],
+    categoryIds: [], // Changed to array of category IDs
+    tagIds: [], // Changed to array of tag IDs
     status: "pending", // Always create posts as pending for admin approval
   });
 
-  const [tagInput, setTagInput] = useState("");
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [loadingTags, setLoadingTags] = useState(false);
+  const [tagSearchInput, setTagSearchInput] = useState("");
+  const [tagSearchResults, setTagSearchResults] = useState([]);
+  const [showTagSearch, setShowTagSearch] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
-  const categories = [
-    { value: "personalStory", label: t("blog.categories.personalStory") },
-    { value: "mentalHealthTips", label: t("blog.categories.mentalHealthTips") },
-    { value: "copingStrategies", label: t("blog.categories.copingStrategies") },
-    { value: "therapy", label: t("blog.categories.therapy") },
-    { value: "lifestyle", label: t("blog.categories.lifestyle") },
-    { value: "relationships", label: t("blog.categories.relationships") },
-    { value: "workLife", label: t("blog.categories.workLife") },
-    { value: "resources", label: t("blog.categories.resources") },
-    { value: "community", label: t("blog.categories.community") },
-    { value: "research", label: t("blog.categories.research") },
-  ];
+  // Load categories and tags from API
+  useEffect(() => {
+    const loadCategoriesAndTags = async () => {
+      try {
+        setLoadingCategories(true);
+        setLoadingTags(true);
+
+        const [categoriesData, tagsData] = await Promise.all([
+          blogService.getAllCategories(),
+          blogService.getAllTags(),
+        ]);
+
+        setAvailableCategories(
+          Array.isArray(categoriesData) ? categoriesData : []
+        );
+        setAvailableTags(Array.isArray(tagsData) ? tagsData : []);
+      } catch (error) {
+        console.error("Error loading categories and tags:", error);
+      } finally {
+        setLoadingCategories(false);
+        setLoadingTags(false);
+      }
+    };
+
+    loadCategoriesAndTags();
+  }, []);
 
   useEffect(() => {
     if (initialData) {
+      // Extract category and tag IDs from initial data
+      const categoryIds = initialData.categories
+        ? initialData.categories.map((cat) =>
+            typeof cat === "object" ? cat.id : cat
+          )
+        : [];
+      const tagIds = initialData.tags
+        ? initialData.tags.map((tag) =>
+            typeof tag === "object" ? tag.id : tag
+          )
+        : [];
+
       setFormData({
         title: initialData.title || "",
         content: initialData.content || "",
         excerpt: initialData.excerpt || "",
         featuredImage: initialData.featuredImage || null,
-        category: initialData.category || "",
-        tags: initialData.tags || [],
+        categoryIds: categoryIds,
+        tagIds: tagIds,
         status: initialData.status || "draft",
       });
     }
@@ -103,32 +136,78 @@ const BlogForm = ({
     }
   };
 
-  const handleTagInputChange = (event) => {
-    setTagInput(event.target.value);
-  };
-
-  const handleTagInputKeyPress = (event) => {
-    if (event.key === "Enter" || event.key === ",") {
-      event.preventDefault();
-      addTag();
+  // Handle tag search
+  useEffect(() => {
+    if (tagSearchInput.trim()) {
+      const filtered = availableTags.filter(
+        (tag) =>
+          tag.name.toLowerCase().includes(tagSearchInput.toLowerCase()) &&
+          !formData.tagIds.includes(tag.id)
+      );
+      setTagSearchResults(filtered.slice(0, 5)); // Show top 5 results
+      setShowTagSearch(true);
+    } else {
+      setTagSearchResults([]);
+      setShowTagSearch(false);
     }
+  }, [tagSearchInput, availableTags, formData.tagIds]);
+
+  // Close tag search on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showTagSearch && !event.target.closest(".tag-search-container")) {
+        setShowTagSearch(false);
+      }
+    };
+
+    if (showTagSearch) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showTagSearch]);
+
+  const handleTagSearchChange = (event) => {
+    setTagSearchInput(event.target.value);
   };
 
-  const addTag = () => {
-    const tag = tagInput.trim();
-    if (tag && !formData.tags.includes(tag)) {
+  const addTag = (tagId) => {
+    if (tagId && !formData.tagIds.includes(tagId)) {
       setFormData((prev) => ({
         ...prev,
-        tags: [...prev.tags, tag],
+        tagIds: [...prev.tagIds, tagId],
       }));
-      setTagInput("");
+      setTagSearchInput("");
+      setShowTagSearch(false);
     }
   };
 
-  const removeTag = (tagToRemove) => {
+  const removeTag = (tagIdToRemove) => {
     setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
+      tagIds: prev.tagIds.filter((tagId) => tagId !== tagIdToRemove),
+    }));
+  };
+
+  const handleCategoryChange = (event) => {
+    const categoryId = event.target.value;
+    if (categoryId) {
+      // Allow multiple categories
+      if (!formData.categoryIds.includes(Number(categoryId))) {
+        setFormData((prev) => ({
+          ...prev,
+          categoryIds: [...prev.categoryIds, Number(categoryId)],
+        }));
+      }
+      // Reset select
+      event.target.value = "";
+    }
+  };
+
+  const removeCategory = (categoryIdToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryIds: prev.categoryIds.filter((id) => id !== categoryIdToRemove),
     }));
   };
 
@@ -164,10 +243,24 @@ const BlogForm = ({
     const submitData = {
       ...formData,
       status: "pending",
+      categoryIds: formData.categoryIds, // Send category IDs
+      tagIds: formData.tagIds, // Send tag IDs
     };
 
     console.log("Submitting data:", submitData);
     onSubmit(submitData);
+  };
+
+  const getSelectedCategories = () => {
+    return formData.categoryIds
+      .map((id) => availableCategories.find((cat) => cat.id === id))
+      .filter(Boolean);
+  };
+
+  const getSelectedTags = () => {
+    return formData.tagIds
+      .map((id) => availableTags.find((tag) => tag.id === id))
+      .filter(Boolean);
   };
 
   return (
@@ -204,52 +297,107 @@ const BlogForm = ({
           )}
         </div>
 
-        {/* Category */}
+        {/* Categories */}
         <div className="md:col-span-1">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {t("blog.createPostForm.form.category")}
           </label>
           <select
-            value={formData.category}
-            onChange={handleInputChange("category")}
-            className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+            onChange={handleCategoryChange}
+            disabled={loadingCategories}
+            className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
           >
             <option value="">
-              {t("blog.createPostForm.form.selectCategory")}
+              {loadingCategories
+                ? t("common.loading")
+                : t("blog.createPostForm.form.selectCategory")}
             </option>
-            {categories.map((category) => (
-              <option key={category.value} value={category.value}>
-                {category.label}
+            {availableCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
               </option>
             ))}
           </select>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {getSelectedCategories().map((category) => (
+              <span
+                key={category.id}
+                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                style={{
+                  backgroundColor: `${category.color || "#10B981"}20`,
+                  color: category.color || "#10B981",
+                  border: `1px solid ${category.color || "#10B981"}`,
+                }}
+              >
+                {category.name}
+                <button
+                  type="button"
+                  onClick={() => removeCategory(category.id)}
+                  className="ml-2 hover:opacity-75"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* Tags */}
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 relative tag-search-container">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {t("blog.createPostForm.form.tags")}
           </label>
           <input
             type="text"
-            value={tagInput}
-            onChange={handleTagInputChange}
-            onKeyPress={handleTagInputKeyPress}
-            onBlur={addTag}
-            className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-            placeholder={t("blog.createPostForm.form.tagsPlaceholder")}
+            value={tagSearchInput}
+            onChange={handleTagSearchChange}
+            onFocus={() => tagSearchInput && setShowTagSearch(true)}
+            disabled={loadingTags}
+            className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
+            placeholder={
+              loadingTags
+                ? t("common.loading")
+                : t("blog.createPostForm.form.tagsPlaceholder")
+            }
           />
+          {/* Tag search dropdown */}
+          {showTagSearch && tagSearchResults.length > 0 && (
+            <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              {tagSearchResults.map((tag) => (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => addTag(tag.id)}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <span
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: tag.color || "#3B82F6" }}
+                  ></span>
+                  <span className="text-gray-900 dark:text-white">
+                    {tag.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Selected tags */}
           <div className="mt-2 flex flex-wrap gap-2">
-            {formData.tags.map((tag, index) => (
+            {getSelectedTags().map((tag) => (
               <span
-                key={index}
-                className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                key={tag.id}
+                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                style={{
+                  backgroundColor: `${tag.color || "#3B82F6"}20`,
+                  color: tag.color || "#3B82F6",
+                  border: `1px solid ${tag.color || "#3B82F6"}`,
+                }}
               >
-                {tag}
+                {tag.name}
                 <button
                   type="button"
-                  onClick={() => removeTag(tag)}
-                  className="ml-2 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
+                  onClick={() => removeTag(tag.id)}
+                  className="ml-2 hover:opacity-75"
                 >
                   ×
                 </button>

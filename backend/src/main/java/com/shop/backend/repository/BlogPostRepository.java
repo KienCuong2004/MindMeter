@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,6 +26,14 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
     // Find posts by tag
     @Query("SELECT p FROM BlogPost p JOIN p.postTags pt WHERE pt.tag.id = :tagId AND p.status = :status")
     Page<BlogPost> findByTagIdAndStatus(@Param("tagId") Long tagId, @Param("status") BlogPost.BlogPostStatus status, Pageable pageable);
+    
+    // Find posts by multiple tag IDs (posts that have ANY of the tags)
+    @Query("SELECT DISTINCT p FROM BlogPost p JOIN p.postTags pt WHERE pt.tag.id IN :tagIds AND p.status = :status")
+    Page<BlogPost> findByTagIdsAndStatus(@Param("tagIds") List<Long> tagIds, @Param("status") BlogPost.BlogPostStatus status, Pageable pageable);
+    
+    // Find posts by multiple category IDs (posts that have ANY of the categories)
+    @Query("SELECT DISTINCT p FROM BlogPost p JOIN p.postCategories pc WHERE pc.category.id IN :categoryIds AND p.status = :status")
+    Page<BlogPost> findByCategoryIdsAndStatus(@Param("categoryIds") List<Long> categoryIds, @Param("status") BlogPost.BlogPostStatus status, Pageable pageable);
     
     // Search posts by title or content
     @Query("SELECT p FROM BlogPost p WHERE (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND p.status = :status")

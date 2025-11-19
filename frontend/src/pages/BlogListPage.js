@@ -141,17 +141,29 @@ const BlogListPage = () => {
       setLoading(true);
       setCurrentPage(0);
 
+      const params = {
+        page: 0,
+        size: 10,
+      };
+
+      // Add filters to params
+      if (searchTerm && searchTerm.trim()) {
+        params.keyword = searchTerm.trim();
+      }
+      if (selectedCategory) {
+        params.categoryIds = [Number(selectedCategory)];
+      }
+      if (selectedTag) {
+        params.tagIds = [Number(selectedTag)];
+      }
+
+      console.log("BlogListPage - Search params:", params);
+
+      // Use getPosts with params for filtering if any filters are provided
       let postsData;
-      if (searchTerm) {
-        postsData = await blogService.searchPosts(searchTerm, 0, 10);
-      } else if (selectedCategory) {
-        postsData = await blogService.getPostsByCategory(
-          selectedCategory,
-          0,
-          10
-        );
-      } else if (selectedTag) {
-        postsData = await blogService.getPostsByTag(selectedTag, 0, 10);
+      if (params.keyword || params.categoryIds || params.tagIds) {
+        postsData = await blogService.getPosts(params);
+        console.log("BlogListPage - Filtered posts:", postsData);
       } else {
         postsData = await blogService.getAllPosts(0, 10);
       }
@@ -159,6 +171,7 @@ const BlogListPage = () => {
       setPosts(postsData.content || []);
       setHasMore(!postsData.last);
     } catch (err) {
+      console.error("BlogListPage - Search error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -182,17 +195,26 @@ const BlogListPage = () => {
       setLoading(true);
       const nextPage = currentPage + 1;
 
-      let postsData;
+      const params = {
+        page: nextPage,
+        size: 10,
+      };
+
+      // Add filters to params
       if (searchTerm) {
-        postsData = await blogService.searchPosts(searchTerm, nextPage, 10);
-      } else if (selectedCategory) {
-        postsData = await blogService.getPostsByCategory(
-          selectedCategory,
-          nextPage,
-          10
-        );
-      } else if (selectedTag) {
-        postsData = await blogService.getPostsByTag(selectedTag, nextPage, 10);
+        params.keyword = searchTerm;
+      }
+      if (selectedCategory) {
+        params.categoryIds = [Number(selectedCategory)];
+      }
+      if (selectedTag) {
+        params.tagIds = [Number(selectedTag)];
+      }
+
+      // Use getPosts with params for filtering if any filters are provided
+      let postsData;
+      if (searchTerm || selectedCategory || selectedTag) {
+        postsData = await blogService.getPosts(params);
       } else {
         postsData = await blogService.getAllPosts(nextPage, 10);
       }
