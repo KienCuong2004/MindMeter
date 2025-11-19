@@ -19,6 +19,13 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
     Page<BlogPost> findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
         BlogPost.BlogPostStatus status, LocalDateTime publishedAt, Pageable pageable);
     
+    // Find published posts (without publishedAt filter for posts without publishedAt set)
+    @Query("SELECT p FROM BlogPost p WHERE p.status = :status AND (p.publishedAt IS NULL OR p.publishedAt <= :now) ORDER BY COALESCE(p.publishedAt, p.createdAt) DESC")
+    Page<BlogPost> findByPublishedStatus(@Param("status") BlogPost.BlogPostStatus status, @Param("now") LocalDateTime now, Pageable pageable);
+    
+    // Find published posts (simpler version - just by status)
+    Page<BlogPost> findByStatusOrderByPublishedAtDesc(BlogPost.BlogPostStatus status, Pageable pageable);
+    
     // Find posts by category
     @Query("SELECT p FROM BlogPost p JOIN p.postCategories pc WHERE pc.category.id = :categoryId AND p.status = :status")
     Page<BlogPost> findByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") BlogPost.BlogPostStatus status, Pageable pageable);

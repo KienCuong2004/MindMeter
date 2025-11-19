@@ -77,8 +77,10 @@ public class BlogService {
     }
     
     public Page<BlogPostDTO> getAllPosts(Pageable pageable, String userEmail) {
-        Page<BlogPost> posts = blogPostRepository.findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
-            BlogPost.BlogPostStatus.published, LocalDateTime.now(), pageable);
+        // Use simpler query that includes all published posts
+        // This will show all posts with status = published, regardless of publishedAt
+        Page<BlogPost> posts = blogPostRepository.findByStatusOrderByPublishedAtDesc(
+            BlogPost.BlogPostStatus.published, pageable);
         return posts.map(post -> convertToDTO(post, userEmail));
     }
 

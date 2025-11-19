@@ -93,9 +93,22 @@ const BlogListPage = () => {
         blogService.getAllTags(),
       ]);
 
+      console.log("BlogListPage - Initial postsData:", postsData);
+      console.log("BlogListPage - postsData.content:", postsData?.content);
+      console.log(
+        "BlogListPage - postsData.totalElements:",
+        postsData?.totalElements
+      );
+      console.log(
+        "BlogListPage - postsData.totalPages:",
+        postsData?.totalPages
+      );
+      console.log("BlogListPage - postsData.last:", postsData?.last);
+
       // If API returns error, set empty arrays
       if (postsData && postsData.error) {
         setPosts([]);
+        return;
       }
 
       if (categoriesData && categoriesData.error) {
@@ -107,9 +120,16 @@ const BlogListPage = () => {
       }
 
       // Ensure we have arrays
-      const posts = Array.isArray(postsData?.content) ? postsData.content : [];
+      const posts = Array.isArray(postsData?.content)
+        ? postsData.content
+        : Array.isArray(postsData)
+        ? postsData
+        : [];
       const categories = Array.isArray(categoriesData) ? categoriesData : [];
       const tags = Array.isArray(tagsData) ? tagsData : [];
+
+      console.log("BlogListPage - Parsed posts:", posts);
+      console.log("BlogListPage - Posts count:", posts.length);
 
       // If no data, set empty arrays to prevent map errors
       if (!Array.isArray(categories)) {
@@ -127,7 +147,15 @@ const BlogListPage = () => {
       }
 
       setPosts(posts);
-      setHasMore(postsData?.last === false);
+      // Check both 'last' and pagination info
+      const isLast =
+        postsData?.last !== undefined
+          ? postsData.last
+          : postsData?.totalPages !== undefined
+          ? postsData.totalPages - 1 <= 0
+          : true;
+      setHasMore(!isLast);
+      console.log("BlogListPage - hasMore:", !isLast);
     } catch (err) {
       console.error("Error loading data:", err);
       setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
