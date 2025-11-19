@@ -42,6 +42,9 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
     // Count posts by status
     long countByStatus(BlogPost.BlogPostStatus status);
     
+    // Find posts by status
+    Page<BlogPost> findByStatus(BlogPost.BlogPostStatus status, Pageable pageable);
+    
     // Find posts by author
     @Query("SELECT p FROM BlogPost p WHERE p.author.id = :authorId AND p.status = :status")
     Page<BlogPost> findByAuthorIdAndStatus(@Param("authorId") Long authorId, @Param("status") BlogPost.BlogPostStatus status, Pageable pageable);

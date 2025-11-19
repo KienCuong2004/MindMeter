@@ -205,11 +205,11 @@ class BlogService {
         content: postData.content,
         excerpt: postData.excerpt || "",
         status: postData.status, // This should be enum: "draft", "pending", "published", etc.
-        categoryIds: [], // TODO: Fix category mapping - backend expects actual category IDs from database
-        tagIds: [], // Backend expects array of tag IDs, we'll handle this later
+        categoryIds: postData.categoryIds || [], // Use provided category IDs
+        tagIds: postData.tagIds || [], // Use provided tag IDs
         featuredImage: featuredImageUrl, // Use the uploaded image URL
-        isFeatured: false,
-        images: [],
+        isFeatured: postData.isFeatured || false,
+        images: postData.images || [],
       };
 
       const response = await this.api.post("/posts", payload, {
@@ -243,11 +243,11 @@ class BlogService {
         content: postData.content,
         excerpt: postData.excerpt || "",
         status: postData.status, // This should be enum: "draft", "pending", "published", etc.
-        categoryIds: [], // TODO: Fix category mapping - backend expects actual category IDs from database
-        tagIds: [], // Backend expects array of tag IDs, we'll handle this later
-        featuredImage: featuredImageUrl, // Use the uploaded image URL
-        isFeatured: false,
-        images: [],
+        categoryIds: postData.categoryIds || [], // Use provided category IDs
+        tagIds: postData.tagIds || [], // Use provided tag IDs
+        featuredImage: featuredImageUrl || postData.featuredImage, // Use the uploaded image URL or existing
+        isFeatured: postData.isFeatured || false,
+        images: postData.images || [],
       };
 
       const response = await this.api.put(`/posts/${id}`, payload, {
@@ -430,6 +430,189 @@ class BlogService {
       return response.data;
     } catch (error) {
       console.error("Error updating post status:", error);
+      throw error;
+    }
+  }
+
+  // Admin blog endpoints (using /api/admin/blog instead of /api/blog/admin)
+  async getAdminPosts(params = {}) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.get("/posts", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching admin blog posts:", error);
+      throw error;
+    }
+  }
+
+  // Helper method to create admin API instance
+  _getAdminApi() {
+    const adminApi = axios.create({
+      baseURL: `${API_BASE_URL}/api/admin/blog`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    
+    // Add response interceptor for auth errors
+    adminApi.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+    );
+    
+    return adminApi;
+  }
+
+  async approvePost(postId) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.put(`/posts/${postId}/approve`);
+      return response.data;
+    } catch (error) {
+      console.error("Error approving post:", error);
+      throw error;
+    }
+  }
+
+  async rejectPost(postId, reason = null) {
+    try {
+      const adminApi = this._getAdminApi();
+      const params = reason ? { reason } : {};
+      const response = await adminApi.put(`/posts/${postId}/reject`, null, { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error rejecting post:", error);
+      throw error;
+    }
+  }
+
+  async publishPost(postId) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.put(`/posts/${postId}/publish`);
+      return response.data;
+    } catch (error) {
+      console.error("Error publishing post:", error);
+      throw error;
+    }
+  }
+
+  async unpublishPost(postId) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.put(`/posts/${postId}/unpublish`);
+      return response.data;
+    } catch (error) {
+      console.error("Error unpublishing post:", error);
+      throw error;
+    }
+  }
+
+  async deletePostByAdmin(postId) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.delete(`/posts/${postId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      throw error;
+    }
+  }
+
+  // Category management (admin)
+  async getAdminCategories() {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.get("/categories");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching admin categories:", error);
+      throw error;
+    }
+  }
+
+  async createCategory(categoryData) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.post("/categories", categoryData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating category:", error);
+      throw error;
+    }
+  }
+
+  async updateCategory(categoryId, categoryData) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.put(`/categories/${categoryId}`, categoryData);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating category:", error);
+      throw error;
+    }
+  }
+
+  async deleteCategory(categoryId) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.delete(`/categories/${categoryId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      throw error;
+    }
+  }
+
+  // Tag management (admin)
+  async getAdminTags() {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.get("/tags");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching admin tags:", error);
+      throw error;
+    }
+  }
+
+  async createTag(tagData) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.post("/tags", tagData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating tag:", error);
+      throw error;
+    }
+  }
+
+  async updateTag(tagId, tagData) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.put(`/tags/${tagId}`, tagData);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating tag:", error);
+      throw error;
+    }
+  }
+
+  async deleteTag(tagId) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.delete(`/tags/${tagId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting tag:", error);
       throw error;
     }
   }

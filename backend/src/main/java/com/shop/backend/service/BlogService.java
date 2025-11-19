@@ -88,6 +88,159 @@ public class BlogService {
         return posts.map(post -> convertToDTO(post, userEmail));
     }
     
+    public Page<BlogPostDTO> getAllPostsForAdmin(BlogPost.BlogPostStatus status, Pageable pageable, String userEmail) {
+        Page<BlogPost> posts;
+        if (status != null) {
+            posts = blogPostRepository.findByStatus(status, pageable);
+        } else {
+            posts = blogPostRepository.findAll(pageable);
+        }
+        return posts.map(post -> convertToDTO(post, userEmail));
+    }
+    
+    public Page<BlogPostDTO> getPendingPosts(Pageable pageable, String userEmail) {
+        Page<BlogPost> posts = blogPostRepository.findByStatus(
+            BlogPost.BlogPostStatus.pending, pageable);
+        return posts.map(post -> convertToDTO(post, userEmail));
+    }
+    
+    public BlogPostDTO approvePost(Long id, String adminEmail) {
+        BlogPost post = blogPostRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+        
+        post.setStatus(BlogPost.BlogPostStatus.published);
+        if (post.getPublishedAt() == null) {
+            post.setPublishedAt(LocalDateTime.now());
+        }
+        
+        post = blogPostRepository.save(post);
+        return convertToDTO(post);
+    }
+    
+    public BlogPostDTO rejectPost(Long id, String reason, String adminEmail) {
+        BlogPost post = blogPostRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+        
+        post.setStatus(BlogPost.BlogPostStatus.rejected);
+        post = blogPostRepository.save(post);
+        return convertToDTO(post);
+    }
+    
+    public BlogPostDTO publishPost(Long id, String adminEmail) {
+        BlogPost post = blogPostRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+        
+        post.setStatus(BlogPost.BlogPostStatus.published);
+        if (post.getPublishedAt() == null) {
+            post.setPublishedAt(LocalDateTime.now());
+        }
+        
+        post = blogPostRepository.save(post);
+        return convertToDTO(post);
+    }
+    
+    public BlogPostDTO unpublishPost(Long id, String adminEmail) {
+        BlogPost post = blogPostRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+        
+        post.setStatus(BlogPost.BlogPostStatus.draft);
+        post = blogPostRepository.save(post);
+        return convertToDTO(post);
+    }
+    
+    public void deletePostByAdmin(Long id, String adminEmail) {
+        BlogPost post = blogPostRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+        blogPostRepository.delete(post);
+    }
+    
+    // Advanced filtering and search
+    public Page<BlogPostDTO> searchPostsAdvanced(
+            String keyword,
+            List<Long> categoryIds,
+            List<Long> tagIds,
+            BlogPost.BlogPostStatus status,
+            Long authorId,
+            Boolean isFeatured,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable,
+            String userEmail) {
+        
+        Page<BlogPost> posts;
+        
+        // Build query based on filters
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            posts = blogPostRepository.searchPosts(
+                status != null ? status : BlogPost.BlogPostStatus.published,
+                keyword.trim(),
+                pageable);
+        } else if (categoryIds != null && !categoryIds.isEmpty()) {
+            // Filter by categories (take first category for now - can be enhanced)
+            posts = blogPostRepository.findByCategoryIdAndStatus(
+                categoryIds.get(0),
+                status != null ? status : BlogPost.BlogPostStatus.published,
+                pageable);
+        } else if (tagIds != null && !tagIds.isEmpty()) {
+            // Filter by tags (take first tag for now - can be enhanced)
+            posts = blogPostRepository.findByTagIdAndStatus(
+                tagIds.get(0),
+                status != null ? status : BlogPost.BlogPostStatus.published,
+                pageable);
+        } else if (status != null) {
+            posts = blogPostRepository.findByStatus(status, pageable);
+        } else {
+            posts = blogPostRepository.findAll(pageable);
+        }
+        
+        // Convert to DTOs and apply additional filters
+        List<BlogPostDTO> filteredDTOs = posts.stream()
+            .map(post -> convertToDTO(post, userEmail))
+            .filter(dto -> {
+                // Apply additional filters
+                if (categoryIds != null && !categoryIds.isEmpty() && dto.getCategories() != null) {
+                    boolean hasCategory = dto.getCategories().stream()
+                        .anyMatch(c -> categoryIds.contains(c.getId()));
+                    if (!hasCategory) {
+                        return false;
+                    }
+                }
+                
+                if (tagIds != null && !tagIds.isEmpty() && dto.getTags() != null) {
+                    boolean hasTag = dto.getTags().stream()
+                        .anyMatch(t -> tagIds.contains(t.getId()));
+                    if (!hasTag) {
+                        return false;
+                    }
+                }
+                
+                if (authorId != null && !dto.getAuthorId().equals(authorId)) {
+                    return false;
+                }
+                
+                if (isFeatured != null && !isFeatured.equals(dto.getIsFeatured())) {
+                    return false;
+                }
+                
+                if (startDate != null && dto.getPublishedAt() != null && dto.getPublishedAt().isBefore(startDate)) {
+                    return false;
+                }
+                
+                if (endDate != null && dto.getPublishedAt() != null && dto.getPublishedAt().isAfter(endDate)) {
+                    return false;
+                }
+                
+                return true;
+            })
+            .collect(Collectors.toList());
+        
+        // Create a new Page from filtered results
+        return new org.springframework.data.domain.PageImpl<>(
+            filteredDTOs,
+            pageable,
+            filteredDTOs.size());
+    }
+    
     public Page<BlogPostDTO> getPostsByCategory(Long categoryId, Pageable pageable) {
         Page<BlogPost> posts = blogPostRepository.findByCategoryIdAndStatus(
             categoryId, BlogPost.BlogPostStatus.published, pageable);
@@ -225,6 +378,39 @@ public class BlogService {
         }
         
         post = blogPostRepository.save(post);
+        
+        // Update categories
+        if (request.getCategoryIds() != null) {
+            // Remove existing categories
+            blogPostCategoryRepository.deleteByPostId(id);
+            
+            // Add new categories
+            for (Long categoryId : request.getCategoryIds()) {
+                BlogCategory category = blogCategoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new RuntimeException("Category not found: " + categoryId));
+                BlogPostCategory postCategory = new BlogPostCategory();
+                postCategory.setPost(post);
+                postCategory.setCategory(category);
+                blogPostCategoryRepository.save(postCategory);
+            }
+        }
+        
+        // Update tags
+        if (request.getTagIds() != null) {
+            // Remove existing tags
+            blogPostTagRepository.deleteByPostId(id);
+            
+            // Add new tags
+            for (Long tagId : request.getTagIds()) {
+                BlogTag tag = blogTagRepository.findById(tagId)
+                    .orElseThrow(() -> new RuntimeException("Tag not found: " + tagId));
+                BlogPostTag postTag = new BlogPostTag();
+                postTag.setPost(post);
+                postTag.setTag(tag);
+                blogPostTagRepository.save(postTag);
+            }
+        }
+        
         return convertToDTO(post);
     }
     
@@ -554,10 +740,144 @@ public class BlogService {
         return categories.stream().map(this::convertCategoryToDTO).collect(Collectors.toList());
     }
     
+    public BlogCategoryDTO createCategory(BlogCategoryRequest request) {
+        BlogCategory category = new BlogCategory();
+        category.setName(request.getName());
+        category.setSlug(generateSlugFromName(request.getName(), true));
+        category.setDescription(request.getDescription());
+        category.setColor(request.getColor() != null ? request.getColor() : "#10B981");
+        category.setDisplayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0);
+        category.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
+        
+        if (request.getParentId() != null) {
+            BlogCategory parent = blogCategoryRepository.findById(request.getParentId())
+                .orElseThrow(() -> new RuntimeException("Parent category not found"));
+            category.setParent(parent);
+        }
+        
+        category = blogCategoryRepository.save(category);
+        return convertCategoryToDTO(category);
+    }
+    
+    public BlogCategoryDTO updateCategory(Long id, BlogCategoryRequest request) {
+        BlogCategory category = blogCategoryRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Category not found"));
+        
+        if (!category.getName().equals(request.getName())) {
+            category.setName(request.getName());
+            category.setSlug(generateSlugFromName(request.getName(), true, id));
+        }
+        
+        category.setDescription(request.getDescription());
+        if (request.getColor() != null) {
+            category.setColor(request.getColor());
+        }
+        if (request.getDisplayOrder() != null) {
+            category.setDisplayOrder(request.getDisplayOrder());
+        }
+        if (request.getIsActive() != null) {
+            category.setIsActive(request.getIsActive());
+        }
+        
+        if (request.getParentId() != null) {
+            if (request.getParentId().equals(id)) {
+                throw new RuntimeException("Category cannot be its own parent");
+            }
+            BlogCategory parent = blogCategoryRepository.findById(request.getParentId())
+                .orElseThrow(() -> new RuntimeException("Parent category not found"));
+            category.setParent(parent);
+        } else {
+            category.setParent(null);
+        }
+        
+        category = blogCategoryRepository.save(category);
+        return convertCategoryToDTO(category);
+    }
+    
+    public void deleteCategory(Long id) {
+        BlogCategory category = blogCategoryRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Category not found"));
+        
+        // Check if category has posts
+        List<BlogPostCategory> postCategories = blogPostCategoryRepository.findByCategoryId(id);
+        if (!postCategories.isEmpty()) {
+            throw new RuntimeException("Cannot delete category with associated posts");
+        }
+        
+        // Check if category has children
+        List<BlogCategory> children = blogCategoryRepository.findByParentIdAndIsActiveTrueOrderByDisplayOrderAsc(id);
+        if (!children.isEmpty()) {
+            throw new RuntimeException("Cannot delete category with child categories");
+        }
+        
+        blogCategoryRepository.delete(category);
+    }
+    
     // Tag Methods
     public List<BlogTagDTO> getAllTags() {
         List<BlogTag> tags = blogTagRepository.findAll();
         return tags.stream().map(this::convertTagToDTO).collect(Collectors.toList());
+    }
+    
+    public BlogTagDTO createTag(BlogTagRequest request) {
+        // Check if tag with same name already exists
+        Optional<BlogTag> existingTag = blogTagRepository.findByNameIgnoreCase(request.getName());
+        if (existingTag.isPresent()) {
+            return convertTagToDTO(existingTag.get());
+        }
+        
+        BlogTag tag = new BlogTag();
+        tag.setName(request.getName());
+        tag.setSlug(generateSlugFromName(request.getName(), false));
+        tag.setDescription(request.getDescription());
+        tag.setColor(request.getColor() != null ? request.getColor() : "#3B82F6");
+        
+        tag = blogTagRepository.save(tag);
+        return convertTagToDTO(tag);
+    }
+    
+    public BlogTagDTO updateTag(Long id, BlogTagRequest request) {
+        BlogTag tag = blogTagRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Tag not found"));
+        
+        if (!tag.getName().equals(request.getName())) {
+            // Check if another tag with same name exists
+            Optional<BlogTag> existingTag = blogTagRepository.findByNameIgnoreCase(request.getName());
+            if (existingTag.isPresent() && !existingTag.get().getId().equals(id)) {
+                throw new RuntimeException("Tag with this name already exists");
+            }
+            tag.setName(request.getName());
+            tag.setSlug(generateSlugFromName(request.getName(), false, id));
+        }
+        
+        tag.setDescription(request.getDescription());
+        if (request.getColor() != null) {
+            tag.setColor(request.getColor());
+        }
+        
+        tag = blogTagRepository.save(tag);
+        return convertTagToDTO(tag);
+    }
+    
+    public void deleteTag(Long id) {
+        BlogTag tag = blogTagRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Tag not found"));
+        
+        // Check if tag has posts
+        List<BlogPostTag> postTags = blogPostTagRepository.findByTagId(id);
+        if (!postTags.isEmpty()) {
+            throw new RuntimeException("Cannot delete tag with associated posts");
+        }
+        
+        blogTagRepository.delete(tag);
+    }
+    
+    public List<BlogTagDTO> getPopularTags(int limit) {
+        List<BlogTag> tags = blogTagRepository.findMostPopularTags();
+        return tags.stream()
+            .limit(limit)
+            .map(this::convertTagToDTO)
+            .collect(Collectors.toList());
     }
     
     // Get comments for a blog post with pagination
@@ -589,6 +909,55 @@ public class BlogService {
                 baseSlug = baseSlug.substring(0, 100 - suffix.length());
             }
             slug = baseSlug + suffix;
+            counter++;
+        }
+        
+        return slug;
+    }
+    
+    private String generateSlugFromName(String name, boolean isCategory) {
+        return generateSlugFromName(name, isCategory, null);
+    }
+    
+    private String generateSlugFromName(String name, boolean isCategory, Long excludeId) {
+        String baseSlug = name.toLowerCase()
+            .replaceAll("[^a-z0-9\\s]", "")
+            .replaceAll("\\s+", "-")
+            .trim();
+        
+        // Ensure slug is not too long (MySQL limit)
+        if (baseSlug.length() > 100) {
+            baseSlug = baseSlug.substring(0, 100);
+        }
+        
+        String slug = baseSlug;
+        int counter = 1;
+        
+        // Check if slug already exists
+        boolean exists;
+        if (isCategory) {
+            exists = excludeId != null 
+                ? blogCategoryRepository.existsBySlugAndIdNot(slug, excludeId)
+                : blogCategoryRepository.existsBySlug(slug);
+        } else {
+            exists = excludeId != null
+                ? blogTagRepository.existsBySlugAndIdNot(slug, excludeId)
+                : blogTagRepository.existsBySlug(slug);
+        }
+        
+        while (exists) {
+            String suffix = "-" + counter;
+            if (baseSlug.length() + suffix.length() > 100) {
+                baseSlug = baseSlug.substring(0, 100 - suffix.length());
+            }
+            slug = baseSlug + suffix;
+            exists = isCategory
+                ? (excludeId != null 
+                    ? blogCategoryRepository.existsBySlugAndIdNot(slug, excludeId)
+                    : blogCategoryRepository.existsBySlug(slug))
+                : (excludeId != null
+                    ? blogTagRepository.existsBySlugAndIdNot(slug, excludeId)
+                    : blogTagRepository.existsBySlug(slug));
             counter++;
         }
         
@@ -694,6 +1063,20 @@ public class BlogService {
         // Set short content (first 150 characters)
         dto.setShortContent(post.getContent().length() > 150 ? 
             post.getContent().substring(0, 150) + "..." : post.getContent());
+        
+        // Set categories
+        List<BlogPostCategory> postCategories = blogPostCategoryRepository.findByPostId(post.getId());
+        List<BlogCategoryDTO> categoryDTOs = postCategories.stream()
+            .map(pc -> convertCategoryToDTO(pc.getCategory()))
+            .collect(Collectors.toList());
+        dto.setCategories(categoryDTOs);
+        
+        // Set tags
+        List<BlogPostTag> postTags = blogPostTagRepository.findByPostId(post.getId());
+        List<BlogTagDTO> tagDTOs = postTags.stream()
+            .map(pt -> convertTagToDTO(pt.getTag()))
+            .collect(Collectors.toList());
+        dto.setTags(tagDTOs);
         
         return dto;
     }
