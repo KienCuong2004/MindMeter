@@ -28,6 +28,8 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [confirmingAppointmentId, setConfirmingAppointmentId] = useState(null);
+  const [cancellingAppointmentId, setCancellingAppointmentId] = useState(null);
 
   // Sử dụng theme từ context
   const { theme, setTheme, toggleTheme } = useTheme();
@@ -303,7 +305,7 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
 
   const handleConfirmAppointment = async (appointmentId) => {
     try {
-      setLoading(true);
+      setConfirmingAppointmentId(appointmentId);
       const response = await authFetch(
         `/api/appointments/${appointmentId}/confirm`,
         {
@@ -346,7 +348,7 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
         }`,
       });
     } finally {
-      setLoading(false);
+      setConfirmingAppointmentId(null);
     }
   };
 
@@ -354,6 +356,7 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
     // Hiển thị custom confirmation modal
     setConfirmAction("cancel");
     setConfirmAppointmentId(appointmentId);
+    setCancellingAppointmentId(appointmentId);
     setShowConfirmModal(true);
   };
 
@@ -365,7 +368,7 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
       if (!cancelReason || !cancelReason.trim()) {
         return;
       }
-      setLoading(true);
+      setCancellingAppointmentId(confirmAppointmentId);
       setIsCancelling(true);
 
       // Sử dụng endpoint đúng với query parameters như backend yêu cầu
@@ -427,7 +430,7 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
         }`,
       });
     } finally {
-      setLoading(false);
+      setCancellingAppointmentId(null);
       setIsCancelling(false);
       // Đóng modal
       setShowConfirmModal(false);
@@ -443,6 +446,7 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
     setConfirmAppointmentId(null);
     setCancelReason("");
     setIsCancelling(false);
+    setCancellingAppointmentId(null);
   };
 
   if (isLoading) {
@@ -878,10 +882,10 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
                                 onClick={() =>
                                   handleConfirmAppointment(appointment.id)
                                 }
-                                disabled={loading}
+                                disabled={confirmingAppointmentId === appointment.id || cancellingAppointmentId === appointment.id}
                                 className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold rounded-lg hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
                               >
-                                {loading ? (
+                                {confirmingAppointmentId === appointment.id ? (
                                   <div className="flex items-center gap-2">
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                                     <span>{t("processing")}</span>
@@ -909,10 +913,10 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
                                 onClick={() =>
                                   handleCancelAppointment(appointment.id)
                                 }
-                                disabled={loading}
+                                disabled={confirmingAppointmentId === appointment.id || cancellingAppointmentId === appointment.id}
                                 className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-semibold rounded-lg hover:from-red-600 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
                               >
-                                {loading ? (
+                                {cancellingAppointmentId === appointment.id ? (
                                   <div className="flex items-center gap-2">
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                                     <span>{t("processing")}</span>
@@ -943,10 +947,10 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
                               onClick={() =>
                                 handleCancelAppointment(appointment.id)
                               }
-                              disabled={loading}
+                              disabled={cancellingAppointmentId === appointment.id}
                               className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-semibold rounded-lg hover:from-red-600 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
                             >
-                              {loading ? (
+                              {cancellingAppointmentId === appointment.id ? (
                                 <div className="flex items-center gap-2">
                                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                                   <span>{t("processing")}</span>
@@ -1127,12 +1131,12 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
               <button
                 onClick={executeCancelAppointment}
                 disabled={
-                  loading ||
+                  isCancelling ||
                   (confirmAction === "cancel" && !cancelReason.trim())
                 }
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors font-medium"
               >
-                {loading || isCancelling ? (
+                {isCancelling ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     <span>{t("processing")}</span>
