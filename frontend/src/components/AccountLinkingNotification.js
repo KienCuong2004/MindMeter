@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { jwtDecode } from "jwt-decode";
 
 const AccountLinkingNotification = () => {
   const navigate = useNavigate();
@@ -26,9 +27,40 @@ const AccountLinkingNotification = () => {
       setUserInfo({ email, name });
       localStorage.setItem("linkedEmail", email);
 
-      // Lưu token vào localStorage để đăng nhập
+      // Lưu token vào localStorage và decode để lưu user object
       if (token) {
         localStorage.setItem("token", token);
+        
+        try {
+          // Decode token để lấy thông tin user
+          const decoded = jwtDecode(token);
+          
+          // Lưu user object vào localStorage giống như AuthCallback
+          const user = {
+            email: decoded.sub || email,
+            role: decoded.role,
+            firstName: decoded.firstName || "",
+            lastName: decoded.lastName || "",
+            avatarUrl: decoded.avatarUrl || null,
+            plan: decoded.plan || "FREE",
+            phone: decoded.phone,
+            anonymous: decoded.anonymous || false,
+          };
+          
+          // Tạo name từ firstName và lastName
+          user.name =
+            (user.firstName || "") + (user.lastName ? " " + user.lastName : "") ||
+            user.email ||
+            "User";
+          
+          localStorage.setItem("user", JSON.stringify(user));
+          
+          // Lưu thời gian đăng nhập để chống spam mua gói
+          const loginTimeKey = `lastLogin_${user.email}`;
+          localStorage.setItem(loginTimeKey, Date.now().toString());
+        } catch (error) {
+          console.error("[AccountLinkingNotification] Error decoding token:", error);
+        }
       }
     }
 
