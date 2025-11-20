@@ -5,9 +5,11 @@ import com.shop.backend.dto.auth.appointment.AppointmentResponse;
 import com.shop.backend.dto.auth.appointment.AvailableSlotRequest;
 import com.shop.backend.dto.auth.appointment.AvailableSlotResponse;
 import com.shop.backend.model.Appointment;
+import com.shop.backend.model.AppointmentHistory;
 import com.shop.backend.model.ExpertBreak;
 import com.shop.backend.model.ExpertSchedule;
 import com.shop.backend.model.User;
+import com.shop.backend.repository.AppointmentHistoryRepository;
 import com.shop.backend.repository.AppointmentRepository;
 import com.shop.backend.repository.ExpertBreakRepository;
 import com.shop.backend.repository.ExpertScheduleRepository;
@@ -34,6 +36,7 @@ public class AppointmentService {
     private final ExpertBreakRepository expertBreakRepository;
     private final UserRepository userRepository;
     private final AppointmentEmailService appointmentEmailService;
+    private final AppointmentHistoryRepository appointmentHistoryRepository;
     
     /**
      * Tạo lịch hẹn mới
@@ -82,6 +85,14 @@ public class AppointmentService {
         
         Appointment savedAppointment = appointmentRepository.save(appointment);
         
+        // Ghi log lịch sử tạo lịch hẹn
+        try {
+            saveAppointmentHistory(savedAppointment, AppointmentHistory.HistoryAction.CREATED, 
+                    null, savedAppointment.getStatus(), student, "Lịch hẹn được tạo mới");
+        } catch (Exception e) {
+            log.error("Lỗi khi ghi log lịch sử tạo lịch hẹn: {}", e.getMessage(), e);
+        }
+        
         // Gửi email thông báo cho học sinh và chuyên gia
         try {
             appointmentEmailService.sendBookingConfirmationToStudent(savedAppointment);
@@ -110,8 +121,19 @@ public class AppointmentService {
             throw new RuntimeException("Lịch hẹn này không thể xác nhận");
         }
         
+        Appointment.AppointmentStatus oldStatus = appointment.getStatus();
         appointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
         Appointment savedAppointment = appointmentRepository.save(appointment);
+        
+        // Ghi log lịch sử xác nhận lịch hẹn
+        try {
+            User expert = userRepository.findById(expertId)
+                    .orElseThrow(() -> new RuntimeException("Chuyên gia không tồn tại"));
+            saveAppointmentHistory(savedAppointment, AppointmentHistory.HistoryAction.CONFIRMED, 
+                    oldStatus, savedAppointment.getStatus(), expert, "Lịch hẹn được xác nhận bởi chuyên gia");
+        } catch (Exception e) {
+            log.error("Lỗi khi ghi log lịch sử xác nhận lịch hẹn: {}", e.getMessage(), e);
+        }
         
         // Gửi email xác nhận cho học sinh và chuyên gia
         try {
@@ -147,11 +169,22 @@ public class AppointmentService {
             throw new RuntimeException("Không thể hủy lịch hẹn đã hoàn thành");
         }
         
+        Appointment.AppointmentStatus oldStatus = appointment.getStatus();
         appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
         appointment.setCancellationReason(reason);
         appointment.setCancelledBy(cancelledBy);
         
         Appointment savedAppointment = appointmentRepository.save(appointment);
+        
+        // Ghi log lịch sử hủy lịch hẹn
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+            saveAppointmentHistory(savedAppointment, AppointmentHistory.HistoryAction.CANCELLED, 
+                    oldStatus, savedAppointment.getStatus(), user, reason);
+        } catch (Exception e) {
+            log.error("Lỗi khi ghi log lịch sử hủy lịch hẹn: {}", e.getMessage(), e);
+        }
         
         return convertToResponse(savedAppointment);
     }
@@ -337,5 +370,32 @@ public class AppointmentService {
         response.setUpdatedAt(appointment.getUpdatedAt());
         
         return response;
+    }
+    
+    /**
+     * Helper method để ghi log lịch sử thay đổi lịch hẹn
+     */
+    private void saveAppointmentHistory(Appointment appointment, 
+                                       AppointmentHistory.HistoryAction action,
+                                       Appointment.AppointmentStatus oldStatus,
+                                       Appointment.AppointmentStatus newStatus,
+                                       User changedBy,
+                                       String changeReason) {
+        try {
+            AppointmentHistory history = new AppointmentHistory();
+            history.setAppointment(appointment);
+            history.setAction(action);
+            history.setOldStatus(oldStatus);
+            history.setNewStatus(newStatus);
+            history.setChangedBy(changedBy);
+            history.setChangeReason(changeReason);
+            
+            appointmentHistoryRepository.save(history);
+            log.debug("Đã ghi log lịch sử thay đổi lịch hẹn {}: {} từ {} sang {}", 
+                    appointment.getId(), action, oldStatus, newStatus);
+        } catch (Exception e) {
+            log.error("Lỗi khi ghi log lịch sử thay đổi lịch hẹn: {}", e.getMessage(), e);
+            // Không throw exception để không ảnh hưởng đến flow chính
+        }
     }
 }

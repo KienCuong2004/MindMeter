@@ -4,8 +4,10 @@ import com.shop.backend.dto.auth.appointment.AppointmentRequest;
 import com.shop.backend.dto.auth.appointment.AutoBookingRequest;
 import com.shop.backend.dto.auth.appointment.AutoBookingResponse;
 import com.shop.backend.model.Appointment;
+import com.shop.backend.model.AppointmentHistory;
 import com.shop.backend.model.User;
 import com.shop.backend.model.Role;
+import com.shop.backend.repository.AppointmentHistoryRepository;
 import com.shop.backend.repository.UserRepository;
 import com.shop.backend.repository.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class AutoBookingService {
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
     private final AppointmentEmailService appointmentEmailService;
+    private final AppointmentHistoryRepository appointmentHistoryRepository;
     
     @Transactional(rollbackFor = Exception.class)
     public AutoBookingResponse autoBookAppointment(AutoBookingRequest request, Long studentId) {
@@ -133,6 +136,14 @@ public class AutoBookingService {
             
             Appointment savedAppointment = appointmentRepository.save(appointment);
             log.info("Đã tạo appointment thành công với ID: {}", savedAppointment.getId());
+            
+            // Ghi log lịch sử tạo lịch hẹn (auto booking)
+            try {
+                saveAppointmentHistory(savedAppointment, com.shop.backend.model.AppointmentHistory.HistoryAction.CREATED, 
+                        null, savedAppointment.getStatus(), student, "Lịch hẹn được tạo tự động");
+            } catch (Exception e) {
+                log.error("Lỗi khi ghi log lịch sử tạo lịch hẹn (auto booking): {}", e.getMessage(), e);
+            }
             
             // Gửi email thông báo cho học sinh và chuyên gia
             try {
@@ -437,5 +448,32 @@ public class AutoBookingService {
         
         // Nếu không nhận diện được, trả về ngày mai
         return today.plusDays(1);
+    }
+    
+    /**
+     * Helper method để ghi log lịch sử thay đổi lịch hẹn
+     */
+    private void saveAppointmentHistory(Appointment appointment, 
+                                       AppointmentHistory.HistoryAction action,
+                                       Appointment.AppointmentStatus oldStatus,
+                                       Appointment.AppointmentStatus newStatus,
+                                       User changedBy,
+                                       String changeReason) {
+        try {
+            AppointmentHistory history = new AppointmentHistory();
+            history.setAppointment(appointment);
+            history.setAction(action);
+            history.setOldStatus(oldStatus);
+            history.setNewStatus(newStatus);
+            history.setChangedBy(changedBy);
+            history.setChangeReason(changeReason);
+            
+            appointmentHistoryRepository.save(history);
+            log.debug("Đã ghi log lịch sử thay đổi lịch hẹn {}: {} từ {} sang {}", 
+                    appointment.getId(), action, oldStatus, newStatus);
+        } catch (Exception e) {
+            log.error("Lỗi khi ghi log lịch sử thay đổi lịch hẹn: {}", e.getMessage(), e);
+            // Không throw exception để không ảnh hưởng đến flow chính
+        }
     }
 }
