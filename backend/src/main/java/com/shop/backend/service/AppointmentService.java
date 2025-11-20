@@ -33,6 +33,7 @@ public class AppointmentService {
     private final ExpertScheduleRepository expertScheduleRepository;
     private final ExpertBreakRepository expertBreakRepository;
     private final UserRepository userRepository;
+    private final AppointmentEmailService appointmentEmailService;
     
     /**
      * Tạo lịch hẹn mới
@@ -81,6 +82,15 @@ public class AppointmentService {
         
         Appointment savedAppointment = appointmentRepository.save(appointment);
         
+        // Gửi email thông báo cho học sinh và chuyên gia
+        try {
+            appointmentEmailService.sendBookingConfirmationToStudent(savedAppointment);
+            appointmentEmailService.sendBookingNotificationToExpert(savedAppointment);
+        } catch (Exception e) {
+            log.error("Lỗi khi gửi email thông báo đặt lịch: {}", e.getMessage(), e);
+            // Không throw exception để không ảnh hưởng đến việc tạo appointment
+        }
+        
         return convertToResponse(savedAppointment);
     }
     
@@ -102,6 +112,15 @@ public class AppointmentService {
         
         appointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
         Appointment savedAppointment = appointmentRepository.save(appointment);
+        
+        // Gửi email xác nhận cho học sinh và chuyên gia
+        try {
+            appointmentEmailService.sendConfirmationToStudent(savedAppointment);
+            appointmentEmailService.sendConfirmationToExpert(savedAppointment);
+        } catch (Exception e) {
+            log.error("Lỗi khi gửi email xác nhận lịch hẹn: {}", e.getMessage(), e);
+            // Không throw exception để không ảnh hưởng đến việc xác nhận appointment
+        }
         
         return convertToResponse(savedAppointment);
     }

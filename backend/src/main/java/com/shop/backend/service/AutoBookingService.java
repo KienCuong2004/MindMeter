@@ -26,6 +26,7 @@ public class AutoBookingService {
     
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentEmailService appointmentEmailService;
     
     @Transactional(rollbackFor = Exception.class)
     public AutoBookingResponse autoBookAppointment(AutoBookingRequest request, Long studentId) {
@@ -132,6 +133,15 @@ public class AutoBookingService {
             
             Appointment savedAppointment = appointmentRepository.save(appointment);
             log.info("Đã tạo appointment thành công với ID: {}", savedAppointment.getId());
+            
+            // Gửi email thông báo cho học sinh và chuyên gia
+            try {
+                appointmentEmailService.sendBookingConfirmationToStudent(savedAppointment);
+                appointmentEmailService.sendBookingNotificationToExpert(savedAppointment);
+            } catch (Exception e) {
+                log.error("Lỗi khi gửi email thông báo đặt lịch (auto booking): {}", e.getMessage(), e);
+                // Không throw exception để không ảnh hưởng đến việc tạo appointment
+            }
             
             // 6. Trả về response thành công
             return new AutoBookingResponse(
