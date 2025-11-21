@@ -330,7 +330,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                 ) && (
                   <div className="mt-1 text-xs font-semibold text-gray-500 dark:text-gray-300">
                     {t("validation.passwordStrongRule")}
-                  </div>
+                    </div>
                 )}
             </div>
             <div className="mb-5 relative">
