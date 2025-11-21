@@ -57,8 +57,8 @@ public class BlogService {
     @Autowired
     private BlogPostViewRepository blogPostViewRepository;
     
-    // @Autowired
-    // private BlogReportRepository blogReportRepository; // Not used yet
+    @Autowired
+    private BlogReportRepository blogReportRepository;
     
     @Autowired
     private BlogPostCategoryRepository blogPostCategoryRepository;
@@ -1141,5 +1141,149 @@ public class BlogService {
         dto.setSharedUrl(share.getSharedUrl());
         dto.setCreatedAt(share.getCreatedAt());
         return dto;
+    }
+    
+    // Report Methods
+    public BlogReportDTO createReport(Long postId, BlogReportRequest request, String userEmail) {
+        BlogPost post = blogPostRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+        User user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Check if user already reported this post
+        if (blogReportRepository.existsByPostIdAndUserId(postId, user.getId())) {
+            throw new RuntimeException("You have already reported this post");
+        }
+        
+        BlogReport report = new BlogReport();
+        report.setPost(post);
+        report.setUser(user);
+        report.setReason(request.getReason());
+        report.setDescription(request.getDescription());
+        report.setStatus(BlogReport.ReportStatus.PENDING);
+        
+        report = blogReportRepository.save(report);
+        return convertReportToDTO(report);
+    }
+    
+    public Page<BlogReportDTO> getAllReportsForAdmin(BlogReport.ReportStatus status, Pageable pageable, String adminEmail) {
+        try {
+            Page<BlogReport> reports;
+            if (status != null) {
+                reports = blogReportRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
+            } else {
+                // Use PageRequest with Sort
+                org.springframework.data.domain.PageRequest pageRequest = org.springframework.data.domain.PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    org.springframework.data.domain.Sort.by("createdAt").descending()
+                );
+                reports = blogReportRepository.findAll(pageRequest);
+            }
+            // Ensure post and user are loaded before mapping
+            List<BlogReport> reportList = reports.getContent();
+            for (BlogReport report : reportList) {
+                // Force load lazy associations
+                if (report.getPost() != null) {
+                    report.getPost().getId();
+                    report.getPost().getTitle();
+                }
+                if (report.getUser() != null) {
+                    report.getUser().getId();
+                    report.getUser().getFirstName();
+                    report.getUser().getLastName();
+                }
+            }
+            return reports.map(this::convertReportToDTO);
+        } catch (Exception e) {
+            System.err.println("Error in getAllReportsForAdmin: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    public Page<BlogReportDTO> getPendingReports(Pageable pageable, String adminEmail) {
+        try {
+            Page<BlogReport> reports = blogReportRepository.findByStatusOrderByCreatedAtDesc(
+                BlogReport.ReportStatus.PENDING, pageable);
+            // Ensure post and user are loaded before mapping
+            List<BlogReport> reportList = reports.getContent();
+            for (BlogReport report : reportList) {
+                // Force load lazy associations
+                if (report.getPost() != null) {
+                    report.getPost().getId();
+                    report.getPost().getTitle();
+                }
+                if (report.getUser() != null) {
+                    report.getUser().getId();
+                    report.getUser().getFirstName();
+                    report.getUser().getLastName();
+                }
+            }
+            return reports.map(this::convertReportToDTO);
+        } catch (Exception e) {
+            System.err.println("Error in getPendingReports: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    public BlogReportDTO reviewReport(Long id, BlogReport.ReportStatus status, String adminNotes, String adminEmail) {
+        BlogReport report = blogReportRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Report not found"));
+        
+        report.setStatus(status);
+        if (adminNotes != null && !adminNotes.trim().isEmpty()) {
+            report.setAdminNotes(adminNotes);
+        }
+        
+        report = blogReportRepository.save(report);
+        return convertReportToDTO(report);
+    }
+    
+    public boolean hasUserReportedPost(Long postId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        return blogReportRepository.existsByPostIdAndUserId(postId, user.getId());
+    }
+    
+    private BlogReportDTO convertReportToDTO(BlogReport report) {
+        try {
+            BlogReportDTO dto = new BlogReportDTO();
+            dto.setId(report.getId());
+            
+            // Safely access post
+            if (report.getPost() != null) {
+                dto.setPostId(report.getPost().getId());
+                dto.setPostTitle(report.getPost().getTitle() != null ? report.getPost().getTitle() : "N/A");
+            } else {
+                dto.setPostId(null);
+                dto.setPostTitle("N/A");
+            }
+            
+            // Safely access user
+            if (report.getUser() != null) {
+                dto.setUserId(report.getUser().getId());
+                String firstName = report.getUser().getFirstName() != null ? report.getUser().getFirstName() : "";
+                String lastName = report.getUser().getLastName() != null ? report.getUser().getLastName() : "";
+                String fullName = (firstName + " " + lastName).trim();
+                dto.setUserName(fullName.isEmpty() ? "Unknown" : fullName);
+            } else {
+                dto.setUserId(null);
+                dto.setUserName("Unknown");
+            }
+            
+            dto.setReason(report.getReason());
+            dto.setDescription(report.getDescription());
+            dto.setStatus(report.getStatus());
+            dto.setAdminNotes(report.getAdminNotes());
+            dto.setCreatedAt(report.getCreatedAt());
+            dto.setUpdatedAt(report.getUpdatedAt());
+            return dto;
+        } catch (Exception e) {
+            System.err.println("Error converting BlogReport to DTO: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error converting report to DTO: " + e.getMessage(), e);
+        }
     }
 }

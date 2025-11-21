@@ -16,6 +16,9 @@ public interface BlogReportRepository extends JpaRepository<BlogReport, Long> {
     // Find reports by status
     Page<BlogReport> findByStatusOrderByCreatedAtDesc(BlogReport.ReportStatus status, Pageable pageable);
     
+    // Find all reports ordered by createdAt
+    Page<BlogReport> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    
     // Find reports by post
     List<BlogReport> findByPostIdOrderByCreatedAtDesc(Long postId);
     

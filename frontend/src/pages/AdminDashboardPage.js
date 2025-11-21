@@ -25,6 +25,7 @@ import {
   FaExclamationTriangle,
   FaBrain,
   FaNewspaper,
+  FaFlag,
 } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
@@ -117,6 +118,12 @@ const actionButtons = [
     color: "bg-purple-500",
     icon: <FaNewspaper />,
     path: "/admin/blog",
+  },
+  {
+    key: "blogReports",
+    color: "bg-red-500",
+    icon: <FaFlag />,
+    path: "/admin/blog/reports",
   },
   {
     key: "announcementManagement",

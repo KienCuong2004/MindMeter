@@ -161,21 +161,24 @@ public class AdminBlogController {
     
     // Report Management
     @GetMapping("/reports")
-    public ResponseEntity<Page<BlogReportDTO>> getAllReports(@RequestParam(required = false) BlogReport.ReportStatus status, Pageable pageable) {
-        // Page<BlogReportDTO> reports = blogService.getAllReportsForAdmin(status, pageable);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Page<BlogReportDTO>> getAllReports(@RequestParam(required = false) BlogReport.ReportStatus status, Pageable pageable, Authentication authentication) {
+        String adminEmail = getCurrentUserEmail(authentication);
+        Page<BlogReportDTO> reports = blogService.getAllReportsForAdmin(status, pageable, adminEmail);
+        return ResponseEntity.ok(reports);
     }
     
     @GetMapping("/reports/pending")
-    public ResponseEntity<Page<BlogReportDTO>> getPendingReports(Pageable pageable) {
-        // Page<BlogReportDTO> reports = blogService.getPendingReports(pageable);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Page<BlogReportDTO>> getPendingReports(Pageable pageable, Authentication authentication) {
+        String adminEmail = getCurrentUserEmail(authentication);
+        Page<BlogReportDTO> reports = blogService.getPendingReports(pageable, adminEmail);
+        return ResponseEntity.ok(reports);
     }
     
     @PutMapping("/reports/{id}/review")
-    public ResponseEntity<BlogReportDTO> reviewReport(@PathVariable Long id, @RequestParam BlogReport.ReportStatus status, @RequestParam(required = false) String adminNotes) {
-        // BlogReportDTO report = blogService.reviewReport(id, status, adminNotes);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<BlogReportDTO> reviewReport(@PathVariable Long id, @RequestParam BlogReport.ReportStatus status, @RequestParam(required = false) String adminNotes, Authentication authentication) {
+        String adminEmail = getCurrentUserEmail(authentication);
+        BlogReportDTO report = blogService.reviewReport(id, status, adminNotes, adminEmail);
+        return ResponseEntity.ok(report);
     }
     
     // Category Management

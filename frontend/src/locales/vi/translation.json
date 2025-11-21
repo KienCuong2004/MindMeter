@@ -53,6 +53,7 @@
   "userManagement": "Quản lý người dùng",
   "questionManagement": "Quản lý câu hỏi",
   "blogManagement": "Quản lý bài viết",
+  "blogReports": "Quản lý báo cáo",
   "announcementManagement": "Quản lý thông báo",
   "statistics": "Xem thống kê",
   "noDepression": "Không trầm cảm",
@@ -1814,6 +1815,34 @@
         "deleteError": "Có lỗi xảy ra khi xóa bình luận"
       }
     },
+    "report": {
+      "title": "Báo cáo bài viết",
+      "report": "Báo cáo",
+      "description": "Nếu bạn thấy nội dung này không phù hợp, vui lòng báo cáo để chúng tôi có thể xem xét.",
+      "alreadyReported": "Đã báo cáo",
+      "alreadyReportedMessage": "Bạn đã báo cáo bài viết này. Chúng tôi sẽ xem xét và xử lý trong thời gian sớm nhất.",
+      "success": "Báo cáo đã được gửi thành công. Cảm ơn bạn đã giúp chúng tôi duy trì một cộng đồng lành mạnh.",
+      "reason": {
+        "label": "Lý do báo cáo",
+        "select": "Chọn lý do báo cáo",
+        "spam": "Spam",
+        "inappropriate": "Nội dung không phù hợp",
+        "harassment": "Quấy rối",
+        "falseInfo": "Thông tin sai sự thật",
+        "other": "Khác"
+      },
+      "description": {
+        "label": "Mô tả chi tiết",
+        "placeholder": "Mô tả chi tiết về vấn đề (tùy chọn)",
+        "optional": "Mô tả chi tiết giúp chúng tôi hiểu rõ hơn về vấn đề (tùy chọn)"
+      },
+      "submit": "Gửi báo cáo",
+      "error": {
+        "selectReason": "Vui lòng chọn lý do báo cáo",
+        "descriptionRequired": "Vui lòng nhập mô tả chi tiết khi chọn lý do 'Khác'",
+        "submitFailed": "Không thể gửi báo cáo. Vui lòng thử lại."
+      }
+    },
     "createPostForm": {
       "title": "Tạo Bài Viết Mới",
       "subtitle": "Chia sẻ hành trình sức khỏe tâm thần và giúp đỡ người khác",
@@ -1983,6 +2012,52 @@
         "deletePost": "Bạn có chắc chắn muốn xóa bài viết này?"
       },
       "noPosts": "Không tìm thấy bài viết nào"
+    },
+    "reports": {
+      "title": "Quản lý Báo cáo",
+      "filter": {
+        "all": "Tất cả trạng thái"
+      },
+      "status": {
+        "pending": "Chờ xử lý",
+        "reviewed": "Đã xem xét",
+        "resolved": "Đã xử lý",
+        "dismissed": "Đã bỏ qua"
+      },
+      "table": {
+        "post": "Bài viết",
+        "reporter": "Người báo cáo",
+        "reason": "Lý do",
+        "status": "Trạng thái",
+        "createdAt": "Ngày tạo",
+        "actions": "Hành động"
+      },
+      "actions": {
+        "view": "Xem",
+        "review": "Xử lý",
+        "submit": "Xác nhận"
+      },
+      "dialog": {
+        "title": "Chi tiết Báo cáo",
+        "post": "Bài viết",
+        "reporter": "Người báo cáo",
+        "reason": "Lý do",
+        "status": "Trạng thái",
+        "description": "Mô tả",
+        "adminNotes": "Ghi chú Admin",
+        "adminNotesPlaceholder": "Nhập ghi chú của bạn...",
+        "createdAt": "Ngày tạo",
+        "reviewTitle": "Xử lý Báo cáo",
+        "reviewStatus": "Trạng thái xử lý"
+      },
+      "success": {
+        "reviewed": "Báo cáo đã được xử lý thành công"
+      },
+      "error": {
+        "fetchFailed": "Không thể tải danh sách báo cáo",
+        "reviewFailed": "Không thể xử lý báo cáo"
+      },
+      "noReports": "Không tìm thấy báo cáo nào"
     }
   },
   "accountLinking": {

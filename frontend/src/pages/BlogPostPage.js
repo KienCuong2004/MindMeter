@@ -15,12 +15,14 @@ import {
   FaTimes,
   FaCopy,
   FaBrain,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import blogService from "../services/blogService";
 import CommentSection from "../components/CommentSection";
 import BlogPostMeta from "../components/BlogPostMeta";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
+import ReportPostModal from "../components/blog/ReportPostModal";
 import { useSavedArticles } from "../contexts/SavedArticlesContext";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
@@ -45,6 +47,8 @@ const BlogPostPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showFullContent, setShowFullContent] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [hasReported, setHasReported] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -134,6 +138,18 @@ const BlogPostPage = () => {
         setLikeCount(postData.likeCount || 0);
         setActualCommentCount(postData.commentCount || 0);
         setShareCount(postData.shareCount || 0);
+
+        // Check if user has reported this post
+        const token = localStorage.getItem("token");
+        if (token) {
+          try {
+            const reported = await blogService.hasUserReportedPost(id);
+            setHasReported(reported);
+          } catch (reportError) {
+            // Silently ignore if checking report fails
+            console.error("Error checking if post reported:", reportError);
+          }
+        }
 
         // Record view - temporarily disabled to avoid 500 error
         // try {
@@ -258,6 +274,35 @@ const BlogPostPage = () => {
 
   const handleShare = () => {
     setShowShareModal(true);
+  };
+
+  const handleReport = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setToastMessage(t("blog.post.loginRequired"));
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      return;
+    }
+    setShowReportModal(true);
+  };
+
+  const handleReportSubmit = async (reason, description) => {
+    if (!post) return;
+
+    setIsLoading(true);
+    try {
+      await blogService.reportPost(post.id, reason, description);
+      setHasReported(true);
+      setToastMessage(t("blog.report.success"));
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      setShowReportModal(false);
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialShare = async (platform) => {
@@ -600,6 +645,28 @@ const BlogPostPage = () => {
                   <FaShare />
                   <span className="font-medium">{shareCount}</span>
                 </button>
+
+                {currentUser && (
+                  <button
+                    onClick={handleReport}
+                    disabled={isLoading || hasReported}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                      hasReported
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    }`}
+                    title={
+                      hasReported
+                        ? t("blog.report.alreadyReported")
+                        : t("blog.report.title")
+                    }
+                  >
+                    <FaExclamationTriangle />
+                    <span className="font-medium">
+                      {t("blog.report.report")}
+                    </span>
+                  </button>
+                )}
               </div>
 
               <button
@@ -631,6 +698,15 @@ const BlogPostPage = () => {
 
       {/* Footer */}
       <FooterSection />
+
+      {/* Report Modal */}
+      <ReportPostModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={handleReportSubmit}
+        postTitle={post?.title}
+        hasReported={hasReported}
+      />
 
       {/* Share Modal */}
       {showShareModal && (

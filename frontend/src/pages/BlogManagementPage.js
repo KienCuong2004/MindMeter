@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { useTheme as useCustomTheme } from "../hooks/useTheme";
 import { jwtDecode } from "jwt-decode";
 import {
@@ -17,8 +18,9 @@ import {
   Cancel as RejectIcon,
   Search as SearchIcon,
   FilterList as FilterIcon,
+  Report as ReportIcon,
 } from "@mui/icons-material";
-import { FaBrain } from "react-icons/fa";
+import { FaBrain, FaExclamationTriangle } from "react-icons/fa";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import blogService from "../services/blogService";
@@ -69,6 +71,7 @@ const StatusChip = ({ status }) => {
 
 const BlogManagementPage = ({ handleLogout }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { theme: themeMode, setTheme } = useCustomTheme();
   const [user, setUser] = useState(null);
 
@@ -290,10 +293,19 @@ const BlogManagementPage = ({ handleLogout }) => {
 
       <div className="flex-1 px-4 py-8 pt-24">
         <div className="max-w-7xl mx-auto">
-          {/* Title */}
-          <h1 className="text-2xl font-bold mb-8 mt-8 text-blue-600 dark:text-blue-300 text-center">
-            {t("blog.admin.title")}
-          </h1>
+          {/* Title and Actions */}
+          <div className="flex items-center justify-between mb-8 mt-8">
+            <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-300 text-center flex-1">
+              {t("blog.admin.title")}
+            </h1>
+            <button
+              onClick={() => navigate("/admin/blog/reports")}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-semibold shadow-sm"
+            >
+              <FaExclamationTriangle />
+              {t("blog.reports.title")}
+            </button>
+          </div>
 
           {/* Controls (search, status, category, tag, clear) */}
           <div className="space-y-4 mb-6">

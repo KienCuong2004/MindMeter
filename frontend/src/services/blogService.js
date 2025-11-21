@@ -649,6 +649,68 @@ class BlogService {
       throw error;
     }
   }
+
+  // Report methods
+  async reportPost(postId, reason, description) {
+    try {
+      const response = await this.api.post(`/posts/${postId}/report`, {
+        reason,
+        description,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error reporting post:", error);
+      throw error;
+    }
+  }
+
+  async hasUserReportedPost(postId) {
+    try {
+      const response = await this.api.get(`/posts/${postId}/report/check`);
+      return response.data;
+    } catch (error) {
+      console.error("Error checking if user reported post:", error);
+      throw error;
+    }
+  }
+
+  // Admin report methods
+  async getAdminReports(params = {}) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.get("/reports", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching admin reports:", error);
+      throw error;
+    }
+  }
+
+  async getPendingReports(params = {}) {
+    try {
+      const adminApi = this._getAdminApi();
+      const response = await adminApi.get("/reports/pending", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching pending reports:", error);
+      throw error;
+    }
+  }
+
+  async reviewReport(reportId, status, adminNotes = null) {
+    try {
+      const adminApi = this._getAdminApi();
+      const params = { status };
+      if (adminNotes) {
+        params.adminNotes = adminNotes;
+      }
+      const response = await adminApi.put(`/reports/${reportId}/review`, null, { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error reviewing report:", error);
+      throw error;
+    }
+  }
 }
 
 const blogService = new BlogService();

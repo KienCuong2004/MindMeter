@@ -4312,6 +4312,23 @@ INSERT INTO blog_bookmarks (post_id, user_id) VALUES
 (2, 6), (2, 7),
 (3, 6), (3, 7), (3, 8), (3, 9);
 
+-- Insert sample blog reports
+INSERT INTO blog_reports (post_id, user_id, reason, description, status, admin_notes, created_at, updated_at) VALUES
+-- Pending reports (chờ xử lý)
+(1, 7, 'spam', 'Bài viết này có vẻ như spam, nội dung lặp lại nhiều lần.', 'pending', NULL, DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(1, 8, 'inappropriate', 'Nội dung bài viết có một số phần không phù hợp với cộng đồng.', 'pending', NULL, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(2, 6, 'false_info', 'Thông tin trong bài viết này không chính xác, có thể gây hiểu lầm cho người đọc.', 'pending', NULL, DATE_SUB(NOW(), INTERVAL 12 HOUR), DATE_SUB(NOW(), INTERVAL 12 HOUR)),
+(3, 9, 'other', 'Tôi nghĩ bài viết này có vấn đề về chất lượng và độ tin cậy của nguồn thông tin.', 'pending', NULL, DATE_SUB(NOW(), INTERVAL 6 HOUR), DATE_SUB(NOW(), INTERVAL 6 HOUR)),
+-- Reviewed reports (đã xem xét)
+(1, 9, 'harassment', 'Bài viết có nội dung có thể gây khó chịu cho một số người đọc.', 'reviewed', 'Đã xem xét báo cáo, nội dung bài viết phù hợp, không vi phạm quy định.', DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(2, 7, 'spam', 'Báo cáo về nội dung spam.', 'reviewed', 'Đã kiểm tra, bài viết không phải spam.', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+-- Resolved reports (đã xử lý)
+(2, 8, 'inappropriate', 'Nội dung không phù hợp.', 'resolved', 'Đã xem xét và chỉnh sửa nội dung theo yêu cầu. Bài viết hiện đã phù hợp với quy định.', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(3, 6, 'false_info', 'Thông tin không chính xác.', 'resolved', 'Đã kiểm tra và cập nhật thông tin chính xác. Cảm ơn bạn đã báo cáo.', DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY)),
+-- Dismissed reports (đã bỏ qua)
+(3, 7, 'other', 'Báo cáo không rõ ràng.', 'dismissed', 'Báo cáo không có cơ sở, nội dung bài viết phù hợp.', DATE_SUB(NOW(), INTERVAL 6 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(1, 10, 'harassment', 'Nội dung gây khó chịu.', 'dismissed', 'Đã xem xét kỹ, không có dấu hiệu vi phạm. Báo cáo đã được bỏ qua.', DATE_SUB(NOW(), INTERVAL 7 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY));
+
 -- Update like counts and comment counts
 -- Tắt Safe Update Mode để có thể UPDATE mà không cần WHERE clause
 SET SQL_SAFE_UPDATES = 0;

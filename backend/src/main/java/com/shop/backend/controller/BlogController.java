@@ -325,6 +325,21 @@ public class BlogController {
         return ResponseEntity.ok(tags);
     }
     
+    // Report Endpoints (Public - for users to report posts)
+    @PostMapping("/posts/{postId}/report")
+    public ResponseEntity<BlogReportDTO> reportPost(@PathVariable Long postId, @RequestBody BlogReportRequest request, Authentication authentication) {
+        String userEmail = getCurrentUserEmail(authentication);
+        BlogReportDTO report = blogService.createReport(postId, request, userEmail);
+        return ResponseEntity.ok(report);
+    }
+    
+    @GetMapping("/posts/{postId}/report/check")
+    public ResponseEntity<Boolean> hasUserReportedPost(@PathVariable Long postId, Authentication authentication) {
+        String userEmail = getCurrentUserEmail(authentication);
+        boolean hasReported = blogService.hasUserReportedPost(postId, userEmail);
+        return ResponseEntity.ok(hasReported);
+    }
+    
     // Helper Methods
     private String getCurrentUserEmail(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {

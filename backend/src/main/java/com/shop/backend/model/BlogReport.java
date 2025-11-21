@@ -1,5 +1,7 @@
 package com.shop.backend.model;
 
+import com.shop.backend.model.converter.ReportReasonConverter;
+import com.shop.backend.model.converter.ReportStatusConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,14 +30,14 @@ public class BlogReport {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ReportReasonConverter.class)
     @Column(nullable = false)
     private ReportReason reason;
     
     @Column(columnDefinition = "TEXT")
     private String description;
     
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ReportStatusConverter.class)
     @Column(nullable = false)
     private ReportStatus status = ReportStatus.PENDING;
     

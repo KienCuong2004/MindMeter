@@ -53,6 +53,7 @@
   "userManagement": "User Management",
   "questionManagement": "Question Management",
   "blogManagement": "Blog Management",
+  "blogReports": "Blog Reports",
   "announcementManagement": "Announcement Management",
   "statistics": "View Statistics",
   "noDepression": "No Depression",
@@ -1815,6 +1816,34 @@
         "deleteError": "Error occurred while deleting comment"
       }
     },
+    "report": {
+      "title": "Report Post",
+      "report": "Report",
+      "description": "If you find this content inappropriate, please report it so we can review it.",
+      "alreadyReported": "Already Reported",
+      "alreadyReportedMessage": "You have already reported this post. We will review and handle it as soon as possible.",
+      "success": "Report submitted successfully. Thank you for helping us maintain a healthy community.",
+      "reason": {
+        "label": "Report Reason",
+        "select": "Select report reason",
+        "spam": "Spam",
+        "inappropriate": "Inappropriate Content",
+        "harassment": "Harassment",
+        "falseInfo": "False Information",
+        "other": "Other"
+      },
+      "description": {
+        "label": "Detailed Description",
+        "placeholder": "Please provide more details about the issue (optional)",
+        "optional": "Detailed description helps us better understand the issue (optional)"
+      },
+      "submit": "Submit Report",
+      "error": {
+        "selectReason": "Please select a report reason",
+        "descriptionRequired": "Please provide a detailed description when selecting 'Other'",
+        "submitFailed": "Failed to submit report. Please try again."
+      }
+    },
     "createPostForm": {
       "title": "Create New Post",
       "subtitle": "Share your mental health journey and help others",
@@ -1984,6 +2013,52 @@
         "deletePost": "Are you sure you want to delete this post?"
       },
       "noPosts": "No posts found"
+    },
+    "reports": {
+      "title": "Blog Reports Management",
+      "filter": {
+        "all": "All statuses"
+      },
+      "status": {
+        "pending": "Pending",
+        "reviewed": "Reviewed",
+        "resolved": "Resolved",
+        "dismissed": "Dismissed"
+      },
+      "table": {
+        "post": "Post",
+        "reporter": "Reporter",
+        "reason": "Reason",
+        "status": "Status",
+        "createdAt": "Created At",
+        "actions": "Actions"
+      },
+      "actions": {
+        "view": "View",
+        "review": "Review",
+        "submit": "Submit"
+      },
+      "dialog": {
+        "title": "Report Details",
+        "post": "Post",
+        "reporter": "Reporter",
+        "reason": "Reason",
+        "status": "Status",
+        "description": "Description",
+        "adminNotes": "Admin Notes",
+        "adminNotesPlaceholder": "Enter your notes...",
+        "createdAt": "Created At",
+        "reviewTitle": "Review Report",
+        "reviewStatus": "Review Status"
+      },
+      "success": {
+        "reviewed": "Report reviewed successfully"
+      },
+      "error": {
+        "fetchFailed": "Failed to fetch reports",
+        "reviewFailed": "Failed to review report"
+      },
+      "noReports": "No reports found"
     }
   },
   "accountLinking": {

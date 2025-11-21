@@ -28,6 +28,7 @@ import { jwtDecode } from "jwt-decode";
 import { authFetch } from "./authFetch";
 import AdminTestResultsPage from "./pages/AdminTestResultsPage";
 import BlogManagementPage from "./pages/BlogManagementPage";
+import AdminBlogReportsPage from "./pages/AdminBlogReportsPage";
 import StudentHomePage from "./pages/StudentHomePage";
 import IntroduceMindMeterPage from "./pages/IntroduceMindMeterPage";
 import StudentTestResultPage from "./pages/StudentTestResultPage";
@@ -628,6 +629,10 @@ export default function AppRoutes() {
           <Route
             path="/admin/blog"
             element={<BlogManagementPage handleLogout={handleLogout} />}
+          />
+          <Route
+            path="/admin/blog/reports"
+            element={<AdminBlogReportsPage handleLogout={handleLogout} />}
           />
           <Route
             path="/admin/statistics"
