@@ -162,7 +162,7 @@ const AccountLinkingNotification = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={handleContinueNow}
-            className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center"
+            className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
           >
             {t("accountLinking.continueToHome")}
             <FaArrowRight className="ml-2" />
@@ -170,7 +170,7 @@ const AccountLinkingNotification = () => {
 
           <button
             onClick={handleGoToLogin}
-            className="flex-1 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            className="flex-1 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"
           >
             {t("accountLinking.goToLogin")}
           </button>
