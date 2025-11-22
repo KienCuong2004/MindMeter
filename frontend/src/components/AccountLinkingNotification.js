@@ -30,11 +30,11 @@ const AccountLinkingNotification = () => {
       // Lưu token vào localStorage và decode để lưu user object
       if (token) {
         localStorage.setItem("token", token);
-        
+
         try {
           // Decode token để lấy thông tin user
           const decoded = jwtDecode(token);
-          
+
           // Lưu user object vào localStorage giống như AuthCallback
           const user = {
             email: decoded.sub || email,
@@ -46,20 +46,24 @@ const AccountLinkingNotification = () => {
             phone: decoded.phone,
             anonymous: decoded.anonymous || false,
           };
-          
+
           // Tạo name từ firstName và lastName
           user.name =
-            (user.firstName || "") + (user.lastName ? " " + user.lastName : "") ||
+            (user.firstName || "") +
+              (user.lastName ? " " + user.lastName : "") ||
             user.email ||
             "User";
-          
+
           localStorage.setItem("user", JSON.stringify(user));
-          
+
           // Lưu thời gian đăng nhập để chống spam mua gói
           const loginTimeKey = `lastLogin_${user.email}`;
           localStorage.setItem(loginTimeKey, Date.now().toString());
         } catch (error) {
-          console.error("[AccountLinkingNotification] Error decoding token:", error);
+          console.error(
+            "[AccountLinkingNotification] Error decoding token:",
+            error
+          );
         }
       }
     }
@@ -101,9 +105,9 @@ const AccountLinkingNotification = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
-      <div className="bg-white/90 dark:bg-white/10 backdrop-blur-md rounded-2xl p-8 max-w-2xl w-full shadow-xl">
+      <div className="bg-white/95 dark:bg-white/10 backdrop-blur-md rounded-3xl p-8 max-w-2xl w-full shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse-slow">
             <FaCheck className="text-white text-3xl" />
           </div>
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
@@ -114,7 +118,7 @@ const AccountLinkingNotification = () => {
           </p>
         </div>
 
-        <div className="bg-gray-100/80 dark:bg-white/5 rounded-xl p-6 mb-6">
+        <div className="bg-gray-100/80 dark:bg-white/5 rounded-2xl p-6 mb-6 border border-gray-200/50 dark:border-gray-700/50">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
             <FaInfoCircle className="mr-2 text-blue-500 dark:text-blue-400" />
             {t("accountLinking.accountInfo")}
@@ -139,7 +143,7 @@ const AccountLinkingNotification = () => {
           </div>
         </div>
 
-        <div className="bg-blue-100/80 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-400/30 rounded-xl p-6 mb-6">
+        <div className="bg-blue-100/80 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-400/30 rounded-2xl p-6 mb-6">
           <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-3">
             {t("accountLinking.howItWorks")}
           </h3>
@@ -158,7 +162,7 @@ const AccountLinkingNotification = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={handleContinueNow}
-            className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 dark:from-green-500 dark:to-blue-500 dark:hover:from-green-600 dark:hover:to-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center"
+            className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 dark:from-green-500 dark:to-blue-500 dark:hover:from-green-600 dark:hover:to-blue-600 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center"
           >
             {t("accountLinking.continueToHome")}
             <FaArrowRight className="ml-2" />
@@ -166,7 +170,7 @@ const AccountLinkingNotification = () => {
 
           <button
             onClick={handleGoToLogin}
-            className="flex-1 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
+            className="flex-1 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
           >
             {t("accountLinking.goToLogin")}
           </button>
