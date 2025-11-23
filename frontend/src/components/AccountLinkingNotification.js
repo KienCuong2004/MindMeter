@@ -178,7 +178,7 @@ const AccountLinkingNotification = () => {
 
         <div className="text-center mt-6">
           <p className="text-gray-500 dark:text-gray-400 text-sm">
-            Tự động chuyển hướng sau {countdown} giây
+            {t("accountLinking.autoRedirect", { count: countdown })}
           </p>
         </div>
       </div>

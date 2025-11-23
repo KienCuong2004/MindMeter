@@ -17,13 +17,41 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
   const [resendMsg, setResendMsg] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [redirectCountdown, setRedirectCountdown] = useState(5);
+  const [otpExpirationTime, setOtpExpirationTime] = useState(300); // 5 minutes in seconds
   const resendTimerRef = useRef(null);
+  const otpExpirationTimerRef = useRef(null);
 
-  // Cleanup timer on unmount
+  // Start OTP expiration countdown when component mounts
+  useEffect(() => {
+    setOtpExpirationTime(300); // Reset to 5 minutes
+    otpExpirationTimerRef.current = setInterval(() => {
+      setOtpExpirationTime((prev) => {
+        if (prev <= 1) {
+          if (otpExpirationTimerRef.current) {
+            clearInterval(otpExpirationTimerRef.current);
+            otpExpirationTimerRef.current = null;
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (otpExpirationTimerRef.current) {
+        clearInterval(otpExpirationTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (resendTimerRef.current) {
         clearInterval(resendTimerRef.current);
+      }
+      if (otpExpirationTimerRef.current) {
+        clearInterval(otpExpirationTimerRef.current);
       }
     };
   }, []);
@@ -59,6 +87,24 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
       if (!res.ok) throw new Error(data);
       setResendMsg(t("otpReset.resendSuccess"));
       setResendCooldown(30);
+
+      // Reset OTP expiration countdown to 5 minutes when resending
+      setOtpExpirationTime(300);
+      if (otpExpirationTimerRef.current) {
+        clearInterval(otpExpirationTimerRef.current);
+      }
+      otpExpirationTimerRef.current = setInterval(() => {
+        setOtpExpirationTime((prev) => {
+          if (prev <= 1) {
+            if (otpExpirationTimerRef.current) {
+              clearInterval(otpExpirationTimerRef.current);
+              otpExpirationTimerRef.current = null;
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
       // Clear existing timer if any
       if (resendTimerRef.current) {
@@ -158,6 +204,27 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
           pattern="[0-9]*"
           placeholder={t("otpReset.otpPlaceholder")}
         />
+        {otpExpirationTime > 0 && (
+          <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 mb-2 font-medium">
+            {(() => {
+              const minutes = Math.floor(otpExpirationTime / 60);
+              const seconds = otpExpirationTime % 60;
+              if (minutes > 0) {
+                return t("otpReset.timeRemaining", {
+                  minutes: minutes,
+                  seconds: String(seconds).padStart(2, "0"),
+                });
+              } else {
+                return t("otpReset.timeRemainingSeconds", { seconds: seconds });
+              }
+            })()}
+          </div>
+        )}
+        {otpExpirationTime === 0 && (
+          <div className="text-sm text-red-600 dark:text-red-400 mt-1 mb-2 font-semibold">
+            {t("otpReset.expired")}
+          </div>
+        )}
         <button
           type="button"
           className={`mt-2 text-blue-600 dark:text-blue-400 font-semibold hover:underline text-sm disabled:opacity-50 disabled:cursor-not-allowed transition`}
