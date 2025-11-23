@@ -243,7 +243,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
               aria-live="polite"
             >
               <div
-                className={`flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg shadow ${
+                className={`flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-2 rounded-3xl shadow ${
                   bannerMessage ? "" : "invisible"
                 }`}
               >
@@ -269,7 +269,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                 ref={emailRef}
                 onFocus={() => setEmailFocus(true)}
                 onBlur={() => setEmailFocus(false)}
-                className={`peer border border-gray-300 dark:border-[#353c4a] rounded-xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-green-500 dark:focus:border-[#22c55e] focus:ring-2 focus:ring-green-100 dark:focus:ring-[#22c55e]/30 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
+                className={`peer border border-gray-300 dark:border-[#353c4a] rounded-3xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-green-500 dark:focus:border-[#22c55e] focus:ring-2 focus:ring-green-100 dark:focus:ring-[#22c55e]/30 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
                   fieldError.email
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600 dark:focus:border-red-500 dark:focus:ring-red-900"
                     : ""
@@ -302,7 +302,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                 ref={passwordRef}
                 onFocus={() => setPasswordFocus(true)}
                 onBlur={() => setPasswordFocus(false)}
-                className={`peer border border-gray-300 dark:border-[#353c4a] rounded-xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-green-500 dark:focus:border-[#22c55e] focus:ring-2 focus:ring-green-100 dark:focus:ring-[#22c55e]/30 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
+                className={`peer border border-gray-300 dark:border-[#353c4a] rounded-3xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-green-500 dark:focus:border-[#22c55e] focus:ring-2 focus:ring-green-100 dark:focus:ring-[#22c55e]/30 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
                   fieldError.password
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600 dark:focus:border-red-500 dark:focus:ring-red-900"
                     : ""
@@ -344,7 +344,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                 onChange={handleChange}
                 onFocus={() => setConfirmPasswordFocus(true)}
                 onBlur={() => setConfirmPasswordFocus(false)}
-                className={`peer border border-gray-300 dark:border-[#353c4a] rounded-xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-green-500 dark:focus:border-[#22c55e] focus:ring-2 focus:ring-green-100 dark:focus:ring-[#22c55e]/30 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
+                className={`peer border border-gray-300 dark:border-[#353c4a] rounded-3xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-green-500 dark:focus:border-[#22c55e] focus:ring-2 focus:ring-green-100 dark:focus:ring-[#22c55e]/30 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
                   fieldError.confirmPassword
                     ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600 dark:focus:border-red-500 dark:focus:ring-red-900"
                     : ""
@@ -426,19 +426,19 @@ function RegisterForm({ onRegister, onSwitchForm }) {
 
             {/* Error display */}
             {error && (
-              <div className="w-full bg-red-500 text-white font-semibold py-2 rounded-lg text-center mb-4">
+              <div className="w-full bg-red-500 text-white font-semibold py-2 rounded-3xl text-center mb-4">
                 {error}
               </div>
             )}
 
             {success ? (
-              <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300 font-semibold py-3 px-4 rounded-lg text-lg text-center">
+              <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300 font-semibold py-3 px-4 rounded-3xl text-lg text-center">
                 <span>{success.replace(/\d+ giây/, `${countdown} giây`)}</span>
               </div>
             ) : (
               <button
                 type="submit"
-                className="w-full bg-[#22c55e] hover:bg-[#16a34a] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] text-white font-semibold py-2 rounded-lg transition text-lg shadow"
+                className="w-full bg-[#22c55e] hover:bg-[#16a34a] dark:bg-[#22c55e] dark:hover:bg-[#16a34a] text-white font-semibold py-2 rounded-3xl transition text-lg shadow"
                 disabled={loading}
               >
                 {loading ? t("loading") : t("register")}
@@ -454,7 +454,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
             <div className="flex flex-col gap-3 mb-6">
               <button
                 type="button"
-                className="flex items-center justify-center gap-2 border border-gray-300 dark:border-[#353c4a] rounded-xl py-2 px-4 bg-white dark:bg-[#232a36] text-gray-800 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-[#232a36]/80 transition"
+                className="flex items-center justify-center gap-2 border border-gray-300 dark:border-[#353c4a] rounded-3xl py-2 px-4 bg-white dark:bg-[#232a36] text-gray-800 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-[#232a36]/80 transition"
                 onClick={handleGoogleRegister}
               >
                 <FaGoogle className="text-red-500 text-lg" />

@@ -107,7 +107,7 @@ export default function LoginPage() {
           Đăng nhập
         </h2>
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-3xl mb-4">
             {error}
           </div>
         )}
@@ -120,7 +120,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-xl border border-blue-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base bg-blue-50 placeholder-gray-400"
+              className="mt-1 block w-full rounded-3xl border border-blue-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base bg-blue-50 placeholder-gray-400"
               required
               placeholder="Nhập email"
             />
@@ -133,14 +133,14 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-xl border border-blue-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base bg-blue-50 placeholder-gray-400"
+              className="mt-1 block w-full rounded-3xl border border-blue-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 py-3 px-4 text-base bg-blue-50 placeholder-gray-400"
               required
               placeholder="Nhập mật khẩu"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl font-bold text-lg shadow hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-3xl font-bold text-lg shadow hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
           >
             Đăng nhập
           </button>
@@ -156,7 +156,7 @@ export default function LoginPage() {
           </div>
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center py-3 px-4 border border-blue-200 rounded-xl shadow-sm bg-white text-base font-semibold text-blue-600 hover:bg-blue-50 transition"
+            className="w-full flex items-center justify-center py-3 px-4 border border-blue-200 rounded-3xl shadow-sm bg-white text-base font-semibold text-blue-600 hover:bg-blue-50 transition"
           >
             <FaGoogle className="h-5 w-5 text-red-600 mr-2" />
             Đăng nhập bằng Google

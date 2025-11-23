@@ -118,7 +118,7 @@ const AccountLinkingNotification = () => {
           </p>
         </div>
 
-        <div className="bg-gray-100/80 dark:bg-white/5 rounded-2xl p-6 mb-6 border border-gray-200/50 dark:border-gray-700/50">
+        <div className="bg-gray-100/80 dark:bg-white/5 rounded-3xl p-6 mb-6 border border-gray-200/50 dark:border-gray-700/50">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
             <FaInfoCircle className="mr-2 text-blue-500 dark:text-blue-400" />
             {t("accountLinking.accountInfo")}
@@ -143,7 +143,7 @@ const AccountLinkingNotification = () => {
           </div>
         </div>
 
-        <div className="bg-blue-100/80 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-400/30 rounded-2xl p-6 mb-6">
+        <div className="bg-blue-100/80 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-400/30 rounded-3xl p-6 mb-6">
           <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-3">
             {t("accountLinking.howItWorks")}
           </h3>
@@ -162,7 +162,7 @@ const AccountLinkingNotification = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={handleContinueNow}
-            className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+            className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
           >
             {t("accountLinking.continueToHome")}
             <FaArrowRight className="ml-2" />
@@ -170,7 +170,7 @@ const AccountLinkingNotification = () => {
 
           <button
             onClick={handleGoToLogin}
-            className="flex-1 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200"
+            className="flex-1 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-200"
           >
             {t("accountLinking.goToLogin")}
           </button>

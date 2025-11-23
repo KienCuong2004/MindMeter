@@ -166,7 +166,7 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
                 </h2>
               </div>
               {showError && errorMsg && (
-                <div className="mb-4 flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg shadow animate-shake">
+                <div className="mb-4 flex items-center gap-2 bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-2 rounded-3xl shadow animate-shake">
                   <FaExclamationCircle className="text-xl mr-2 text-red-500 dark:text-red-300" />
                   <div className="font-semibold">{errorMsg}</div>
                 </div>
@@ -182,7 +182,7 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
                   ref={emailRef}
                   onFocus={() => setEmailFocus(true)}
                   onBlur={() => setEmailFocus(false)}
-                  className={`peer border border-gray-200 dark:border-[#353c4a] rounded-xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
+                  className={`peer border border-gray-200 dark:border-[#353c4a] rounded-3xl w-full py-2 pl-10 pr-4 text-gray-800 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
                     fieldError.email &&
                     fieldError.email.includes(t("validation.fieldRequired"))
                       ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600 dark:focus:border-red-500 dark:focus:ring-red-900"
@@ -213,7 +213,7 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
                   ref={passwordRef}
                   onFocus={() => setPasswordFocus(true)}
                   onBlur={() => setPasswordFocus(false)}
-                  className={`peer border border-gray-200 dark:border-[#353c4a] rounded-xl w-full py-2 pl-10 pr-10 text-gray-800 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
+                  className={`peer border border-gray-200 dark:border-[#353c4a] rounded-3xl w-full py-2 pl-10 pr-10 text-gray-800 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-gray-100 dark:bg-[#232a36] transition duration-150 text-base placeholder-gray-600 dark:placeholder-gray-300 ${
                     fieldError.password &&
                     fieldError.password.includes(t("validation.fieldRequired"))
                       ? "border-red-400 focus:border-red-500 focus:ring-red-100 dark:border-red-600 dark:focus:border-red-500 dark:focus:ring-red-900"
@@ -251,7 +251,7 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
               <div className="flex flex-col gap-3 mb-6">
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 border border-gray-200 dark:border-[#353c4a] rounded-xl py-2 px-4 bg-white dark:bg-[#232a36] text-gray-800 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-[#232a36]/80 transition"
+                  className="flex items-center justify-center gap-2 border border-gray-200 dark:border-[#353c4a] rounded-3xl py-2 px-4 bg-white dark:bg-[#232a36] text-gray-800 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-[#232a36]/80 transition"
                   onClick={handleGoogleLogin}
                 >
                   <FaGoogle className="text-red-500 text-lg" />
@@ -269,7 +269,7 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
               </div>
               <button
                 type="submit"
-                className="w-full bg-[#2563eb] hover:bg-[#397cf6] dark:bg-[#2563eb] dark:hover:bg-[#397cf6] text-white font-semibold py-2 rounded-lg transition text-lg shadow"
+                className="w-full bg-[#2563eb] hover:bg-[#397cf6] dark:bg-[#2563eb] dark:hover:bg-[#397cf6] text-white font-semibold py-2 rounded-3xl transition text-lg shadow"
                 disabled={loading}
               >
                 {loading ? t("loading") : t("login")}
