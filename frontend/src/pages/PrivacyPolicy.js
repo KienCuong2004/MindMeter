@@ -420,10 +420,10 @@ const PrivacyPolicy = () => {
             <li>
               {t("privacyPolicy.section10.email")}{" "}
               <a
-                href="mailto:trankiencuong30072003@gmail.com"
+                href="mailto:mindmeter.app@gmail.com"
                 className="text-blue-500 dark:text-blue-300 underline"
               >
-                trankiencuong30072003@gmail.com
+                mindmeter.app@gmail.com
               </a>
             </li>
             <li>{t("privacyPolicy.section10.address")}</li>

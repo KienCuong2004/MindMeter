@@ -20,7 +20,7 @@ import {
 } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 
-const EMAIL = "trankiencuong30072003@gmail.com";
+const EMAIL = "mindmeter.app@gmail.com";
 const PHONE = "0369702376";
 
 // Định nghĩa màu sắc cho mức độ trầm cảm

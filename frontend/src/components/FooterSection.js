@@ -136,10 +136,10 @@ export default function FooterSection() {
             <li>
               {t("footer.emailLabel")}{" "}
               <a
-                href="mailto:trankiencuong30072003@gmail.com"
+                href="mailto:mindmeter.app@gmail.com"
                 className="underline hover:text-yellow-300 dark:hover:text-yellow-300"
               >
-                trankiencuong30072003@gmail.com
+                mindmeter.app@gmail.com
               </a>
             </li>
           </ul>

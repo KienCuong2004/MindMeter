@@ -289,7 +289,7 @@ export default function SecurityPolicy() {
                 <strong className="text-emerald-600 dark:text-emerald-400">
                   {t("securityPolicy.contact.email")}:
                 </strong>{" "}
-                trankiencuong30072003@gmail.com
+                mindmeter.app@gmail.com
               </p>
               <p className="text-gray-700 dark:text-gray-300 mt-2">
                 <strong className="text-emerald-600 dark:text-emerald-400">
