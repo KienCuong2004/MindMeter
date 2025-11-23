@@ -766,6 +766,7 @@
     "otpLabel": "Mã OTP",
     "otpPlaceholder": "Nhập mã OTP",
     "resend": "Gửi lại mã OTP",
+    "sending": "Đang gửi...",
     "resendCooldown": "Gửi lại OTP ({{s}}s)",
     "resendSuccess": "Đã gửi lại mã OTP!",
     "passwordLabel": "Mật khẩu mới",

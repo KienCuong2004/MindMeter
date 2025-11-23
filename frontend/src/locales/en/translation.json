@@ -768,6 +768,7 @@
     "otpLabel": "OTP",
     "otpPlaceholder": "Enter OTP",
     "resend": "Resend OTP",
+    "sending": "Sending...",
     "resendCooldown": "Resend OTP ({{s}}s)",
     "resendSuccess": "OTP resent!",
     "passwordLabel": "New password",

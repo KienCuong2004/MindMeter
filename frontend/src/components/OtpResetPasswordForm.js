@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { authFetch } from "../authFetch";
@@ -17,6 +17,16 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
   const [resendMsg, setResendMsg] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [redirectCountdown, setRedirectCountdown] = useState(5);
+  const resendTimerRef = useRef(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (resendTimerRef.current) {
+        clearInterval(resendTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (success) {
@@ -35,7 +45,7 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
     }
   }, [success, onSuccess]);
 
-  // Resend OTP logic
+  // Resend OTP logic with countdown
   const handleResend = async () => {
     setResendLoading(true);
     setResendMsg("");
@@ -49,10 +59,25 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
       if (!res.ok) throw new Error(data);
       setResendMsg(t("otpReset.resendSuccess"));
       setResendCooldown(30);
-      const timer = setInterval(() => {
+
+      // Clear existing timer if any
+      if (resendTimerRef.current) {
+        clearInterval(resendTimerRef.current);
+      }
+
+      // Auto-hide success message after 3 seconds
+      setTimeout(() => {
+        setResendMsg("");
+      }, 3000);
+
+      // Start countdown timer
+      resendTimerRef.current = setInterval(() => {
         setResendCooldown((c) => {
           if (c <= 1) {
-            clearInterval(timer);
+            if (resendTimerRef.current) {
+              clearInterval(resendTimerRef.current);
+              resendTimerRef.current = null;
+            }
             return 0;
           }
           return c - 1;
@@ -110,7 +135,7 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-sm mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow dark:shadow-lg border dark:border-gray-700"
+      className="w-full max-w-sm mx-auto p-6 bg-white dark:bg-gray-900 rounded-3xl shadow dark:shadow-lg border dark:border-gray-700"
     >
       <h2 className="text-2xl font-bold mb-4 text-blue-700 dark:text-blue-400 text-center">
         {t("otpReset.title")}
@@ -121,7 +146,7 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
         </label>
         <input
           type="text"
-          className="tracking-widest text-2xl text-center font-bold border-2 border-blue-400 bg-blue-50 dark:bg-gray-800 rounded-xl px-6 py-4 focus:outline-none focus:border-blue-600 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-gray-900 transition w-64 mb-2 shadow-md text-gray-900 dark:text-white"
+          className="tracking-widest text-2xl text-center font-bold border-2 border-blue-400 bg-blue-50 dark:bg-gray-800 rounded-3xl px-6 py-4 focus:outline-none focus:border-blue-600 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-gray-900 transition w-64 mb-2 shadow-md text-gray-900 dark:text-white"
           value={otp}
           onChange={(e) =>
             setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
@@ -135,12 +160,14 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
         />
         <button
           type="button"
-          className={`mt-2 text-blue-600 dark:text-blue-400 font-semibold hover:underline text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
+          className={`mt-2 text-blue-600 dark:text-blue-400 font-semibold hover:underline text-sm disabled:opacity-50 disabled:cursor-not-allowed transition`}
           onClick={handleResend}
           disabled={resendLoading || resendCooldown > 0}
         >
-          {resendCooldown > 0
-            ? t("otpReset.resendCooldown", { s: resendCooldown })
+          {resendLoading
+            ? t("otpReset.sending")
+            : resendCooldown > 0
+            ? `${t("otpReset.resend")} (${resendCooldown}s)`
             : t("otpReset.resend")}
         </button>
         {resendMsg && (
@@ -156,7 +183,7 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
         <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 pr-10 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border-gray-300 dark:border-gray-600"
+            className="w-full border rounded-3xl px-3 py-2 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 pr-10 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border-gray-300 dark:border-gray-600"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -190,7 +217,7 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
         <div className="relative">
           <input
             type={showConfirm ? "text" : "password"}
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 pr-10 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border-gray-300 dark:border-gray-600"
+            className="w-full border rounded-3xl px-3 py-2 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 pr-10 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border-gray-300 dark:border-gray-600"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
@@ -219,7 +246,7 @@ export default function OtpResetPasswordForm({ email, onSuccess }) {
       )}
       <button
         type="submit"
-        className="w-full bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition"
+        className="w-full bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold py-2 rounded-3xl transition"
         disabled={loading}
       >
         {loading ? t("otpReset.submitting") : t("otpReset.submit")}
