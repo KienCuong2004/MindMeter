@@ -112,7 +112,7 @@ const ReportPostModal = ({
         </div>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          {t("blog.report.description")}
+          {t("blog.report.descriptionText")}
         </p>
 
         <form onSubmit={handleSubmit}>
