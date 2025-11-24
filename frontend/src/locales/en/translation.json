@@ -1775,6 +1775,12 @@
     "loadMore": "Load More",
     "views": "views",
     "featured": "Featured",
+    "status": {
+      "pending": "Pending Review",
+      "published": "Published",
+      "draft": "Draft",
+      "rejected": "Rejected"
+    },
     "error": {
       "title": "Something went wrong",
       "description": "We couldn't load the blog posts. Please try again.",
@@ -1813,6 +1819,11 @@
         "success": "Post deleted successfully",
         "error": "Error occurred while deleting post"
       },
+      "menu": {
+        "report": "Report Post",
+        "edit": "Edit Post",
+        "delete": "Delete Post"
+      },
       "comment": {
         "deleteConfirm": "Delete Comment",
         "deleteWarning": "This action cannot be undone. Are you sure you want to delete this comment?",
@@ -1823,7 +1834,7 @@
     "report": {
       "title": "Report Post",
       "report": "Report",
-      "description": "If you find this content inappropriate, please report it so we can review it.",
+      "descriptionText": "If you find this content inappropriate, please report it so we can review it.",
       "alreadyReported": "Already Reported",
       "alreadyReportedMessage": "You have already reported this post. We will review and handle it as soon as possible.",
       "success": "Report submitted successfully. Thank you for helping us maintain a healthy community.",
@@ -1848,9 +1859,12 @@
         "submitFailed": "Failed to submit report. Please try again."
       }
     },
+    "loading": "Loading...",
     "createPostForm": {
       "title": "Create New Post",
       "subtitle": "Share your mental health journey and help others",
+      "editTitle": "Edit Post",
+      "editSubtitle": "Update your post information",
       "form": {
         "title": "Post Title",
         "titlePlaceholder": "Enter a compelling title for your post...",
@@ -1864,6 +1878,7 @@
         "categoryPlaceholder": "Select a category",
         "selectCategory": "Select a category",
         "tags": "Tags",
+        "selectTag": "Select a tag",
         "tagsPlaceholder": "Add tags separated by commas",
         "status": "Status",
         "publish": "Publish",
@@ -1885,13 +1900,16 @@
         "published": "Post published successfully!",
         "saved": "Post saved as draft!",
         "updated": "Post updated successfully!",
-        "pending": "Post submitted for admin approval! You will be notified when the post is approved."
+        "pending": "Your post has been successfully submitted. Please wait for review."
       },
       "error": {
         "publishFailed": "Failed to publish post",
         "saveFailed": "Failed to save post",
         "updateFailed": "Failed to update post",
-        "uploadFailed": "Failed to upload image"
+        "uploadFailed": "Failed to upload image",
+        "postNotFound": "Post not found",
+        "loadFailed": "Failed to load post",
+        "unauthorized": "You are not authorized to edit this post"
       }
     },
     "categories": {

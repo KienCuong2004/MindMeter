@@ -1774,6 +1774,12 @@
     "loadMore": "Tải thêm",
     "views": "lượt xem",
     "featured": "Nổi bật",
+    "status": {
+      "pending": "Chờ duyệt",
+      "published": "Đã xuất bản",
+      "draft": "Bản nháp",
+      "rejected": "Đã từ chối"
+    },
     "error": {
       "title": "Có lỗi xảy ra",
       "description": "Chúng tôi không thể tải các bài viết. Vui lòng thử lại.",
@@ -1812,6 +1818,11 @@
         "success": "Bài viết đã được xóa thành công",
         "error": "Có lỗi xảy ra khi xóa bài viết"
       },
+      "menu": {
+        "report": "Báo cáo bài viết",
+        "edit": "Sửa bài viết",
+        "delete": "Xóa bài viết"
+      },
       "comment": {
         "deleteConfirm": "Xóa bình luận",
         "deleteWarning": "Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa bình luận này?",
@@ -1822,7 +1833,7 @@
     "report": {
       "title": "Báo cáo bài viết",
       "report": "Báo cáo",
-      "description": "Nếu bạn thấy nội dung này không phù hợp, vui lòng báo cáo để chúng tôi có thể xem xét.",
+      "descriptionText": "Nếu bạn thấy nội dung này không phù hợp, vui lòng báo cáo để chúng tôi có thể xem xét.",
       "alreadyReported": "Đã báo cáo",
       "alreadyReportedMessage": "Bạn đã báo cáo bài viết này. Chúng tôi sẽ xem xét và xử lý trong thời gian sớm nhất.",
       "success": "Báo cáo đã được gửi thành công. Cảm ơn bạn đã giúp chúng tôi duy trì một cộng đồng lành mạnh.",
@@ -1847,9 +1858,12 @@
         "submitFailed": "Không thể gửi báo cáo. Vui lòng thử lại."
       }
     },
+    "loading": "Đang tải...",
     "createPostForm": {
       "title": "Tạo Bài Viết Mới",
       "subtitle": "Chia sẻ hành trình sức khỏe tâm thần và giúp đỡ người khác",
+      "editTitle": "Chỉnh sửa Bài Viết",
+      "editSubtitle": "Cập nhật thông tin bài viết của bạn",
       "form": {
         "title": "Tiêu đề bài viết",
         "titlePlaceholder": "Nhập tiêu đề hấp dẫn cho bài viết của bạn...",
@@ -1863,6 +1877,7 @@
         "categoryPlaceholder": "Chọn danh mục",
         "selectCategory": "Chọn danh mục",
         "tags": "Thẻ",
+        "selectTag": "Chọn thẻ",
         "tagsPlaceholder": "Thêm thẻ cách nhau bởi dấu phẩy",
         "status": "Trạng thái",
         "publish": "Đăng bài",
@@ -1884,13 +1899,16 @@
         "published": "Đăng bài thành công!",
         "saved": "Lưu nháp thành công!",
         "updated": "Cập nhật bài viết thành công!",
-        "pending": "Bài viết đã được gửi để admin duyệt! Bạn sẽ được thông báo khi bài viết được phê duyệt."
+        "pending": "Bài viết của bạn đã đăng tải thành công. Vui lòng chờ được kiểm duyệt."
       },
       "error": {
         "publishFailed": "Không thể đăng bài",
         "saveFailed": "Không thể lưu bài viết",
         "updateFailed": "Không thể cập nhật bài viết",
-        "uploadFailed": "Không thể tải lên hình ảnh"
+        "uploadFailed": "Không thể tải lên hình ảnh",
+        "postNotFound": "Không tìm thấy bài viết",
+        "loadFailed": "Không thể tải bài viết",
+        "unauthorized": "Bạn không có quyền chỉnh sửa bài viết này"
       }
     },
     "categories": {
