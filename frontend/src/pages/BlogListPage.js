@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {
   FaSearch,
@@ -22,6 +22,7 @@ import blogService from "../services/blogService";
 const BlogListPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, setTheme, toggleTheme } = useTheme();
 
   // User state
@@ -64,6 +65,9 @@ const BlogListPage = () => {
 
         const userObject = {
           email: decoded.sub,
+          id: decoded.id || decoded.userId || userData.id || userData.userId,
+          userId:
+            decoded.id || decoded.userId || userData.id || userData.userId,
           role: decoded.role,
           firstName: decoded.firstName || userData.firstName || "",
           lastName: decoded.lastName || userData.lastName || "",
@@ -209,6 +213,20 @@ const BlogListPage = () => {
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  // Check for success message from navigation state
+  useEffect(() => {
+    if (location.state?.successMessage) {
+      setToastMessage(location.state.successMessage);
+      setShowToast(true);
+      // Clear the state to prevent showing the message again on refresh
+      window.history.replaceState({}, document.title);
+      // Auto-hide toast after 5 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     if (searchTerm || selectedCategory || selectedTag || sortBy) {
@@ -609,6 +627,10 @@ const BlogListPage = () => {
                   onBookmark={handleBookmark}
                   onShare={handleShare}
                   onComment={handleComment}
+                  currentUser={user}
+                  onDelete={(postId) => {
+                    setPosts((prev) => prev.filter((p) => p.id !== postId));
+                  }}
                 />
               ))}
 

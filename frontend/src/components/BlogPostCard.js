@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
   FaHeart,
   FaComment,
@@ -10,11 +11,15 @@ import {
   FaCalendarAlt,
   FaEye,
   FaTag,
+  FaExclamationTriangle,
+  FaEdit,
+  FaTrash,
 } from "react-icons/fa";
 import blogService from "../services/blogService";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 import { useSavedArticles } from "../contexts/SavedArticlesContext";
+import ReportPostModal from "./blog/ReportPostModal";
 
 const BlogPostCard = ({
   post,
@@ -23,8 +28,10 @@ const BlogPostCard = ({
   onShare,
   onComment,
   currentUser,
+  onDelete,
 }) => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { toggleSaveArticle, isArticleSaved, saveArticle, unsaveArticle } =
     useSavedArticles();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
@@ -33,8 +40,64 @@ const BlogPostCard = ({
   const [commentCount] = useState(post.commentCount || 0);
   const [shareCount, setShareCount] = useState(post.shareCount || 0);
   const [isLoading, setIsLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [hasReported, setHasReported] = useState(false);
+  const menuRef = useRef(null);
 
   const currentLocale = i18n.language === "vi" ? vi : enUS;
+
+  // Check if current user is the author
+  // Try multiple ways to check: by authorId, authorEmail, or author.email
+  const isAuthor = React.useMemo(() => {
+    if (!currentUser || !post) return false;
+
+    // Check by email (most reliable since JWT has email)
+    if (post.authorEmail && currentUser.email === post.authorEmail) {
+      return true;
+    }
+
+    // Check by authorId (if user has id)
+    if (
+      post.authorId &&
+      (currentUser.id === post.authorId || currentUser.userId === post.authorId)
+    ) {
+      return true;
+    }
+
+    // Check by author object
+    if (post.author) {
+      if (post.author.email && currentUser.email === post.author.email) {
+        return true;
+      }
+      if (
+        post.author.id &&
+        (currentUser.id === post.author.id ||
+          currentUser.userId === post.author.id)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [currentUser, post]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showMenu]);
 
   const handleLike = async () => {
     if (isLoading) return;
@@ -110,6 +173,40 @@ const BlogPostCard = ({
     if (onComment) onComment(post.id);
   };
 
+  const handleReport = async (reason, description) => {
+    try {
+      await blogService.reportPost(post.id, reason, description);
+      setHasReported(true);
+      setShowReportModal(false);
+    } catch (error) {
+      console.error("Error reporting post:", error);
+      throw error;
+    }
+  };
+
+  const handleEdit = () => {
+    setShowMenu(false);
+    navigate(`/blog/edit/${post.id}`);
+  };
+
+  const handleDelete = async () => {
+    setShowMenu(false);
+    if (
+      window.confirm(
+        t("blog.post.delete.confirm") ||
+          "Bạn có chắc chắn muốn xóa bài viết này?"
+      )
+    ) {
+      try {
+        await blogService.deletePost(post.id);
+        if (onDelete) onDelete(post.id);
+      } catch (error) {
+        console.error("Error deleting post:", error);
+        alert(t("blog.post.delete.error") || "Có lỗi xảy ra khi xóa bài viết");
+      }
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -155,7 +252,11 @@ const BlogPostCard = ({
               </h3>
               <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-2">
                 <FaCalendarAlt className="text-xs" />
-                <span>{formatDate(post.publishedAt)}</span>
+                <span>
+                  {formatDate(
+                    post.publishedAt || post.createdAt || post.updatedAt
+                  )}
+                </span>
                 {post.viewCount > 0 && (
                   <>
                     <span>•</span>
@@ -169,14 +270,73 @@ const BlogPostCard = ({
             </div>
           </div>
           <div className="flex items-center space-x-2">
+            {post.status === "pending" && (
+              <span className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                {t("blog.status.pending") || "Chờ duyệt"}
+              </span>
+            )}
             {post.isFeatured && (
               <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {t("blog.featured")}
               </span>
             )}
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
-              <FaEllipsisH className="text-gray-500 dark:text-gray-400" />
-            </button>
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+              >
+                <FaEllipsisH className="text-gray-500 dark:text-gray-400" />
+              </button>
+
+              {/* Dropdown Menu */}
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                  <div className="py-1">
+                    {/* Report - Show for non-authors */}
+                    {!isAuthor && currentUser && (
+                      <button
+                        onClick={() => {
+                          setShowReportModal(true);
+                          setShowMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
+                      >
+                        <FaExclamationTriangle className="text-red-500" />
+                        <span>
+                          {t("blog.post.menu.report") || "Báo cáo bài viết"}
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Edit - Show for authors */}
+                    {isAuthor && (
+                      <button
+                        onClick={handleEdit}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
+                      >
+                        <FaEdit className="text-blue-500" />
+                        <span>
+                          {t("blog.post.menu.edit") || "Sửa bài viết"}
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Delete - Show for authors */}
+                    {isAuthor && (
+                      <button
+                        onClick={handleDelete}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2"
+                      >
+                        <FaTrash className="text-red-500" />
+                        <span>
+                          {t("blog.post.menu.delete") || "Xóa bài viết"}
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -282,6 +442,17 @@ const BlogPostCard = ({
           </button>
         </div>
       </div>
+
+      {/* Report Modal */}
+      {currentUser && (
+        <ReportPostModal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          onSubmit={handleReport}
+          postTitle={post.title}
+          hasReported={hasReported}
+        />
+      )}
     </div>
   );
 };
