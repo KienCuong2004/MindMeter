@@ -40,6 +40,7 @@ import BlogListPage from "./pages/BlogListPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import SavedArticlesPage from "./pages/SavedArticlesPage";
 import CreatePostPage from "./pages/CreatePostPage";
+import EditPostPage from "./pages/EditPostPage";
 import BlogErrorBoundary from "./components/BlogErrorBoundary";
 import Disclaimer from "./pages/Disclaimer";
 import SecurityPolicy from "./pages/SecurityPolicy";
@@ -294,13 +295,16 @@ export default function AppRoutes() {
             navigate("/expert/dashboard", { replace: true });
           }
         } else if (decoded.role === "STUDENT") {
-          // Student được ở /home, /student/*, /appointments, hoặc public paths
+          // Student được ở /home, /student/*, /appointments, /blog/edit/:id, hoặc public paths
+          const isBlogEditPath =
+            window.location.pathname.startsWith("/blog/edit/");
           if (
             window.location.pathname === "/" ||
             (!window.location.pathname.startsWith("/student") &&
               window.location.pathname !== "/home" &&
               window.location.pathname !== "/appointments" &&
               window.location.pathname !== "/saved-articles" &&
+              !isBlogEditPath &&
               !publicPaths.includes(window.location.pathname) &&
               !isBlogPostPath)
           ) {
@@ -736,6 +740,14 @@ export default function AppRoutes() {
             element={
               <BlogErrorBoundary>
                 <CreatePostPage />
+              </BlogErrorBoundary>
+            }
+          />
+          <Route
+            path="/blog/edit/:id"
+            element={
+              <BlogErrorBoundary>
+                <EditPostPage />
               </BlogErrorBoundary>
             }
           />
