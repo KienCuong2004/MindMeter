@@ -1953,6 +1953,12 @@
       "unsave": "Bỏ lưu",
       "viewArticle": "Xem Bài Viết",
       "clearAll": "Xóa Tất Cả",
+      "loading": "Đang tải...",
+      "loadMore": "Tải thêm",
+      "loadError": "Không thể tải bài viết đã lưu",
+      "unsaveError": "Không thể bỏ lưu bài viết",
+      "clearError": "Không thể xóa tất cả bookmark",
+      "loginRequired": "Vui lòng đăng nhập để xem bài viết đã lưu",
       "clearConfirm": {
         "title": "Xóa Tất Cả Bài Viết Đã Lưu",
         "description": "Bạn có chắc chắn muốn xóa tất cả bài viết đã lưu? Hành động này không thể hoàn tác."

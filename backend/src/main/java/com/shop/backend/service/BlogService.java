@@ -678,6 +678,19 @@ public class BlogService {
         }
     }
     
+    public Page<BlogPostDTO> getMyBookmarks(String userEmail, Pageable pageable) {
+        User user = userRepository.findByEmail(userEmail)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        Page<BlogBookmark> bookmarks = blogBookmarkRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
+        
+        return bookmarks.map(bookmark -> {
+            BlogPostDTO dto = convertToDTO(bookmark.getPost(), userEmail);
+            // Set bookmark created date if needed in the future
+            return dto;
+        });
+    }
+    
     // View Methods
     public void recordView(Long postId, String userEmail, String ipAddress, String userAgent) {
         BlogPost post = blogPostRepository.findById(postId)

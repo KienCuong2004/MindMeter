@@ -1954,6 +1954,12 @@
       "unsave": "Remove from saved",
       "viewArticle": "View Article",
       "clearAll": "Clear All",
+      "loading": "Loading...",
+      "loadMore": "Load More",
+      "loadError": "Failed to load saved articles",
+      "unsaveError": "Failed to unsave article",
+      "clearError": "Failed to clear all bookmarks",
+      "loginRequired": "Please login to view your saved articles",
       "clearConfirm": {
         "title": "Clear All Saved Articles",
         "description": "Are you sure you want to remove all saved articles? This action cannot be undone."

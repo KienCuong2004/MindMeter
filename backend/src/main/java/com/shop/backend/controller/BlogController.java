@@ -287,6 +287,13 @@ public class BlogController {
         return ResponseEntity.ok(isBookmarked);
     }
     
+    @GetMapping("/bookmarks")
+    public ResponseEntity<Page<BlogPostDTO>> getMyBookmarks(Pageable pageable, Authentication authentication) {
+        String userEmail = getCurrentUserEmail(authentication);
+        Page<BlogPostDTO> bookmarks = blogService.getMyBookmarks(userEmail, pageable);
+        return ResponseEntity.ok(bookmarks);
+    }
+    
     // View Endpoints
     @PostMapping("/posts/{postId}/view")
     public ResponseEntity<Void> recordView(@PathVariable Long postId, Authentication authentication, HttpServletRequest request) {

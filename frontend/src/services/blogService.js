@@ -312,6 +312,17 @@ class BlogService {
     }
   }
 
+  // Get user's bookmarked posts
+  async getMyBookmarks(params = {}) {
+    try {
+      const response = await this.api.get("/bookmarks", { params });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching bookmarks:", error);
+      throw error;
+    }
+  }
+
   // Record view for a blog post
   async recordView(postId) {
     try {

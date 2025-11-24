@@ -15,8 +15,9 @@ import {
   FaArrowLeft,
   FaSearch,
   FaFilter,
+  FaSpinner,
 } from "react-icons/fa";
-import { useSavedArticles } from "../contexts/SavedArticlesContext";
+import blogService from "../services/blogService";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { useTheme } from "../hooks/useTheme";
@@ -29,22 +30,22 @@ const SavedArticlesPage = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const {
-    savedArticles,
-    unsaveArticle,
-    clearAllSavedArticles,
-    getSavedArticlesCount,
-  } = useSavedArticles();
 
   const [user, setUser] = useState(null);
+  const [savedArticles, setSavedArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("recent"); // recent, title, author
   const [filteredArticles, setFilteredArticles] = useState([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalElements, setTotalElements] = useState(0);
 
   const currentLocale = i18n.language === "vi" ? vi : enUS;
 
-  // Load user data
+  // Load user data and bookmarks
   useEffect(() => {
     const loadUser = () => {
       try {
@@ -76,6 +77,7 @@ const SavedArticlesPage = () => {
           };
 
           setUser(userObject);
+          return true; // User is authenticated
         } else if (anonymousToken) {
           setUser({
             email: "anonymous",
@@ -84,15 +86,70 @@ const SavedArticlesPage = () => {
             lastName: t("anonymous.anonymous"),
             anonymous: true,
           });
+          return false; // Anonymous user
         }
+        return false; // No user
       } catch (error) {
         console.error("Error loading user:", error);
         setUser(null);
+        return false;
       }
     };
 
-    loadUser();
+    const isAuthenticated = loadUser();
+    
+    // Load bookmarks if user is authenticated
+    if (isAuthenticated) {
+      loadBookmarks(0);
+    } else {
+      setLoading(false);
+      setError(t("blog.savedArticles.loginRequired") || "Please login to view your saved articles");
+    }
   }, [t]);
+
+  // Load bookmarks from API
+  const loadBookmarks = async (page = 0) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const params = {
+        page: page,
+        size: 20, // Number of items per page
+        sort: "createdAt,desc"
+      };
+      
+      const response = await blogService.getMyBookmarks(params);
+      
+      if (page === 0) {
+        // First page - replace all articles
+        setSavedArticles(response.content || []);
+      } else {
+        // Subsequent pages - append to existing articles
+        setSavedArticles(prev => [...prev, ...(response.content || [])]);
+      }
+      
+      setCurrentPage(page);
+      setHasMore(!response.last);
+      setTotalElements(response.totalElements || 0);
+    } catch (error) {
+      console.error("Error loading bookmarks:", error);
+      setError(t("blog.savedArticles.loadError") || "Failed to load saved articles");
+      if (error.response?.status === 401) {
+        // User not authenticated
+        navigate("/login");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load more bookmarks (pagination)
+  const loadMore = () => {
+    if (!loading && hasMore) {
+      loadBookmarks(currentPage + 1);
+    }
+  };
 
   // Filter and sort articles
   useEffect(() => {
@@ -102,8 +159,8 @@ const SavedArticlesPage = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (article) =>
-          article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          article.authorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          article.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          article.authorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (article.excerpt &&
             article.excerpt.toLowerCase().includes(searchTerm.toLowerCase()))
       );
@@ -113,25 +170,53 @@ const SavedArticlesPage = () => {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "title":
-          return a.title.localeCompare(b.title);
+          return (a.title || "").localeCompare(b.title || "");
         case "author":
-          return a.authorName.localeCompare(b.authorName);
+          return (a.authorName || "").localeCompare(b.authorName || "");
         case "recent":
         default:
-          return new Date(b.savedAt) - new Date(a.savedAt);
+          // Sort by publishedAt (most recent first)
+          const dateA = a.publishedAt ? new Date(a.publishedAt) : new Date(0);
+          const dateB = b.publishedAt ? new Date(b.publishedAt) : new Date(0);
+          return dateB - dateA;
       }
     });
 
     setFilteredArticles(filtered);
   }, [savedArticles, searchTerm, sortBy]);
 
-  const handleUnsaveArticle = (articleId) => {
-    unsaveArticle(articleId);
+  const handleUnsaveArticle = async (articleId) => {
+    try {
+      await blogService.toggleBookmark(articleId);
+      // Remove from local state
+      setSavedArticles(prev => prev.filter(article => article.id !== articleId));
+      setTotalElements(prev => prev - 1);
+    } catch (error) {
+      console.error("Error unsaving article:", error);
+      setError(t("blog.savedArticles.unsaveError") || "Failed to unsave article");
+    }
   };
 
-  const handleClearAll = () => {
-    clearAllSavedArticles();
-    setShowClearConfirm(false);
+  const handleClearAll = async () => {
+    try {
+      // Unbookmark all articles
+      const promises = savedArticles.map(article => 
+        blogService.toggleBookmark(article.id).catch(err => {
+          console.error(`Error unsaving article ${article.id}:`, err);
+          return null;
+        })
+      );
+      
+      await Promise.all(promises);
+      
+      // Clear local state
+      setSavedArticles([]);
+      setTotalElements(0);
+      setShowClearConfirm(false);
+    } catch (error) {
+      console.error("Error clearing all bookmarks:", error);
+      setError(t("blog.savedArticles.clearError") || "Failed to clear all bookmarks");
+    }
   };
 
   const handleViewArticle = (articleId) => {
@@ -213,7 +298,7 @@ const SavedArticlesPage = () => {
                     {t("blog.savedArticles.title")}
                   </h1>
                   <p className="text-gray-600 dark:text-gray-400 mt-2">
-                    {`${getSavedArticlesCount() || 0} ${t(
+                    {`${totalElements} ${t(
                       "blog.savedArticles.articleText"
                     )}`}
                   </p>
@@ -271,7 +356,29 @@ const SavedArticlesPage = () => {
 
         {/* Content */}
         <div className="max-w-4xl mx-auto px-4 py-8">
-          {savedArticles.length === 0 ? (
+          {loading && savedArticles.length === 0 ? (
+            <div className="text-center py-12">
+              <FaSpinner className="text-gray-400 dark:text-gray-500 text-6xl mb-4 animate-spin mx-auto" />
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                {t("blog.savedArticles.loading") || "Loading..."}
+              </h3>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="text-red-400 dark:text-red-500 text-6xl mb-4">
+                <FaBookmark />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                {error}
+              </h3>
+              <button
+                onClick={() => loadBookmarks(0)}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mt-4"
+              >
+                {t("common.retry") || "Retry"}
+              </button>
+            </div>
+          ) : savedArticles.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">
                 <FaBookmark />
@@ -336,9 +443,6 @@ const SavedArticlesPage = () => {
                           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-2">
                             <FaCalendarAlt className="text-xs" />
                             <span>{formatDate(article.publishedAt)}</span>
-                            <span>•</span>
-                            <FaBookmark className="text-xs text-yellow-500" />
-                            <span>{formatDate(article.savedAt)}</span>
                             {article.viewCount > 0 && (
                               <>
                                 <span>•</span>
@@ -453,6 +557,26 @@ const SavedArticlesPage = () => {
                   </div>
                 </div>
               ))}
+              
+              {/* Load More Button */}
+              {hasMore && (
+                <div className="text-center mt-8">
+                  <button
+                    onClick={loadMore}
+                    disabled={loading}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
+                  >
+                    {loading ? (
+                      <>
+                        <FaSpinner className="animate-spin" />
+                        <span>{t("blog.savedArticles.loading") || "Loading..."}</span>
+                      </>
+                    ) : (
+                      <span>{t("blog.savedArticles.loadMore") || "Load More"}</span>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
