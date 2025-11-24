@@ -8,7 +8,6 @@ import { jwtDecode } from "jwt-decode";
 import {
   getCurrentUser,
   getCurrentToken,
-  clearAnonymousData,
 } from "../services/anonymousService";
 import { useTheme } from "../hooks/useTheme";
 import { handleLogout } from "../utils/logoutUtils";
@@ -99,7 +98,7 @@ const PrivacyPolicy = () => {
     window.addEventListener("storage", handleStorage);
     setUser((prev) => prev); // trigger update on mount
     return () => window.removeEventListener("storage", handleStorage);
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     document.title = t("privacyPolicy.title") + " | MindMeter";

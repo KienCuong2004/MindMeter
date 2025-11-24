@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardHeader from "../components/DashboardHeader";
@@ -8,13 +8,9 @@ import { handleLogout } from "../utils/logoutUtils";
 import {
   getCurrentUser,
   getCurrentToken,
-  clearAnonymousData,
 } from "../services/anonymousService";
 import {
-  FaUserMd,
   FaCalendarAlt,
-  FaPhone,
-  FaEnvelope,
   FaComments,
   FaBrain,
 } from "react-icons/fa";
@@ -201,13 +197,19 @@ const ConsultTherapyPage = () => {
                     <a
                       href={`mailto:${EMAIL}`}
                       className="text-blue-700 dark:text-blue-300 underline hover:text-blue-800 dark:hover:text-blue-200"
-                    />
+                      aria-label={EMAIL}
+                    >
+                      {EMAIL}
+                    </a>
                   ),
                   3: (
                     <a
                       href={`tel:${PHONE}`}
                       className="text-blue-700 dark:text-blue-300 underline hover:text-blue-800 dark:hover:text-blue-200"
-                    />
+                      aria-label={PHONE}
+                    >
+                      {PHONE}
+                    </a>
                   ),
                 }}
               />

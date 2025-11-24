@@ -1,21 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import {
-  FaShieldAlt,
-  FaLock,
-  FaUserShield,
-  FaEye,
-  FaDatabase,
-  FaServer,
-  FaKey,
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaClock,
-  FaUsers,
-  FaChartLine,
-  FaBrain,
-} from "react-icons/fa";
+import { FaShieldAlt, FaBrain } from "react-icons/fa";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { useTheme } from "../hooks/useTheme";

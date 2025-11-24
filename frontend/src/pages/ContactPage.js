@@ -5,13 +5,9 @@ import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { useTheme } from "../hooks/useTheme";
 import { handleLogout } from "../utils/logoutUtils";
-import { FaEnvelopeOpenText, FaBrain } from "react-icons/fa";
+import { FaBrain } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
-import {
-  getCurrentUser,
-  getCurrentToken,
-  clearAnonymousData,
-} from "../services/anonymousService";
+import { getCurrentUser, getCurrentToken } from "../services/anonymousService";
 
 export default function ContactPage() {
   const { t, i18n } = useTranslation();
@@ -66,7 +62,7 @@ export default function ContactPage() {
         email: user.email || "",
       }));
     }
-  }, [user && user.name, user && user.email]);
+  }, [user]);
 
   // Kiểm tra cooldown khi load trang
   useEffect(() => {
@@ -93,7 +89,7 @@ export default function ContactPage() {
   useEffect(() => {
     document.title =
       i18n.language === "vi" ? t("pageTitles.contact") : "Contact | MindMeter";
-  }, [i18n.language]);
+  }, [i18n.language, t]);
 
   // Đảm bảo clear interval khi unmount
   useEffect(() => {
