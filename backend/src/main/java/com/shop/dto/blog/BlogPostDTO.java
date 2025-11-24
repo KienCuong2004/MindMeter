@@ -21,6 +21,7 @@ public class BlogPostDTO {
     private Long authorId;
     private String authorName;
     private String authorAvatar;
+    private String authorEmail;
     private BlogPost.BlogPostStatus status;
     private String featuredImage;
     private Integer viewCount;

@@ -17,6 +17,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -77,11 +78,56 @@ public class BlogService {
     }
     
     public Page<BlogPostDTO> getAllPosts(Pageable pageable, String userEmail) {
-        // Use simpler query that includes all published posts
-        // This will show all posts with status = published, regardless of publishedAt
-        Page<BlogPost> posts = blogPostRepository.findByStatusOrderByPublishedAtDesc(
+        // If user is logged in, include their pending posts
+        if (userEmail != null) {
+            User user = userRepository.findByEmail(userEmail).orElse(null);
+            if (user != null) {
+                // Get all published posts (larger page size to combine with pending)
+                Pageable largerPageable = PageRequest.of(0, pageable.getPageSize() * 10, pageable.getSort());
+                Page<BlogPost> publishedPosts = blogPostRepository.findByStatusOrderByPublishedAtDesc(
+                    BlogPost.BlogPostStatus.published, largerPageable);
+                
+                // Get all pending posts of this user
+                Pageable pendingPageable = PageRequest.of(0, 100, Sort.by("createdAt").descending());
+                Page<BlogPost> userPendingPosts = blogPostRepository.findByAuthorIdAndStatus(
+                    user.getId(), BlogPost.BlogPostStatus.pending, pendingPageable);
+                
+                // Combine published posts with user's pending posts
+                List<BlogPost> allPosts = new ArrayList<>();
+                allPosts.addAll(publishedPosts.getContent());
+                allPosts.addAll(userPendingPosts.getContent());
+                
+                // Remove duplicates (in case a post is both published and pending - shouldn't happen but safety)
+                allPosts = allPosts.stream()
+                    .distinct()
+                    .collect(Collectors.toList());
+                
+                // Sort by date descending (publishedAt for published, createdAt for pending)
+                allPosts.sort((a, b) -> {
+                    LocalDateTime dateA = a.getPublishedAt() != null ? a.getPublishedAt() : a.getCreatedAt();
+                    LocalDateTime dateB = b.getPublishedAt() != null ? b.getPublishedAt() : b.getCreatedAt();
+                    return dateB.compareTo(dateA);
+                });
+                
+                // Apply pagination
+                int start = (int) pageable.getOffset();
+                int end = Math.min((start + pageable.getPageSize()), allPosts.size());
+                List<BlogPost> paginatedPosts = start < allPosts.size() 
+                    ? allPosts.subList(start, end)
+                    : new ArrayList<>();
+                
+                return new org.springframework.data.domain.PageImpl<>(
+                    paginatedPosts.stream().map(post -> convertToDTO(post, userEmail)).collect(Collectors.toList()),
+                    pageable,
+                    allPosts.size()
+                );
+            }
+        }
+        
+        // For non-logged in users, return only published posts
+        Page<BlogPost> publishedPosts = blogPostRepository.findByStatusOrderByPublishedAtDesc(
             BlogPost.BlogPostStatus.published, pageable);
-        return posts.map(post -> convertToDTO(post, userEmail));
+        return publishedPosts.map(post -> convertToDTO(post, userEmail));
     }
 
     // Admin method to get all posts (including pending, draft, etc.)
@@ -1036,6 +1082,7 @@ public class BlogService {
         dto.setAuthorId(post.getAuthor().getId());
         dto.setAuthorName(post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName());
         dto.setAuthorAvatar(post.getAuthor().getAvatarUrl());
+        dto.setAuthorEmail(post.getAuthor().getEmail()); // Add author email for frontend comparison
         dto.setStatus(post.getStatus());
         
         // Fix featured image URL to include base URL
