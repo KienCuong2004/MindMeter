@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme as useCustomTheme } from "../hooks/useTheme";
 import { jwtDecode } from "jwt-decode";
 import BlogForm from "../components/blog/BlogForm";
@@ -16,7 +16,6 @@ const CreatePostPage = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   // Decode user from JWT token
   useEffect(() => {
@@ -44,21 +43,24 @@ const CreatePostPage = () => {
     try {
       setLoading(true);
       setError("");
-      console.log("Creating post:", formData);
+      console.log("CreatePostPage - Creating post:", formData);
 
       // Call API to create post
       const response = await blogService.createPost(formData);
-      console.log("Post created successfully:", response);
+      console.log("CreatePostPage - Post created successfully:", response);
 
-      setSuccess(t("blog.createPostForm.success.pending"));
-
-      // Redirect to blog page after successful creation
-      setTimeout(() => {
-        navigate("/blog");
-      }, 2000);
+      // Redirect immediately to blog page with success message in state
+      const successMessage = t("blog.createPostForm.success.pending");
+      navigate("/blog", {
+        state: { successMessage },
+      });
     } catch (error) {
-      console.error("Error creating post:", error);
-      setError(t("blog.createPostForm.error.publishFailed"));
+      console.error("CreatePostPage - Error creating post:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        t("blog.createPostForm.error.publishFailed");
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -120,7 +122,6 @@ const CreatePostPage = () => {
               onCancel={handleCancel}
               loading={loading}
               error={error}
-              success={success}
             />
           </div>
         </div>

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import blogService from "../../services/blogService";
 import {
   Container,
   Paper,
@@ -18,6 +19,7 @@ import {
   CircularProgress,
   IconButton,
   Tooltip,
+  OutlinedInput,
 } from "@mui/material";
 import {
   Save as SaveIcon,
@@ -49,12 +51,6 @@ const ImageUploadArea = styled(Box)(({ theme }) => ({
   },
 }));
 
-const TagInput = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    padding: theme.spacing(1),
-  },
-}));
-
 const CreatePost = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -64,34 +60,67 @@ const CreatePost = () => {
     content: "",
     excerpt: "",
     featuredImage: null,
-    category: "",
-    tags: [],
+    categoryIds: [],
+    tagIds: [],
     status: "draft",
   });
 
-  const [tagInput, setTagInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [loadingTags, setLoadingTags] = useState(false);
 
-  const categories = [
-    { value: "personalStory", label: t("blog.categories.personalStory") },
-    { value: "mentalHealthTips", label: t("blog.categories.mentalHealthTips") },
-    { value: "copingStrategies", label: t("blog.categories.copingStrategies") },
-    { value: "therapy", label: t("blog.categories.therapy") },
-    { value: "lifestyle", label: t("blog.categories.lifestyle") },
-    { value: "relationships", label: t("blog.categories.relationships") },
-    { value: "workLife", label: t("blog.categories.workLife") },
-    { value: "resources", label: t("blog.categories.resources") },
-    { value: "community", label: t("blog.categories.community") },
-    { value: "research", label: t("blog.categories.research") },
-  ];
+  // Load categories and tags from API
+  useEffect(() => {
+    const loadCategoriesAndTags = async () => {
+      try {
+        setLoadingCategories(true);
+        setLoadingTags(true);
+
+        const [categoriesData, tagsData] = await Promise.all([
+          blogService.getAllCategories(),
+          blogService.getAllTags(),
+        ]);
+
+        setAvailableCategories(
+          Array.isArray(categoriesData) ? categoriesData : []
+        );
+        setAvailableTags(Array.isArray(tagsData) ? tagsData : []);
+      } catch (error) {
+        console.error("Error loading categories and tags:", error);
+      } finally {
+        setLoadingCategories(false);
+        setLoadingTags(false);
+      }
+    };
+
+    loadCategoriesAndTags();
+  }, []);
 
   const handleInputChange = (field) => (event) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: event.target.value,
-    }));
+    const value = event.target.value;
+    setFormData((prev) => {
+      if (field === "categoryIds") {
+        // Handle single category selection
+        return {
+          ...prev,
+          categoryIds: value ? [value] : [],
+        };
+      } else if (field === "tagIds") {
+        // Handle multiple tag selection - value is already an array from Select
+        return {
+          ...prev,
+          tagIds: Array.isArray(value) ? value : [],
+        };
+      }
+      return {
+        ...prev,
+        [field]: value,
+      };
+    });
     setError("");
   };
 
@@ -116,35 +145,6 @@ const CreatePost = () => {
       }));
       setError("");
     }
-  };
-
-  const handleTagInputChange = (event) => {
-    setTagInput(event.target.value);
-  };
-
-  const handleTagInputKeyPress = (event) => {
-    if (event.key === "Enter" || event.key === ",") {
-      event.preventDefault();
-      addTag();
-    }
-  };
-
-  const addTag = () => {
-    const tag = tagInput.trim();
-    if (tag && !formData.tags.includes(tag)) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tag],
-      }));
-      setTagInput("");
-    }
-  };
-
-  const removeTag = (tagToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }));
   };
 
   const validateForm = () => {
@@ -176,23 +176,28 @@ const CreatePost = () => {
 
     setLoading(true);
     setError("");
+    setSuccess("");
 
     try {
+      // Always set status to "pending" for admin approval
+      // Users can't directly publish posts
       const submitData = {
-        ...formData,
-        status,
+        title: formData.title,
+        content: formData.content,
+        excerpt: formData.excerpt || "",
+        featuredImage: formData.featuredImage,
+        categoryIds: formData.categoryIds || [],
+        tagIds: formData.tagIds || [],
+        status: "pending", // Always pending for admin approval
+        isFeatured: false,
+        images: [],
       };
 
-      // TODO: Implement API call to save post
-      console.log("Saving post:", submitData);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const createdPost = await blogService.createPost(submitData);
 
       setSuccess(
-        status === "published"
-          ? t("blog.createPost.success.published")
-          : t("blog.createPost.success.saved")
+        t("blog.createPost.success.submitted") ||
+          "Bài viết đã được gửi và đang chờ phê duyệt!"
       );
 
       // Redirect after success
@@ -200,11 +205,13 @@ const CreatePost = () => {
         navigate("/blog");
       }, 2000);
     } catch (err) {
-      setError(
-        status === "published"
-          ? t("blog.createPost.error.publishFailed")
-          : t("blog.createPost.error.saveFailed")
-      );
+      console.error("Error creating post:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        t("blog.createPost.error.saveFailed") ||
+        "Có lỗi xảy ra khi tạo bài viết. Vui lòng thử lại.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -261,13 +268,14 @@ const CreatePost = () => {
             <FormControl fullWidth>
               <InputLabel>{t("blog.createPost.form.category")}</InputLabel>
               <Select
-                value={formData.category}
-                onChange={handleInputChange("category")}
+                value={formData.categoryIds[0] || ""}
+                onChange={handleInputChange("categoryIds")}
                 label={t("blog.createPost.form.category")}
+                disabled={loadingCategories}
               >
-                {categories.map((category) => (
-                  <MenuItem key={category.value} value={category.value}>
-                    {category.label}
+                {availableCategories.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
                   </MenuItem>
                 ))}
               </Select>
@@ -276,30 +284,39 @@ const CreatePost = () => {
 
           {/* Tags */}
           <Grid item xs={12} md={6}>
-            <Box>
-              <TagInput
-                fullWidth
+            <FormControl fullWidth>
+              <InputLabel>{t("blog.createPost.form.tags")}</InputLabel>
+              <Select
+                multiple
+                value={formData.tagIds || []}
+                onChange={handleInputChange("tagIds")}
                 label={t("blog.createPost.form.tags")}
-                placeholder={t("blog.createPost.form.tagsPlaceholder")}
-                value={tagInput}
-                onChange={handleTagInputChange}
-                onKeyPress={handleTagInputKeyPress}
-                variant="outlined"
-                onBlur={addTag}
-              />
-              <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {formData.tags.map((tag, index) => (
-                  <Chip
-                    key={index}
-                    label={tag}
-                    onDelete={() => removeTag(tag)}
-                    color="primary"
-                    variant="outlined"
-                    size="small"
-                  />
+                disabled={loadingTags}
+                input={<OutlinedInput label={t("blog.createPost.form.tags")} />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                    {selected.map((tagId) => {
+                      const tag = availableTags.find((t) => t.id === tagId);
+                      return tag ? (
+                        <Chip
+                          key={tagId}
+                          label={tag.name}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                        />
+                      ) : null;
+                    })}
+                  </Box>
+                )}
+              >
+                {availableTags.map((tag) => (
+                  <MenuItem key={tag.id} value={tag.id}>
+                    {tag.name}
+                  </MenuItem>
                 ))}
-              </Box>
-            </Box>
+              </Select>
+            </FormControl>
           </Grid>
 
           {/* Featured Image */}
@@ -372,12 +389,13 @@ const CreatePost = () => {
               <Button
                 variant="outlined"
                 startIcon={<SaveIcon />}
-                onClick={() => handleSave("draft")}
+                onClick={() => handleSave("pending")}
                 disabled={loading}
               >
-                {loading && formData.status === "draft" ? (
+                {loading ? (
                   <CircularProgress size={20} />
                 ) : (
+                  t("blog.createPost.form.saveDraft") ||
                   t("blog.createPost.form.draft")
                 )}
               </Button>
@@ -385,13 +403,14 @@ const CreatePost = () => {
               <Button
                 variant="contained"
                 startIcon={<PublishIcon />}
-                onClick={() => handleSave("published")}
+                onClick={() => handleSave("pending")}
                 disabled={loading}
                 color="primary"
               >
-                {loading && formData.status === "published" ? (
+                {loading ? (
                   <CircularProgress size={20} color="inherit" />
                 ) : (
+                  t("blog.createPost.form.submit") ||
                   t("blog.createPost.form.publish")
                 )}
               </Button>

@@ -30,10 +30,8 @@ const BlogForm = ({
   const [availableTags, setAvailableTags] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [loadingTags, setLoadingTags] = useState(false);
-  const [tagSearchInput, setTagSearchInput] = useState("");
-  const [tagSearchResults, setTagSearchResults] = useState([]);
-  const [showTagSearch, setShowTagSearch] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [imagePreview, setImagePreview] = useState(null);
 
   // Load categories and tags from API
   useEffect(() => {
@@ -124,6 +122,13 @@ const BlogForm = ({
         return;
       }
 
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+
       setFormData((prev) => ({
         ...prev,
         featuredImage: file,
@@ -136,51 +141,16 @@ const BlogForm = ({
     }
   };
 
-  // Handle tag search
+  // Reset preview when formData.featuredImage changes (e.g., when editing)
   useEffect(() => {
-    if (tagSearchInput.trim()) {
-      const filtered = availableTags.filter(
-        (tag) =>
-          tag.name.toLowerCase().includes(tagSearchInput.toLowerCase()) &&
-          !formData.tagIds.includes(tag.id)
-      );
-      setTagSearchResults(filtered.slice(0, 5)); // Show top 5 results
-      setShowTagSearch(true);
-    } else {
-      setTagSearchResults([]);
-      setShowTagSearch(false);
+    if (formData.featuredImage && typeof formData.featuredImage === "string") {
+      // If it's a URL string (from existing post), use it as preview
+      setImagePreview(formData.featuredImage);
+    } else if (!formData.featuredImage) {
+      // If no image, clear preview
+      setImagePreview(null);
     }
-  }, [tagSearchInput, availableTags, formData.tagIds]);
-
-  // Close tag search on outside click
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showTagSearch && !event.target.closest(".tag-search-container")) {
-        setShowTagSearch(false);
-      }
-    };
-
-    if (showTagSearch) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [showTagSearch]);
-
-  const handleTagSearchChange = (event) => {
-    setTagSearchInput(event.target.value);
-  };
-
-  const addTag = (tagId) => {
-    if (tagId && !formData.tagIds.includes(tagId)) {
-      setFormData((prev) => ({
-        ...prev,
-        tagIds: [...prev.tagIds, tagId],
-      }));
-      setTagSearchInput("");
-      setShowTagSearch(false);
-    }
-  };
+  }, [formData.featuredImage]);
 
   const removeTag = (tagIdToRemove) => {
     setFormData((prev) => ({
@@ -211,6 +181,21 @@ const BlogForm = ({
     }));
   };
 
+  const handleTagChange = (event) => {
+    const tagId = event.target.value;
+    if (tagId) {
+      // Allow multiple tags
+      if (!formData.tagIds.includes(Number(tagId))) {
+        setFormData((prev) => ({
+          ...prev,
+          tagIds: [...prev.tagIds, Number(tagId)],
+        }));
+      }
+      // Reset select
+      event.target.value = "";
+    }
+  };
+
   const validateForm = () => {
     const errors = {};
 
@@ -227,10 +212,16 @@ const BlogForm = ({
     }
 
     setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
+    const isValid = Object.keys(errors).length === 0;
+
+    if (!isValid) {
+      console.log("Validation errors:", errors);
+    }
+
+    return isValid;
   };
 
-  const handleSubmit = (status) => {
+  const handleSubmit = async (status) => {
     console.log("BlogForm handleSubmit called with status:", status);
     console.log("Form data:", formData);
 
@@ -248,7 +239,12 @@ const BlogForm = ({
     };
 
     console.log("Submitting data:", submitData);
-    onSubmit(submitData);
+    try {
+      await onSubmit(submitData);
+    } catch (error) {
+      console.error("Error in handleSubmit:", error);
+      // Error is handled by parent component (CreatePostPage)
+    }
   };
 
   const getSelectedCategories = () => {
@@ -268,12 +264,6 @@ const BlogForm = ({
       {error && (
         <div className="p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg">
           {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="p-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-300 rounded-lg">
-          {success}
         </div>
       )}
 
@@ -343,44 +333,26 @@ const BlogForm = ({
         </div>
 
         {/* Tags */}
-        <div className="md:col-span-1 relative tag-search-container">
+        <div className="md:col-span-1">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {t("blog.createPostForm.form.tags")}
           </label>
-          <input
-            type="text"
-            value={tagSearchInput}
-            onChange={handleTagSearchChange}
-            onFocus={() => tagSearchInput && setShowTagSearch(true)}
+          <select
+            onChange={handleTagChange}
             disabled={loadingTags}
             className="w-full px-4 py-3 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
-            placeholder={
-              loadingTags
+          >
+            <option value="">
+              {loadingTags
                 ? t("common.loading")
-                : t("blog.createPostForm.form.tagsPlaceholder")
-            }
-          />
-          {/* Tag search dropdown */}
-          {showTagSearch && tagSearchResults.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-              {tagSearchResults.map((tag) => (
-                <button
-                  key={tag.id}
-                  type="button"
-                  onClick={() => addTag(tag.id)}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
-                >
-                  <span
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: tag.color || "#3B82F6" }}
-                  ></span>
-                  <span className="text-gray-900 dark:text-white">
-                    {tag.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
+                : t("blog.createPostForm.form.selectTag") || "Chọn thẻ"}
+            </option>
+            {availableTags.map((tag) => (
+              <option key={tag.id} value={tag.id}>
+                {tag.name}
+              </option>
+            ))}
+          </select>
           {/* Selected tags */}
           <div className="mt-2 flex flex-wrap gap-2">
             {getSelectedTags().map((tag) => (
@@ -419,28 +391,57 @@ const BlogForm = ({
             id="featured-image-upload"
           />
           <label htmlFor="featured-image-upload" className="cursor-pointer">
-            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-              >
-                <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            {imagePreview ||
+            (formData.featuredImage &&
+              typeof formData.featuredImage === "string") ? (
+              <div className="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden group">
+                <img
+                  src={imagePreview || formData.featuredImage}
+                  alt="Preview"
+                  className="w-full h-64 object-cover"
                 />
-              </svg>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {formData.featuredImage
-                  ? typeof formData.featuredImage === "string"
-                    ? formData.featuredImage
-                    : formData.featuredImage.name
-                  : t("blog.createPostForm.form.featuredImagePlaceholder")}
-              </p>
-            </div>
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center">
+                  <div className="text-white opacity-0 group-hover:opacity-100 transition-opacity text-center">
+                    <svg
+                      className="mx-auto h-8 w-8 mb-2"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                    >
+                      <path
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <p className="text-sm">
+                      {t("blog.createPostForm.form.changeImage") ||
+                        "Click để thay đổi ảnh"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                <svg
+                  className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 48 48"
+                >
+                  <path
+                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t("blog.createPostForm.form.featuredImagePlaceholder")}
+                </p>
+              </div>
+            )}
           </label>
           {validationErrors.featuredImage && (
             <p className="mt-1 text-sm text-red-600 dark:text-red-400">
