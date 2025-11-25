@@ -1397,9 +1397,9 @@ public class BlogService {
             
             // Most popular post (by view count)
             BlogPost mostViewedPost = blogPostRepository.findAll().stream()
-                .max((p1, p2) -> Long.compare(
-                    p1.getViewCount() != null ? p1.getViewCount() : 0L,
-                    p2.getViewCount() != null ? p2.getViewCount() : 0L
+                .max((p1, p2) -> Integer.compare(
+                    p1.getViewCount() != null ? p1.getViewCount() : 0,
+                    p2.getViewCount() != null ? p2.getViewCount() : 0
                 ))
                 .orElse(null);
             if (mostViewedPost != null && mostViewedPost.getTitle() != null) {
