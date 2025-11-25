@@ -18,6 +18,7 @@ import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { useTheme } from "../hooks/useTheme";
 import blogService from "../services/blogService";
+import logger from "../utils/logger";
 
 const BlogListPage = () => {
   const { t } = useTranslation();
@@ -79,7 +80,7 @@ const BlogListPage = () => {
 
         setUser(userObject);
       } catch (error) {
-        console.error("Error decoding token:", error);
+        logger.error("Error decoding token:", error);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
       }
@@ -97,17 +98,17 @@ const BlogListPage = () => {
         blogService.getAllTags(),
       ]);
 
-      console.log("BlogListPage - Initial postsData:", postsData);
-      console.log("BlogListPage - postsData.content:", postsData?.content);
-      console.log(
+      logger.debug("BlogListPage - Initial postsData:", postsData);
+      logger.debug("BlogListPage - postsData.content:", postsData?.content);
+      logger.debug(
         "BlogListPage - postsData.totalElements:",
         postsData?.totalElements
       );
-      console.log(
+      logger.debug(
         "BlogListPage - postsData.totalPages:",
         postsData?.totalPages
       );
-      console.log("BlogListPage - postsData.last:", postsData?.last);
+      logger.debug("BlogListPage - postsData.last:", postsData?.last);
 
       // If API returns error, set empty arrays
       if (postsData && postsData.error) {
@@ -132,19 +133,19 @@ const BlogListPage = () => {
       const categories = Array.isArray(categoriesData) ? categoriesData : [];
       const tags = Array.isArray(tagsData) ? tagsData : [];
 
-      console.log("BlogListPage - Parsed posts:", posts);
-      console.log("BlogListPage - Posts count:", posts.length);
+      logger.debug("BlogListPage - Parsed posts:", posts);
+      logger.debug("BlogListPage - Posts count:", posts.length);
 
       // If no data, set empty arrays to prevent map errors
       if (!Array.isArray(categories)) {
-        console.warn("Categories data is not an array:", categories);
+        logger.warn("Categories data is not an array:", categories);
         setCategories([]);
       } else {
         setCategories(categories);
       }
 
       if (!Array.isArray(tags)) {
-        console.warn("Tags data is not an array:", tags);
+        logger.warn("Tags data is not an array:", tags);
         setTags([]);
       } else {
         setTags(tags);
@@ -159,9 +160,9 @@ const BlogListPage = () => {
           ? postsData.totalPages - 1 <= 0
           : true;
       setHasMore(!isLast);
-      console.log("BlogListPage - hasMore:", !isLast);
+      logger.debug("BlogListPage - hasMore:", !isLast);
     } catch (err) {
-      console.error("Error loading data:", err);
+      logger.error("Error loading data:", err);
       setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
     } finally {
       setLoading(false);
@@ -189,13 +190,13 @@ const BlogListPage = () => {
         params.tagIds = [Number(selectedTag)];
       }
 
-      console.log("BlogListPage - Search params:", params);
+      logger.debug("BlogListPage - Search params:", params);
 
       // Use getPosts with params for filtering if any filters are provided
       let postsData;
       if (params.keyword || params.categoryIds || params.tagIds) {
         postsData = await blogService.getPosts(params);
-        console.log("BlogListPage - Filtered posts:", postsData);
+        logger.debug("BlogListPage - Filtered posts:", postsData);
       } else {
         postsData = await blogService.getAllPosts(0, 10);
       }
@@ -203,7 +204,7 @@ const BlogListPage = () => {
       setPosts(postsData.content || []);
       setHasMore(!postsData.last);
     } catch (err) {
-      console.error("BlogListPage - Search error:", err);
+      logger.error("BlogListPage - Search error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -353,7 +354,7 @@ const BlogListPage = () => {
           setTimeout(() => setShowToast(false), 3000);
           return;
         } catch (err) {
-          console.error("Failed to copy: ", err);
+          logger.error("Failed to copy: ", err);
           setToastMessage("Không thể sao chép liên kết");
           setShowToast(true);
           setTimeout(() => setShowToast(false), 3000);
@@ -387,7 +388,7 @@ const BlogListPage = () => {
           )
         );
       } catch (error) {
-        console.error("Error recording share:", error);
+        logger.error("Error recording share:", error);
       }
     }
   };

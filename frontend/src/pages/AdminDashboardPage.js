@@ -796,13 +796,45 @@ export function AdminProfilePage() {
     e.preventDefault();
     setSaving(true);
     setAlert("");
-    // TODO: Gọi API cập nhật thông tin user ở đây
-    setTimeout(() => {
+    setError("");
+
+    try {
+      // Prepare update data
+      const updateData = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        phone: form.phone,
+      };
+
+      // Call API to update admin profile
+      const response = await authFetch("/api/admin/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || t("updateUserFailed"));
+      }
+
+      const updatedData = await response.json();
+
+      // Update profile state with response data
+      setProfile((prev) => ({
+        ...prev,
+        firstName: updatedData.firstName || form.firstName,
+        lastName: updatedData.lastName || form.lastName,
+        phone: updatedData.phone || form.phone,
+      }));
+
       setSaving(false);
       setIsEdit(false);
       setAlert(t("updateUserSuccess"));
-      setProfile((prev) => ({ ...prev, ...form }));
-    }, 1200);
+    } catch (err) {
+      setSaving(false);
+      setError(err.message || t("updateUserFailed"));
+    }
   };
   if (loading) {
     return (
