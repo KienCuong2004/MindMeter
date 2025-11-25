@@ -117,7 +117,7 @@ const CreatePost = () => {
         };
       }
       return {
-        ...prev,
+      ...prev,
         [field]: value,
       };
     });
@@ -298,16 +298,16 @@ const CreatePost = () => {
                     {selected.map((tagId) => {
                       const tag = availableTags.find((t) => t.id === tagId);
                       return tag ? (
-                        <Chip
+                  <Chip
                           key={tagId}
                           label={tag.name}
                           size="small"
-                          color="primary"
-                          variant="outlined"
-                        />
+                    color="primary"
+                    variant="outlined"
+                  />
                       ) : null;
                     })}
-                  </Box>
+              </Box>
                 )}
               >
                 {availableTags.map((tag) => (
