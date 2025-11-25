@@ -1,4 +1,5 @@
 import axios from "axios";
+import logger from "../utils/logger";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
@@ -44,7 +45,7 @@ class BlogService {
       const response = await this.api.get("/posts", { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching blog posts:", error);
+      logger.error("Error fetching blog posts:", error);
       throw error;
     }
   }
@@ -56,7 +57,7 @@ class BlogService {
       const response = await this.api.get(`/admin/posts`, { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching admin blog posts:", error);
+      logger.error("Error fetching admin blog posts:", error);
       throw error;
     }
   }
@@ -72,7 +73,7 @@ class BlogService {
       const response = await this.api.get("/categories");
       return response.data;
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      logger.error("Error fetching categories:", error);
       throw error;
     }
   }
@@ -83,7 +84,7 @@ class BlogService {
       const response = await this.api.get("/tags");
       return response.data;
     } catch (error) {
-      console.error("Error fetching tags:", error);
+      logger.error("Error fetching tags:", error);
       throw error;
     }
   }
@@ -96,7 +97,7 @@ class BlogService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error searching posts:", error);
+      logger.error("Error searching posts:", error);
       throw error;
     }
   }
@@ -109,7 +110,7 @@ class BlogService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching posts by category:", error);
+      logger.error("Error fetching posts by category:", error);
       throw error;
     }
   }
@@ -122,7 +123,7 @@ class BlogService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching posts by tag:", error);
+      logger.error("Error fetching posts by tag:", error);
       throw error;
     }
   }
@@ -136,7 +137,7 @@ class BlogService {
       );
       return response.data;
     } catch (error) {
-      console.error("Error creating share:", error);
+      logger.error("Error creating share:", error);
       throw error;
     }
   }
@@ -147,7 +148,7 @@ class BlogService {
       const response = await this.api.get(`/posts/${id}`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching blog post:", error);
+      logger.error("Error fetching blog post:", error);
       throw error;
     }
   }
@@ -158,7 +159,7 @@ class BlogService {
       const response = await this.api.get(`/posts/${id}/public`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching public blog post:", error);
+      logger.error("Error fetching public blog post:", error);
       throw error;
     }
   }
@@ -182,7 +183,7 @@ class BlogService {
 
       return response.data; // Returns the file URL
     } catch (error) {
-      console.error("Error uploading image:", error);
+      logger.error("Error uploading image:", error);
       throw error;
     }
   }
@@ -194,9 +195,9 @@ class BlogService {
 
       // Upload featured image if exists
       if (postData.featuredImage && postData.featuredImage instanceof File) {
-        console.log("Uploading featured image...");
+        logger.debug("Uploading featured image...");
         featuredImageUrl = await this.uploadImage(postData.featuredImage);
-        console.log("Featured image uploaded:", featuredImageUrl);
+        logger.debug("Featured image uploaded:", featuredImageUrl);
       }
 
       // Prepare JSON payload according to BlogPostRequest DTO
@@ -220,7 +221,7 @@ class BlogService {
 
       return response.data;
     } catch (error) {
-      console.error("Error creating blog post:", error);
+      logger.error("Error creating blog post:", error);
       throw error;
     }
   }
@@ -232,9 +233,9 @@ class BlogService {
 
       // Upload featured image if exists
       if (postData.featuredImage && postData.featuredImage instanceof File) {
-        console.log("Uploading featured image...");
+        logger.debug("Uploading featured image...");
         featuredImageUrl = await this.uploadImage(postData.featuredImage);
-        console.log("Featured image uploaded:", featuredImageUrl);
+        logger.debug("Featured image uploaded:", featuredImageUrl);
       }
 
       // Prepare JSON payload according to BlogPostRequest DTO
@@ -258,7 +259,7 @@ class BlogService {
 
       return response.data;
     } catch (error) {
-      console.error("Error updating blog post:", error);
+      logger.error("Error updating blog post:", error);
       throw error;
     }
   }
@@ -271,7 +272,7 @@ class BlogService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching comments:", error);
+      logger.error("Error fetching comments:", error);
       throw error;
     }
   }
@@ -285,7 +286,7 @@ class BlogService {
       );
       return response.data;
     } catch (error) {
-      console.error("Error creating comment:", error);
+      logger.error("Error creating comment:", error);
       throw error;
     }
   }
@@ -296,7 +297,7 @@ class BlogService {
       const response = await this.api.post(`/posts/${postId}/like`);
       return response.data;
     } catch (error) {
-      console.error("Error toggling like:", error);
+      logger.error("Error toggling like:", error);
       throw error;
     }
   }
@@ -307,7 +308,7 @@ class BlogService {
       const response = await this.api.post(`/posts/${postId}/bookmark`);
       return response.data;
     } catch (error) {
-      console.error("Error toggling bookmark:", error);
+      logger.error("Error toggling bookmark:", error);
       throw error;
     }
   }
@@ -318,7 +319,7 @@ class BlogService {
       const response = await this.api.get("/bookmarks", { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching bookmarks:", error);
+      logger.error("Error fetching bookmarks:", error);
       throw error;
     }
   }
@@ -329,7 +330,7 @@ class BlogService {
       const response = await this.api.post(`/posts/${postId}/view`);
       return response.data;
     } catch (error) {
-      console.error("Error recording view:", error);
+      logger.error("Error recording view:", error);
       throw error;
     }
   }
@@ -340,7 +341,7 @@ class BlogService {
       const response = await this.api.get("/saved", { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching saved posts:", error);
+      logger.error("Error fetching saved posts:", error);
       throw error;
     }
   }
@@ -351,7 +352,7 @@ class BlogService {
       const response = await this.api.post(`/posts/${postId}/save`);
       return response.data;
     } catch (error) {
-      console.error("Error toggling save post:", error);
+      logger.error("Error toggling save post:", error);
       throw error;
     }
   }
@@ -362,7 +363,7 @@ class BlogService {
       const response = await this.api.post(`/posts/${postId}/like`);
       return response.data;
     } catch (error) {
-      console.error("Error toggling like post:", error);
+      logger.error("Error toggling like post:", error);
       throw error;
     }
   }
@@ -375,7 +376,7 @@ class BlogService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching post comments:", error);
+      logger.error("Error fetching post comments:", error);
       throw error;
     }
   }
@@ -389,7 +390,7 @@ class BlogService {
       );
       return response.data;
     } catch (error) {
-      console.error("Error adding comment:", error);
+      logger.error("Error adding comment:", error);
       throw error;
     }
   }
@@ -400,7 +401,7 @@ class BlogService {
       const response = await this.api.get("/categories");
       return response.data;
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      logger.error("Error fetching categories:", error);
       throw error;
     }
   }
@@ -413,7 +414,7 @@ class BlogService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching popular tags:", error);
+      logger.error("Error fetching popular tags:", error);
       throw error;
     }
   }
@@ -425,7 +426,7 @@ class BlogService {
       const response = await this.api.get(url, { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching user posts:", error);
+      logger.error("Error fetching user posts:", error);
       throw error;
     }
   }
@@ -440,7 +441,7 @@ class BlogService {
       const response = await this.api.put(`/posts/${postId}/status`, data);
       return response.data;
     } catch (error) {
-      console.error("Error updating post status:", error);
+      logger.error("Error updating post status:", error);
       throw error;
     }
   }
@@ -452,7 +453,7 @@ class BlogService {
       const response = await adminApi.get("/posts", { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching admin blog posts:", error);
+      logger.error("Error fetching admin blog posts:", error);
       throw error;
     }
   }
@@ -466,7 +467,7 @@ class BlogService {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
-    
+
     // Add response interceptor for auth errors
     adminApi.interceptors.response.use(
       (response) => response,
@@ -478,7 +479,7 @@ class BlogService {
         return Promise.reject(error);
       }
     );
-    
+
     return adminApi;
   }
 
@@ -488,7 +489,7 @@ class BlogService {
       const response = await adminApi.put(`/posts/${postId}/approve`);
       return response.data;
     } catch (error) {
-      console.error("Error approving post:", error);
+      logger.error("Error approving post:", error);
       throw error;
     }
   }
@@ -497,10 +498,12 @@ class BlogService {
     try {
       const adminApi = this._getAdminApi();
       const params = reason ? { reason } : {};
-      const response = await adminApi.put(`/posts/${postId}/reject`, null, { params });
+      const response = await adminApi.put(`/posts/${postId}/reject`, null, {
+        params,
+      });
       return response.data;
     } catch (error) {
-      console.error("Error rejecting post:", error);
+      logger.error("Error rejecting post:", error);
       throw error;
     }
   }
@@ -511,7 +514,7 @@ class BlogService {
       const response = await adminApi.put(`/posts/${postId}/publish`);
       return response.data;
     } catch (error) {
-      console.error("Error publishing post:", error);
+      logger.error("Error publishing post:", error);
       throw error;
     }
   }
@@ -522,7 +525,7 @@ class BlogService {
       const response = await adminApi.put(`/posts/${postId}/unpublish`);
       return response.data;
     } catch (error) {
-      console.error("Error unpublishing post:", error);
+      logger.error("Error unpublishing post:", error);
       throw error;
     }
   }
@@ -533,7 +536,7 @@ class BlogService {
       const response = await adminApi.delete(`/posts/${postId}`);
       return response.data;
     } catch (error) {
-      console.error("Error deleting post:", error);
+      logger.error("Error deleting post:", error);
       throw error;
     }
   }
@@ -545,7 +548,7 @@ class BlogService {
       const response = await adminApi.get("/categories");
       return response.data;
     } catch (error) {
-      console.error("Error fetching admin categories:", error);
+      logger.error("Error fetching admin categories:", error);
       throw error;
     }
   }
@@ -556,7 +559,7 @@ class BlogService {
       const response = await adminApi.post("/categories", categoryData);
       return response.data;
     } catch (error) {
-      console.error("Error creating category:", error);
+      logger.error("Error creating category:", error);
       throw error;
     }
   }
@@ -564,10 +567,13 @@ class BlogService {
   async updateCategory(categoryId, categoryData) {
     try {
       const adminApi = this._getAdminApi();
-      const response = await adminApi.put(`/categories/${categoryId}`, categoryData);
+      const response = await adminApi.put(
+        `/categories/${categoryId}`,
+        categoryData
+      );
       return response.data;
     } catch (error) {
-      console.error("Error updating category:", error);
+      logger.error("Error updating category:", error);
       throw error;
     }
   }
@@ -578,7 +584,7 @@ class BlogService {
       const response = await adminApi.delete(`/categories/${categoryId}`);
       return response.data;
     } catch (error) {
-      console.error("Error deleting category:", error);
+      logger.error("Error deleting category:", error);
       throw error;
     }
   }
@@ -590,7 +596,7 @@ class BlogService {
       const response = await adminApi.get("/tags");
       return response.data;
     } catch (error) {
-      console.error("Error fetching admin tags:", error);
+      logger.error("Error fetching admin tags:", error);
       throw error;
     }
   }
@@ -601,7 +607,7 @@ class BlogService {
       const response = await adminApi.post("/tags", tagData);
       return response.data;
     } catch (error) {
-      console.error("Error creating tag:", error);
+      logger.error("Error creating tag:", error);
       throw error;
     }
   }
@@ -612,7 +618,7 @@ class BlogService {
       const response = await adminApi.put(`/tags/${tagId}`, tagData);
       return response.data;
     } catch (error) {
-      console.error("Error updating tag:", error);
+      logger.error("Error updating tag:", error);
       throw error;
     }
   }
@@ -623,7 +629,7 @@ class BlogService {
       const response = await adminApi.delete(`/tags/${tagId}`);
       return response.data;
     } catch (error) {
-      console.error("Error deleting tag:", error);
+      logger.error("Error deleting tag:", error);
       throw error;
     }
   }
@@ -633,7 +639,7 @@ class BlogService {
       const response = await this.api.delete(`/posts/${postId}`);
       return response.data;
     } catch (error) {
-      console.error("Error deleting post:", error);
+      logger.error("Error deleting post:", error);
       throw error;
     }
   }
@@ -646,7 +652,7 @@ class BlogService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error editing comment:", error);
+      logger.error("Error editing comment:", error);
       throw error;
     }
   }
@@ -656,7 +662,7 @@ class BlogService {
       const response = await this.api.delete(`/comments/${commentId}`);
       return response.data;
     } catch (error) {
-      console.error("Error deleting comment:", error);
+      logger.error("Error deleting comment:", error);
       throw error;
     }
   }
@@ -670,7 +676,7 @@ class BlogService {
       });
       return response.data;
     } catch (error) {
-      console.error("Error reporting post:", error);
+      logger.error("Error reporting post:", error);
       throw error;
     }
   }
@@ -680,7 +686,7 @@ class BlogService {
       const response = await this.api.get(`/posts/${postId}/report/check`);
       return response.data;
     } catch (error) {
-      console.error("Error checking if user reported post:", error);
+      logger.error("Error checking if user reported post:", error);
       throw error;
     }
   }
@@ -692,7 +698,7 @@ class BlogService {
       const response = await adminApi.get("/reports", { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching admin reports:", error);
+      logger.error("Error fetching admin reports:", error);
       throw error;
     }
   }
@@ -703,7 +709,7 @@ class BlogService {
       const response = await adminApi.get("/reports/pending", { params });
       return response.data;
     } catch (error) {
-      console.error("Error fetching pending reports:", error);
+      logger.error("Error fetching pending reports:", error);
       throw error;
     }
   }
@@ -715,10 +721,12 @@ class BlogService {
       if (adminNotes) {
         params.adminNotes = adminNotes;
       }
-      const response = await adminApi.put(`/reports/${reportId}/review`, null, { params });
+      const response = await adminApi.put(`/reports/${reportId}/review`, null, {
+        params,
+      });
       return response.data;
     } catch (error) {
-      console.error("Error reviewing report:", error);
+      logger.error("Error reviewing report:", error);
       throw error;
     }
   }

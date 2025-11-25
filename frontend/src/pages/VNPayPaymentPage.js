@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { getCurrentUser } from "../services/anonymousService";
+import logger from "../utils/logger";
 
 const VNPayPaymentPage = () => {
   const { t } = useTranslation("payment");
@@ -29,15 +30,15 @@ const VNPayPaymentPage = () => {
   const planName = plan === "pro" ? "Pro" : "Plus";
 
   // Debug logs
-  console.log("VNPayPaymentPage - planFromUrl:", planFromUrl);
-  console.log("VNPayPaymentPage - user?.plan:", user?.plan);
-  console.log("VNPayPaymentPage - displayPlan:", displayPlan);
-  console.log("VNPayPaymentPage - plan:", plan);
-  console.log("VNPayPaymentPage - amount:", amount);
-  console.log("VNPayPaymentPage - planName:", planName);
-  console.log("VNPayPaymentPage - vnp_ResponseCode:", vnp_ResponseCode);
-  console.log("VNPayPaymentPage - vnp_TxnRef:", vnp_TxnRef);
-  console.log("VNPayPaymentPage - success:", success);
+  logger.debug("VNPayPaymentPage - planFromUrl:", planFromUrl);
+  logger.debug("VNPayPaymentPage - user?.plan:", user?.plan);
+  logger.debug("VNPayPaymentPage - displayPlan:", displayPlan);
+  logger.debug("VNPayPaymentPage - plan:", plan);
+  logger.debug("VNPayPaymentPage - amount:", amount);
+  logger.debug("VNPayPaymentPage - planName:", planName);
+  logger.debug("VNPayPaymentPage - vnp_ResponseCode:", vnp_ResponseCode);
+  logger.debug("VNPayPaymentPage - vnp_TxnRef:", vnp_TxnRef);
+  logger.debug("VNPayPaymentPage - success:", success);
 
   // Check if returning from VNPay (has response code)
   const isReturningFromVNPay = vnp_ResponseCode !== null;
@@ -49,7 +50,7 @@ const VNPayPaymentPage = () => {
   const createPayment = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!user && !token) {
-      console.log("No user and no token found, redirecting to login");
+      logger.debug("No user and no token found, redirecting to login");
       navigate("/login");
       return;
     }
@@ -58,7 +59,7 @@ const VNPayPaymentPage = () => {
     setError(null);
 
     try {
-      console.log("Creating VNPay payment for plan:", plan);
+      logger.debug("Creating VNPay payment for plan:", plan);
 
       const response = await axios.post(
         "/api/payment/vnpay/create-payment",
@@ -73,10 +74,10 @@ const VNPayPaymentPage = () => {
         }
       );
 
-      console.log("VNPay payment URL created:", response.data);
+      logger.debug("VNPay payment URL created:", response.data);
 
       if (response.data.paymentUrl) {
-        console.log("Redirecting to VNPay with payment URL");
+        logger.debug("Redirecting to VNPay with payment URL");
 
         // Redirect to VNPay
         window.location.href = response.data.paymentUrl;
@@ -84,7 +85,7 @@ const VNPayPaymentPage = () => {
         throw new Error("No payment URL received");
       }
     } catch (error) {
-      console.error("Error creating VNPay payment:", error);
+      logger.error("Error creating VNPay payment:", error);
       setError(error.response?.data?.error || t("failedToCreatePayment"));
     } finally {
       setLoading(false);
@@ -99,7 +100,7 @@ const VNPayPaymentPage = () => {
     setError(null);
 
     try {
-      console.log("Processing VNPay return...");
+      logger.debug("Processing VNPay return...");
 
       // Get all URL parameters
       const params = new URLSearchParams(window.location.search);
@@ -111,7 +112,7 @@ const VNPayPaymentPage = () => {
       // Try to get token from localStorage
       const token = localStorage.getItem("token");
       if (!token) {
-        console.error("No token found for VNPay return processing");
+        logger.error("No token found for VNPay return processing");
         setError("Authentication required for payment processing");
         return;
       }
@@ -126,7 +127,7 @@ const VNPayPaymentPage = () => {
         headers: headers,
       });
 
-      console.log("VNPay return processed:", response.data);
+      logger.debug("VNPay return processed:", response.data);
       setPaymentResult(response.data);
 
       if (response.data.success) {
@@ -136,7 +137,7 @@ const VNPayPaymentPage = () => {
         }, 3000);
       }
     } catch (error) {
-      console.error("Error processing VNPay return:", error);
+      logger.error("Error processing VNPay return:", error);
       setError(t("failedToProcessPayment"));
     } finally {
       setLoading(false);
@@ -145,18 +146,21 @@ const VNPayPaymentPage = () => {
 
   // Main useEffect
   useEffect(() => {
-    console.log("=== VNPayPaymentPage useEffect START ===");
-    console.log("VNPayPaymentPage useEffect - user:", user);
-    console.log(
+    logger.debug("=== VNPayPaymentPage useEffect START ===");
+    logger.debug("VNPayPaymentPage useEffect - user:", user);
+    logger.debug(
       "VNPayPaymentPage useEffect - isReturningFromVNPay:",
       isReturningFromVNPay
     );
-    console.log("VNPayPaymentPage useEffect - hasInitialized:", hasInitialized);
-    console.log(
+    logger.debug(
+      "VNPayPaymentPage useEffect - hasInitialized:",
+      hasInitialized
+    );
+    logger.debug(
       "VNPayPaymentPage useEffect - hasCreatedPayment:",
       hasCreatedPayment
     );
-    console.log(
+    logger.debug(
       "VNPayPaymentPage useEffect - hasProcessedReturn:",
       hasProcessedReturn
     );
@@ -165,32 +169,32 @@ const VNPayPaymentPage = () => {
     const token = localStorage.getItem("token");
     const userFromStorage = localStorage.getItem("user");
 
-    console.log("Token exists:", !!token);
-    console.log("User exists:", !!user);
-    console.log("User from localStorage exists:", !!userFromStorage);
-    console.log("Full localStorage keys:", Object.keys(localStorage));
+    logger.debug("Token exists:", !!token);
+    logger.debug("User exists:", !!user);
+    logger.debug("User from localStorage exists:", !!userFromStorage);
+    logger.debug("Full localStorage keys:", Object.keys(localStorage));
 
     if (!user && !token) {
-      console.log("No user and no token found, redirecting to login");
+      logger.debug("No user and no token found, redirecting to login");
       navigate("/login");
       return;
     }
 
     // If returning from VNPay, always process regardless of user state
     if (isReturningFromVNPay) {
-      console.log(
+      logger.debug(
         "Returning from VNPay, processing return regardless of user state"
       );
       // Don't redirect to login, process the return
     } else if (!user) {
-      console.log("No user found for new payment, redirecting to login");
+      logger.debug("No user found for new payment, redirecting to login");
       navigate("/login");
       return;
     }
 
     // Prevent multiple initialization calls
     if (hasInitialized) {
-      console.log("Already initialized, skipping...");
+      logger.debug("Already initialized, skipping...");
       return;
     }
 
@@ -198,26 +202,26 @@ const VNPayPaymentPage = () => {
 
     if (isReturningFromVNPay) {
       if (hasProcessedReturn) {
-        console.log("Already processed return, skipping...");
+        logger.debug("Already processed return, skipping...");
         return;
       }
-      console.log("Returning from VNPay, processing result...");
+      logger.debug("Returning from VNPay, processing result...");
       setHasProcessedReturn(true);
       processReturn();
     } else {
       // Create new payment - check if we have user or token
       if (!user && !token) {
-        console.log(
+        logger.debug(
           "No user and no token for new payment creation, skipping..."
         );
         return;
       }
 
       if (hasCreatedPayment) {
-        console.log("Already created payment, skipping...");
+        logger.debug("Already created payment, skipping...");
         return;
       }
-      console.log("Creating new VNPay payment...");
+      logger.debug("Creating new VNPay payment...");
       setHasCreatedPayment(true);
       createPayment();
     }

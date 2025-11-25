@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { getCurrentUser } from "../services/anonymousService";
 import axios from "axios";
+import logger from "../utils/logger";
 
 const PayPalPaymentPage = () => {
   const { t } = useTranslation("payment");
@@ -35,18 +36,18 @@ const PayPalPaymentPage = () => {
     displayPlan === "PRO" || displayPlan === "pro" ? "Pro" : "Plus";
 
   // Debug logs
-  console.log("PayPalPaymentPage - planFromUrl:", planFromUrl);
-  console.log("PayPalPaymentPage - user?.plan:", user?.plan);
-  console.log("PayPalPaymentPage - displayPlan:", displayPlan);
-  console.log("PayPalPaymentPage - amount:", amount);
-  console.log("PayPalPaymentPage - planName:", planName);
+  logger.debug("PayPalPaymentPage - planFromUrl:", planFromUrl);
+  logger.debug("PayPalPaymentPage - user?.plan:", user?.plan);
+  logger.debug("PayPalPaymentPage - displayPlan:", displayPlan);
+  logger.debug("PayPalPaymentPage - amount:", amount);
+  logger.debug("PayPalPaymentPage - planName:", planName);
 
   const createPayment = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      console.log("Creating PayPal payment for plan:", plan);
+      logger.debug("Creating PayPal payment for plan:", plan);
       const token = localStorage.getItem("token");
       const response = await axios.post(
         "/api/payment/create-payment",
@@ -59,20 +60,20 @@ const PayPalPaymentPage = () => {
         }
       );
 
-      console.log("PayPal payment creation response:", response.data);
+      logger.debug("PayPal payment creation response:", response.data);
 
       if (response.data.url) {
         setApprovalUrl(response.data.url);
-        console.log("Redirecting to PayPal:", response.data.url);
+        logger.debug("Redirecting to PayPal:", response.data.url);
 
         // Redirect to PayPal
         window.location.href = response.data.url;
       } else {
-        console.error("No approval URL received:", response.data);
+        logger.error("No approval URL received:", response.data);
         setError(t("createErrorMessage"));
       }
     } catch (err) {
-      console.error("Error creating PayPal payment:", err);
+      logger.error("Error creating PayPal payment:", err);
       setError(err.response?.data?.error || t("createErrorMessage"));
     } finally {
       setLoading(false);
@@ -85,7 +86,7 @@ const PayPalPaymentPage = () => {
       setError(null);
 
       try {
-        console.log("Executing PayPal payment:", { paymentId, payerId });
+        logger.debug("Executing PayPal payment:", { paymentId, payerId });
         const token = localStorage.getItem("token");
         const response = await axios.post(
           "/api/payment/execute-payment",
@@ -98,11 +99,11 @@ const PayPalPaymentPage = () => {
           }
         );
 
-        console.log("PayPal payment execution response:", response.data);
+        logger.debug("PayPal payment execution response:", response.data);
 
         if (response.data.success) {
           setSuccess(true);
-          console.log("Payment successful, refreshing user token...");
+          logger.debug("Payment successful, refreshing user token...");
           // Refresh user token to get updated plan
           await refreshUserToken();
 
@@ -111,11 +112,11 @@ const PayPalPaymentPage = () => {
             navigate("/pricing?success=true");
           }, 3000);
         } else {
-          console.error("Payment execution failed:", response.data);
+          logger.error("Payment execution failed:", response.data);
           setError(t("errorMessage"));
         }
       } catch (err) {
-        console.error("Error executing PayPal payment:", err);
+        logger.error("Error executing PayPal payment:", err);
         setError(err.response?.data?.error || t("errorMessage"));
       } finally {
         setLoading(false);
@@ -143,7 +144,7 @@ const PayPalPaymentPage = () => {
         localStorage.setItem("user", JSON.stringify(response.data.user));
       }
     } catch (err) {
-      console.error("Error refreshing token:", err);
+      logger.error("Error refreshing token:", err);
     }
   };
 
@@ -152,14 +153,14 @@ const PayPalPaymentPage = () => {
   };
 
   useEffect(() => {
-    console.log("PayPalPaymentPage useEffect - user:", user);
-    console.log(
+    logger.debug("PayPalPaymentPage useEffect - user:", user);
+    logger.debug(
       "PayPalPaymentPage useEffect - searchParams:",
       Object.fromEntries(searchParams.entries())
     );
 
     if (!user) {
-      console.log("No user found, redirecting to login");
+      logger.debug("No user found, redirecting to login");
       navigate("/login");
       return;
     }
@@ -168,15 +169,15 @@ const PayPalPaymentPage = () => {
     const paymentId = searchParams.get("paymentId");
     const payerId = searchParams.get("PayerID");
 
-    console.log("PayPal return parameters:", { paymentId, payerId });
+    logger.debug("PayPal return parameters:", { paymentId, payerId });
 
     if (paymentId && payerId && !hasExecutedPayment) {
-      console.log("Returning from PayPal, executing payment...");
+      logger.debug("Returning from PayPal, executing payment...");
       setHasExecutedPayment(true); // Set flag to true to prevent re-execution
       executePayment(paymentId, payerId);
     } else if (!paymentId && !payerId) {
       // Only create payment if no params are present
-      console.log("Creating new PayPal payment...");
+      logger.debug("Creating new PayPal payment...");
       createPayment();
     }
   }, [user, navigate, createPayment, executePayment, hasExecutedPayment]); // Added hasExecutedPayment to dependencies
