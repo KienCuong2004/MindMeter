@@ -231,10 +231,14 @@ public class AdminBlogController {
         return ResponseEntity.ok().build();
     }
     
-    // Statistics (placeholder for future implementation)
+    // Statistics
     @GetMapping("/stats")
     public ResponseEntity<BlogStatsDTO> getBlogStats() {
-        // TODO: Implement blog stats
-        return ResponseEntity.ok().build();
+        try {
+            BlogStatsDTO stats = blogService.getBlogStats();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 }

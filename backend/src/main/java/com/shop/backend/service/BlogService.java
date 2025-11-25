@@ -1346,4 +1346,122 @@ public class BlogService {
             throw new RuntimeException("Error converting report to DTO: " + e.getMessage(), e);
         }
     }
+    
+    // Blog Statistics
+    public BlogStatsDTO getBlogStats() {
+        try {
+            BlogStatsDTO stats = new BlogStatsDTO();
+            
+            // Post counts
+            stats.setTotalPosts(blogPostRepository.count());
+            stats.setPublishedPosts(blogPostRepository.countByStatus(BlogPost.BlogPostStatus.published));
+            stats.setPendingPosts(blogPostRepository.countByStatus(BlogPost.BlogPostStatus.pending));
+            stats.setDraftPosts(blogPostRepository.countByStatus(BlogPost.BlogPostStatus.draft));
+            
+            // Comment counts
+            long totalComments = blogCommentRepository.count();
+            stats.setTotalComments(totalComments);
+            // Assuming pending comments are those not yet approved (if you have approval system)
+            stats.setPendingComments(0L); // Update if you have comment approval system
+            
+            // Like, Share, View counts
+            stats.setTotalLikes(blogLikeRepository.count());
+            stats.setTotalShares(blogShareRepository.count());
+            stats.setTotalViews(blogPostViewRepository.count());
+            
+            // Report counts
+            long totalReports = blogReportRepository.count();
+            stats.setTotalReports(totalReports);
+            stats.setPendingReports(blogReportRepository.countByStatus(BlogReport.ReportStatus.PENDING));
+            
+            // Category and Tag counts
+            stats.setTotalCategories(blogCategoryRepository.count());
+            stats.setTotalTags(blogTagRepository.count());
+            
+            // Recent activity (this week)
+            LocalDateTime weekAgo = LocalDateTime.now().minusWeeks(1);
+            long postsThisWeek = blogPostRepository.findAll().stream()
+                .filter(post -> post.getCreatedAt() != null && post.getCreatedAt().isAfter(weekAgo))
+                .count();
+            stats.setPostsThisWeek(postsThisWeek);
+            
+            long commentsThisWeek = blogCommentRepository.findAll().stream()
+                .filter(comment -> comment.getCreatedAt() != null && comment.getCreatedAt().isAfter(weekAgo))
+                .count();
+            stats.setCommentsThisWeek(commentsThisWeek);
+            
+            long viewsThisWeek = blogPostViewRepository.findAll().stream()
+                .filter(view -> view.getViewedAt() != null && view.getViewedAt().isAfter(weekAgo))
+                .count();
+            stats.setViewsThisWeek(viewsThisWeek);
+            
+            // Most popular post (by view count)
+            BlogPost mostViewedPost = blogPostRepository.findAll().stream()
+                .max((p1, p2) -> Long.compare(
+                    p1.getViewCount() != null ? p1.getViewCount() : 0L,
+                    p2.getViewCount() != null ? p2.getViewCount() : 0L
+                ))
+                .orElse(null);
+            if (mostViewedPost != null && mostViewedPost.getTitle() != null) {
+                stats.setMostPopularPost(mostViewedPost.getTitle());
+            } else {
+                stats.setMostPopularPost("N/A");
+            }
+            
+            // Most active author (by post count)
+            User mostActiveAuthor = blogPostRepository.findAll().stream()
+                .filter(post -> post.getAuthor() != null)
+                .collect(Collectors.groupingBy(BlogPost::getAuthor, Collectors.counting()))
+                .entrySet().stream()
+                .max((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()))
+                .map(entry -> entry.getKey())
+                .orElse(null);
+            if (mostActiveAuthor != null) {
+                String firstName = mostActiveAuthor.getFirstName() != null ? mostActiveAuthor.getFirstName() : "";
+                String lastName = mostActiveAuthor.getLastName() != null ? mostActiveAuthor.getLastName() : "";
+                String fullName = (firstName + " " + lastName).trim();
+                stats.setMostActiveAuthor(fullName.isEmpty() ? "Unknown" : fullName);
+            } else {
+                stats.setMostActiveAuthor("N/A");
+            }
+            
+            // Most used category
+            BlogCategory mostUsedCategory = blogPostCategoryRepository.findAll().stream()
+                .collect(Collectors.groupingBy(
+                    pc -> pc.getCategory(),
+                    Collectors.counting()
+                ))
+                .entrySet().stream()
+                .max((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()))
+                .map(entry -> entry.getKey())
+                .orElse(null);
+            if (mostUsedCategory != null && mostUsedCategory.getName() != null) {
+                stats.setMostUsedCategory(mostUsedCategory.getName());
+            } else {
+                stats.setMostUsedCategory("N/A");
+            }
+            
+            // Most used tag
+            BlogTag mostUsedTag = blogPostTagRepository.findAll().stream()
+                .collect(Collectors.groupingBy(
+                    pt -> pt.getTag(),
+                    Collectors.counting()
+                ))
+                .entrySet().stream()
+                .max((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()))
+                .map(entry -> entry.getKey())
+                .orElse(null);
+            if (mostUsedTag != null && mostUsedTag.getName() != null) {
+                stats.setMostUsedTag(mostUsedTag.getName());
+            } else {
+                stats.setMostUsedTag("N/A");
+            }
+            
+            return stats;
+        } catch (Exception e) {
+            System.err.println("Error calculating blog stats: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error calculating blog stats: " + e.getMessage(), e);
+        }
+    }
 }
