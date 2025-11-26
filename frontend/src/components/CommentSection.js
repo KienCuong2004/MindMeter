@@ -29,8 +29,22 @@ const CommentSection = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("error"); // error, success, warning
 
   const currentLocale = i18n.language === "vi" ? vi : enUS;
+
+  // Toast notification helper
+  const showToastNotification = (message, type = "error") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    // Auto-hide toast after 5 seconds
+    setTimeout(() => {
+      setShowToast(false);
+    }, 5000);
+  };
 
   const loadComments = useCallback(async () => {
     try {
@@ -108,8 +122,12 @@ const CommentSection = ({
         onDeleteComment(commentId);
       }
     } catch (error) {
-      console.error("Error deleting comment:", error);
-      // TODO: Show error toast notification here
+      logger.error("Error deleting comment:", error);
+      showToastNotification(
+        t("blog.comment.deleteError") ||
+          "Failed to delete comment. Please try again.",
+        "error"
+      );
     }
   };
 
@@ -129,7 +147,6 @@ const CommentSection = ({
     const now = new Date();
 
     // Debug timezone issue
-    logger.debug("=== DATE DEBUG ===");
     logger.debug("Original dateString:", dateString);
     logger.debug("Parsed date:", date);
     logger.debug("Date ISO:", date.toISOString());
@@ -574,6 +591,23 @@ const CommentSection = ({
           </div>
         )}
       </div>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in">
+          <div
+            className={`px-6 py-3 rounded-lg shadow-lg text-white ${
+              toastType === "error"
+                ? "bg-red-500"
+                : toastType === "success"
+                ? "bg-green-500"
+                : "bg-yellow-500"
+            }`}
+          >
+            {toastMessage}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

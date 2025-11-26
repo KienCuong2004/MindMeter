@@ -83,13 +83,6 @@ public class StudentProfileController {
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found for email: " + email));
             
-            // Log thông tin file
-            // System.out.println("=== AVATAR UPLOAD DEBUG ===");
-            // System.out.println("File name: " + file.getOriginalFilename());
-            // System.out.println("File size: " + file.getSize() + " bytes");
-            // System.out.println("File content type: " + file.getContentType());
-            // System.out.println("Upload directory: " + AVATAR_UPLOAD_DIR);
-            
             // Kiểm tra file
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body("File không được để trống");
@@ -133,7 +126,6 @@ public class StudentProfileController {
             userRepository.save(user);
             
             // System.out.println("Avatar URL saved to database: " + avatarUrl);
-            // System.out.println("=== END DEBUG ===");
             
             return ResponseEntity.ok().body(Map.of("avatarUrl", avatarUrl));
             
