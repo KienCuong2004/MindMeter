@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense, lazy } from "react";
 import {
   Routes,
   Route,
@@ -12,22 +12,30 @@ import RegisterForm from "./components/RegisterForm";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AuthCallback from "./pages/AuthCallback";
-import UserManagementPage from "./pages/UserManagementPage";
-import AdminDashboardPage from "./pages/AdminDashboardPage";
-import AdminProfilePage from "./pages/AdminProfilePage";
+import LoadingSpinner from "./components/LoadingSpinner";
+
+// Lazy load admin pages for better performance
+const UserManagementPage = lazy(() => import("./pages/UserManagementPage"));
+const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
+const AdminProfilePage = lazy(() => import("./pages/AdminProfilePage"));
+const QuestionManagementPage = lazy(() =>
+  import("./pages/QuestionManagementPage")
+);
+const AnnouncementManagementPage = lazy(() =>
+  import("./pages/AnnouncementManagementPage")
+);
+const AdminStatisticsPage = lazy(() => import("./pages/AdminStatisticsPage"));
+const AdminTestResultsPage = lazy(() => import("./pages/AdminTestResultsPage"));
+const BlogManagementPage = lazy(() => import("./pages/BlogManagementPage"));
+
 import ExpertStudentsPage from "./pages/ExpertStudentsPage";
 import StudentTestPage from "./pages/StudentTestPage";
 import StudentProfilePage from "./pages/StudentProfilePage";
-import QuestionManagementPage from "./pages/QuestionManagementPage";
-import AnnouncementManagementPage from "./pages/AnnouncementManagementPage";
-import AdminStatisticsPage from "./pages/AdminStatisticsPage";
 import ExpertDashboardPage from "./pages/ExpertDashboardPage";
 import ExpertProfilePage from "./pages/ExpertProfilePage";
 import AdviceSentPage from "./pages/AdviceSentPage";
 import { jwtDecode } from "jwt-decode";
 import { authFetch } from "./authFetch";
-import AdminTestResultsPage from "./pages/AdminTestResultsPage";
-import BlogManagementPage from "./pages/BlogManagementPage";
 import AdminBlogReportsPage from "./pages/AdminBlogReportsPage";
 import StudentHomePage from "./pages/StudentHomePage";
 import IntroduceMindMeterPage from "./pages/IntroduceMindMeterPage";
@@ -602,11 +610,17 @@ export default function AppRoutes() {
           <Route
             path="/admin/dashboard"
             element={
-              <AdminDashboardPage
-                handleLogout={handleLogout}
-                avatarUpdateKey={avatarUpdateKey}
-                user={user}
-              />
+              <Suspense
+                fallback={
+                  <LoadingSpinner message="Loading Admin Dashboard..." />
+                }
+              >
+                <AdminDashboardPage
+                  handleLogout={handleLogout}
+                  avatarUpdateKey={avatarUpdateKey}
+                  user={user}
+                />
+              </Suspense>
             }
           />
           <Route
@@ -620,7 +634,15 @@ export default function AppRoutes() {
           />
           <Route
             path="/admin/users"
-            element={<UserManagementPage handleLogout={handleLogout} />}
+            element={
+              <Suspense
+                fallback={
+                  <LoadingSpinner message="Loading User Management..." />
+                }
+              >
+                <UserManagementPage handleLogout={handleLogout} />
+              </Suspense>
+            }
           />
           <Route
             path="/admin/questions"
@@ -640,7 +662,13 @@ export default function AppRoutes() {
           />
           <Route
             path="/admin/statistics"
-            element={<AdminStatisticsPage handleLogout={handleLogout} />}
+            element={
+              <Suspense
+                fallback={<LoadingSpinner message="Loading Statistics..." />}
+              >
+                <AdminStatisticsPage handleLogout={handleLogout} />
+              </Suspense>
+            }
           />
           <Route
             path="/admin/tests"

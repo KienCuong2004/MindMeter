@@ -14,6 +14,12 @@ public class BlogCategoryRequest {
     
     private String color;
     
+    private Integer displayOrder;
+    
+    private Boolean isActive;
+    
+    private Long parentId;
+    
     // Constructors
     public BlogCategoryRequest() {}
     
@@ -46,5 +52,29 @@ public class BlogCategoryRequest {
     
     public void setColor(String color) {
         this.color = color;
+    }
+    
+    public Integer getDisplayOrder() {
+        return displayOrder;
+    }
+    
+    public void setDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
+    }
+    
+    public Boolean getIsActive() {
+        return isActive;
+    }
+    
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+    
+    public Long getParentId() {
+        return parentId;
+    }
+    
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
     }
 }
