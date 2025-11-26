@@ -11,6 +11,7 @@ import {
 import blogService from "../services/blogService";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
+import logger from "../utils/logger";
 
 const CommentSection = ({
   postId,
@@ -128,15 +129,15 @@ const CommentSection = ({
     const now = new Date();
 
     // Debug timezone issue
-    console.log("=== DATE DEBUG ===");
-    console.log("Original dateString:", dateString);
-    console.log("Parsed date:", date);
-    console.log("Date ISO:", date.toISOString());
-    console.log("Date local:", date.toString());
-    console.log("Current time:", now);
-    console.log("Current ISO:", now.toISOString());
-    console.log("Difference (hours):", (now - date) / (1000 * 60 * 60));
-    console.log("==================");
+    logger.debug("=== DATE DEBUG ===");
+    logger.debug("Original dateString:", dateString);
+    logger.debug("Parsed date:", date);
+    logger.debug("Date ISO:", date.toISOString());
+    logger.debug("Date local:", date.toString());
+    logger.debug("Current time:", now);
+    logger.debug("Current ISO:", now.toISOString());
+    logger.debug("Difference (hours):", (now - date) / (1000 * 60 * 60));
+    logger.debug("==================");
 
     return formatDistanceToNow(date, {
       addSuffix: true,

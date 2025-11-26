@@ -8,6 +8,7 @@ import blogService from "../services/blogService";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { FaBrain } from "react-icons/fa";
+import logger from "../utils/logger";
 
 const CreatePostPage = () => {
   const { t } = useTranslation();
@@ -43,11 +44,11 @@ const CreatePostPage = () => {
     try {
       setLoading(true);
       setError("");
-      console.log("CreatePostPage - Creating post:", formData);
+      logger.debug("CreatePostPage - Creating post:", formData);
 
       // Call API to create post
       const response = await blogService.createPost(formData);
-      console.log("CreatePostPage - Post created successfully:", response);
+      logger.debug("CreatePostPage - Post created successfully:", response);
 
       // Redirect immediately to blog page with success message in state
       const successMessage = t("blog.createPostForm.success.pending");

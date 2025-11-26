@@ -8,6 +8,7 @@ import blogService from "../services/blogService";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { FaBrain } from "react-icons/fa";
+import logger from "../utils/logger";
 
 const EditPostPage = () => {
   const { t } = useTranslation();
@@ -103,11 +104,11 @@ const EditPostPage = () => {
     try {
       setLoading(true);
       setError("");
-      console.log("EditPostPage - Updating post:", formData);
+      logger.debug("EditPostPage - Updating post:", formData);
 
       // Call API to update post
       const response = await blogService.updatePost(id, formData);
-      console.log("EditPostPage - Post updated successfully:", response);
+      logger.debug("EditPostPage - Post updated successfully:", response);
 
       // Redirect immediately to blog page with success message in state
       const successMessage =

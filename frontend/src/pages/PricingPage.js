@@ -11,6 +11,7 @@ import { jwtDecode } from "jwt-decode";
 import NotificationModal from "../components/NotificationModal";
 import RateLimitModal from "../components/RateLimitModal";
 import NotFoundPage from "./NotFoundPage";
+import logger from "../utils/logger";
 
 export default function PricingPage() {
   const { t, i18n } = useTranslation();
@@ -158,15 +159,15 @@ export default function PricingPage() {
   };
 
   const handleBuyPlan = async (plan) => {
-    console.log("handleBuyPlan called with plan:", plan);
-    console.log("Current plan:", currentPlan);
+    logger.debug("handleBuyPlan called with plan:", plan);
+    logger.debug("Current plan:", currentPlan);
 
     // 🚫 Chống spam: Kiểm tra cooldown period (3 giây)
     const now = Date.now();
     const COOLDOWN_PERIOD = 3000; // 3 giây
 
     if (now - lastClickTime < COOLDOWN_PERIOD) {
-      console.log("Rate limited - too soon since last click");
+      logger.debug("Rate limited - too soon since last click");
       setNotificationModal({
         isOpen: true,
         type: "warning",
@@ -179,7 +180,7 @@ export default function PricingPage() {
 
     // 🚫 Chống spam: Kiểm tra đang xử lý
     if (isProcessing) {
-      console.log("Already processing a request");
+      logger.debug("Already processing a request");
       return;
     }
 
@@ -188,7 +189,7 @@ export default function PricingPage() {
     const currentPlanLevel = planHierarchy[currentPlan] || 0;
     const targetPlanLevel = planHierarchy[plan.toUpperCase()] || 0;
 
-    console.log(
+    logger.debug(
       "Plan levels - current:",
       currentPlanLevel,
       "target:",
@@ -197,7 +198,7 @@ export default function PricingPage() {
 
     // Chỉ cho phép nâng cấp lên plan cao hơn
     if (targetPlanLevel <= currentPlanLevel) {
-      console.log("Cannot upgrade - target level not higher than current");
+      logger.debug("Cannot upgrade - target level not higher than current");
       setNotificationModal({
         isOpen: true,
         type: "warning",
@@ -214,7 +215,7 @@ export default function PricingPage() {
     setLoadingPlan(plan);
 
     try {
-      console.log("Navigating to payment method page...");
+      logger.debug("Navigating to payment method page...");
       // Navigate to payment method selection page
       navigate(`/payment-method?plan=${plan}`);
     } catch (err) {

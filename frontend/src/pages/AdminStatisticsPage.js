@@ -66,6 +66,25 @@ const getHistoricalData = (currentStats) => {
   return historicalData;
 };
 
+// Calculate weekly growth percentage based on historical data
+const calculateWeeklyGrowth = (historicalData) => {
+  if (!historicalData || historicalData.length < 14) return 0;
+
+  // Get last 7 days and previous 7 days
+  const lastWeek = historicalData.slice(-7);
+  const previousWeek = historicalData.slice(-14, -7);
+
+  // Calculate totals for each week
+  const lastWeekTotal = lastWeek.reduce((sum, day) => sum + (day.total || 0), 0);
+  const previousWeekTotal = previousWeek.reduce((sum, day) => sum + (day.total || 0), 0);
+
+  // Calculate growth percentage
+  if (previousWeekTotal === 0) return 0;
+  const growth = ((lastWeekTotal - previousWeekTotal) / previousWeekTotal) * 100;
+  
+  return Math.round(growth * 10) / 10; // Round to 1 decimal place
+};
+
 // Custom Tooltip cho PieChart (tỷ lệ mức trầm cảm)
 const CustomPieTooltip = ({ active, payload, dark, t }) => {
   if (active && payload && payload.length) {
@@ -513,7 +532,7 @@ const AdminStatisticsPage = ({ handleLogout: propHandleLogout }) => {
                 },
                 testCountByLevel: pieData,
                 historicalData: getHistoricalData(stats), // Get real historical data
-                weeklyGrowth: 5.2, // TODO: Get real weekly growth
+                weeklyGrowth: calculateWeeklyGrowth(getHistoricalData(stats)), // Calculate dynamic weekly growth
               }}
               className="max-w-7xl mx-auto"
             />

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
 import { useTheme as useCustomTheme } from "../../hooks/useTheme";
 import blogService from "../../services/blogService";
+import logger from "../../utils/logger";
 
 const BlogForm = ({
   initialData = null,
@@ -215,18 +216,18 @@ const BlogForm = ({
     const isValid = Object.keys(errors).length === 0;
 
     if (!isValid) {
-      console.log("Validation errors:", errors);
+      logger.debug("Validation errors:", errors);
     }
 
     return isValid;
   };
 
   const handleSubmit = async (status) => {
-    console.log("BlogForm handleSubmit called with status:", status);
-    console.log("Form data:", formData);
+    logger.debug("BlogForm handleSubmit called with status:", status);
+    logger.debug("Form data:", formData);
 
     if (!validateForm()) {
-      console.log("Form validation failed");
+      logger.debug("Form validation failed");
       return;
     }
 
@@ -238,7 +239,7 @@ const BlogForm = ({
       tagIds: formData.tagIds, // Send tag IDs
     };
 
-    console.log("Submitting data:", submitData);
+    logger.debug("Submitting data:", submitData);
     try {
       await onSubmit(submitData);
     } catch (error) {

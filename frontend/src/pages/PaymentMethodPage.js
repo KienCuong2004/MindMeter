@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FaPaypal, FaCreditCard, FaWallet, FaMobileAlt } from "react-icons/fa";
 import { getCurrentUser } from "../services/anonymousService";
+import logger from "../utils/logger";
 
 const PaymentMethodPage = () => {
   const { t } = useTranslation("payment");
@@ -15,14 +16,14 @@ const PaymentMethodPage = () => {
   const plan = searchParams.get("plan") || "plus";
 
   // Debug logs
-  console.log("PaymentMethodPage - plan:", plan);
-  console.log("PaymentMethodPage - user:", user);
-  console.log(
+  logger.debug("PaymentMethodPage - plan:", plan);
+  logger.debug("PaymentMethodPage - user:", user);
+  logger.debug(
     "PaymentMethodPage - searchParams:",
     Object.fromEntries(searchParams.entries())
   );
-  console.log("PaymentMethodPage - current URL:", window.location.href);
-  console.log("PaymentMethodPage - component mounted successfully");
+  logger.debug("PaymentMethodPage - current URL:", window.location.href);
+  logger.debug("PaymentMethodPage - component mounted successfully");
 
   // Safe translation with fallbacks
   const getTranslation = (key, fallback) => {
@@ -116,7 +117,7 @@ const PaymentMethodPage = () => {
               const result = t("selectMethodDescription", {
                 plan: plan.toUpperCase(),
               });
-              console.log("Translation result:", result, "Plan:", plan);
+              logger.debug("Translation result:", result, "Plan:", plan);
               return result;
             })()}
           </p>
