@@ -13,21 +13,6 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import AuthCallback from "./pages/AuthCallback";
 import LoadingSpinner from "./components/LoadingSpinner";
-
-// Lazy load admin pages for better performance
-const UserManagementPage = lazy(() => import("./pages/UserManagementPage"));
-const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
-const AdminProfilePage = lazy(() => import("./pages/AdminProfilePage"));
-const QuestionManagementPage = lazy(() =>
-  import("./pages/QuestionManagementPage")
-);
-const AnnouncementManagementPage = lazy(() =>
-  import("./pages/AnnouncementManagementPage")
-);
-const AdminStatisticsPage = lazy(() => import("./pages/AdminStatisticsPage"));
-const AdminTestResultsPage = lazy(() => import("./pages/AdminTestResultsPage"));
-const BlogManagementPage = lazy(() => import("./pages/BlogManagementPage"));
-
 import ExpertStudentsPage from "./pages/ExpertStudentsPage";
 import StudentTestPage from "./pages/StudentTestPage";
 import StudentProfilePage from "./pages/StudentProfilePage";
@@ -62,6 +47,20 @@ import AccountLinkingNotification from "./components/AccountLinkingNotification"
 import PaymentMethodPage from "./pages/PaymentMethodPage";
 import PayPalPaymentPage from "./pages/PayPalPaymentPage";
 import VNPayPaymentPage from "./pages/VNPayPaymentPage";
+
+// Lazy load admin pages for better performance
+const UserManagementPage = lazy(() => import("./pages/UserManagementPage"));
+const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage"));
+const AdminProfilePage = lazy(() => import("./pages/AdminProfilePage"));
+const QuestionManagementPage = lazy(() =>
+  import("./pages/QuestionManagementPage")
+);
+const AnnouncementManagementPage = lazy(() =>
+  import("./pages/AnnouncementManagementPage")
+);
+const AdminStatisticsPage = lazy(() => import("./pages/AdminStatisticsPage"));
+const AdminTestResultsPage = lazy(() => import("./pages/AdminTestResultsPage"));
+const BlogManagementPage = lazy(() => import("./pages/BlogManagementPage"));
 
 export default function AppRoutes() {
   const [user, setUser] = useState(null);

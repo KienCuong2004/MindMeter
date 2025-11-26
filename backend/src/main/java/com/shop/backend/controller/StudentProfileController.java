@@ -3,6 +3,7 @@ package com.shop.backend.controller;
 import com.shop.backend.dto.UserDTO;
 import com.shop.backend.model.User;
 import com.shop.backend.repository.UserRepository;
+import com.shop.backend.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,9 @@ public class StudentProfileController {
 
     @GetMapping("/profile")
     public ResponseEntity<UserDTO> getCurrentStudentProfile(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedException("User not authenticated");
+        }
         String email = authentication.getName();
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("User not found for email: " + email));
