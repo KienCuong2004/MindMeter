@@ -5,6 +5,7 @@ import com.shop.backend.model.BlogPost;
 import com.shop.backend.model.BlogComment;
 import com.shop.backend.model.BlogReport;
 import com.shop.backend.service.BlogService;
+import com.shop.backend.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/blog")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:3000", "https://mindmeter.app"})
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminBlogController {
     
@@ -189,13 +191,16 @@ public class AdminBlogController {
     }
     
     @PostMapping("/categories")
-    public ResponseEntity<BlogCategoryDTO> createCategory(@RequestBody BlogCategoryRequest request) {
+    public ResponseEntity<BlogCategoryDTO> createCategory(@Valid @RequestBody BlogCategoryRequest request) {
         BlogCategoryDTO category = blogService.createCategory(request);
         return ResponseEntity.ok(category);
     }
     
     @PutMapping("/categories/{id}")
-    public ResponseEntity<BlogCategoryDTO> updateCategory(@PathVariable Long id, @RequestBody BlogCategoryRequest request) {
+    public ResponseEntity<BlogCategoryDTO> updateCategory(@PathVariable Long id, @Valid @RequestBody BlogCategoryRequest request) {
+        if (id == null || id <= 0) {
+            throw new BadRequestException("Invalid category ID");
+        }
         BlogCategoryDTO category = blogService.updateCategory(id, request);
         return ResponseEntity.ok(category);
     }
@@ -214,13 +219,16 @@ public class AdminBlogController {
     }
     
     @PostMapping("/tags")
-    public ResponseEntity<BlogTagDTO> createTag(@RequestBody BlogTagRequest request) {
+    public ResponseEntity<BlogTagDTO> createTag(@Valid @RequestBody BlogTagRequest request) {
         BlogTagDTO tag = blogService.createTag(request);
         return ResponseEntity.ok(tag);
     }
     
     @PutMapping("/tags/{id}")
-    public ResponseEntity<BlogTagDTO> updateTag(@PathVariable Long id, @RequestBody BlogTagRequest request) {
+    public ResponseEntity<BlogTagDTO> updateTag(@PathVariable Long id, @Valid @RequestBody BlogTagRequest request) {
+        if (id == null || id <= 0) {
+            throw new BadRequestException("Invalid tag ID");
+        }
         BlogTagDTO tag = blogService.updateTag(id, request);
         return ResponseEntity.ok(tag);
     }
