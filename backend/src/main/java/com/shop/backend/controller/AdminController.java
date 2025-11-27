@@ -553,8 +553,14 @@ public class AdminController {
     @GetMapping("/statistics")
     @PreAuthorize("hasAnyRole('ADMIN','EXPERT')")
     public ResponseEntity<Map<String, Object>> getSystemStatistics() {
-        Map<String, Object> stats = adminService.getSystemStatistics();
-        return ResponseEntity.ok(stats);
+        try {
+            Map<String, Object> stats = adminService.getSystemStatistics();
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            System.err.println("Error in AdminController.getSystemStatistics: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     @GetMapping("/test-results/recent")
