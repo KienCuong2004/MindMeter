@@ -5,8 +5,6 @@ import {
   FaLock,
   FaExclamationCircle,
   FaGoogle,
-  FaTimes,
-  FaExclamationTriangle,
 } from "react-icons/fa";
 import TermsModal from "./TermsModal";
 import { useTranslation, Trans } from "react-i18next";
@@ -189,9 +187,9 @@ function RegisterForm({ onRegister, onSwitchForm }) {
 
   // Removed password strength meter (no longer used)
 
-  const requiredErrors = Object.values(fieldError).filter((e) =>
-    e.includes(t("validation.fieldRequired"))
-  );
+  // Hiển thị lỗi đầu tiên (tránh tự ghép câu hardcode)
+  const allErrors = Object.values(fieldError);
+  const errorMsg = allErrors.length ? allErrors[0] : "";
 
   useEffect(() => {
     document.title = t("registerTitle") + " | MindMeter";
@@ -205,10 +203,6 @@ function RegisterForm({ onRegister, onSwitchForm }) {
       }
     };
   }, []);
-
-  // Hiển thị lỗi đầu tiên (tránh tự ghép câu hardcode)
-  const allErrors = Object.values(fieldError);
-  const errorMsg = allErrors.length ? allErrors[0] : "";
 
   const handleGoogleRegister = () => {
     window.location.href = `${process.env.REACT_APP_API_URL}/oauth2/authorization/google`;
@@ -330,7 +324,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
                 ) && (
                   <div className="mt-1 text-xs font-semibold text-gray-500 dark:text-gray-300">
                     {t("validation.passwordStrongRule")}
-                    </div>
+                  </div>
                 )}
             </div>
             <div className="mb-5 relative">

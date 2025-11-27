@@ -9,15 +9,12 @@ import {
   FaGoogle,
 } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
 import { authFetch } from "../authFetch";
 import { useTheme } from "../hooks/useTheme";
 import ChangePasswordModal from "./ChangePasswordModal";
 
 function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { theme } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

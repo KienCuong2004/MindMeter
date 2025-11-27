@@ -12,7 +12,7 @@ const AnonymousBanner = ({ onUpgradeClick }) => {
       const dismissedData = localStorage.getItem("anonymousBannerDismissed");
       if (dismissedData) {
         try {
-          const { timestamp, dismissed } = JSON.parse(dismissedData);
+          const { timestamp } = JSON.parse(dismissedData);
           const now = new Date();
           const dismissedDate = new Date(timestamp);
 

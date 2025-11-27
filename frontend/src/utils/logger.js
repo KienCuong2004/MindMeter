@@ -12,6 +12,7 @@ class Logger {
    */
   log(...args) {
     if (isDevelopment) {
+      // eslint-disable-next-line no-console
       console.log('[INFO]', ...args);
     }
   }
@@ -22,6 +23,7 @@ class Logger {
    */
   error(...args) {
     if (isDevelopment) {
+      // eslint-disable-next-line no-console
       console.error('[ERROR]', ...args);
     }
     // In production, you could send to error tracking service (e.g., Sentry)
@@ -36,6 +38,7 @@ class Logger {
    */
   warn(...args) {
     if (isDevelopment) {
+      // eslint-disable-next-line no-console
       console.warn('[WARN]', ...args);
     }
   }
@@ -46,6 +49,7 @@ class Logger {
    */
   debug(...args) {
     if (isDevelopment && process.env.REACT_APP_DEBUG === 'true') {
+      // eslint-disable-next-line no-console
       console.debug('[DEBUG]', ...args);
     }
   }
@@ -58,6 +62,7 @@ class Logger {
    */
   api(method, url, data = null) {
     if (isDevelopment) {
+      // eslint-disable-next-line no-console
       console.log(`[API ${method}]`, url, data ? { data } : '');
     }
   }
@@ -70,6 +75,7 @@ class Logger {
    */
   apiResponse(method, url, response = null) {
     if (isDevelopment) {
+      // eslint-disable-next-line no-console
       console.log(`[API ${method} Response]`, url, response ? { response } : '');
     }
   }

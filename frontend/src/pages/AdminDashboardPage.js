@@ -10,22 +10,17 @@ import {
   FaMeh,
   FaSadTear,
   FaUsers,
-  FaChartPie,
   FaQuestionCircle,
   FaBullhorn,
   FaChartBar,
-  FaChevronDown,
-  FaSignOutAlt,
-  FaUserCircle,
-  FaMoon,
-  FaSun,
-  FaGlobe,
-  FaArrowUp,
-  FaArrowDown,
-  FaExclamationTriangle,
   FaBrain,
   FaNewspaper,
   FaFlag,
+  FaChartPie,
+  FaArrowUp,
+  FaArrowDown,
+  FaExclamationTriangle,
+  FaUserCircle,
 } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation } from "react-i18next";
@@ -139,28 +134,6 @@ const actionButtons = [
   },
 ];
 
-const AnimatedNumber = ({ value }) => {
-  const [display, setDisplay] = useState(0);
-  useEffect(() => {
-    let start = 0;
-    const end = Number(value);
-    if (start === end) return;
-    let increment = end / 30;
-    let current = start;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= end) {
-        setDisplay(end);
-        clearInterval(timer);
-      } else {
-        setDisplay(Math.floor(current));
-      }
-    }, 15);
-    return () => clearInterval(timer);
-  }, [value]);
-  return <span>{display}</span>;
-};
-
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -169,8 +142,6 @@ export default function AdminDashboardPage() {
   const [testStats, setTestStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timeoutReached, setTimeoutReached] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
 
   // Sử dụng user từ props nếu có, nếu không thì fallback về JWT token
   const [user, setUser] = useState(() => {
@@ -208,7 +179,6 @@ export default function AdminDashboardPage() {
     // Gọi API lấy thống kê hệ thống
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem("token");
         const res = await authFetch("/api/admin/statistics");
         if (!res.ok) throw new Error(t("errors.cannotLoadStatistics"));
         const data = await res.json();
@@ -223,7 +193,6 @@ export default function AdminDashboardPage() {
     // Gọi API lấy thống kê test theo ngày
     const fetchTestStats = async () => {
       try {
-        const token = localStorage.getItem("token");
         const res = await authFetch(
           "/api/admin/statistics/test-count-by-date?days=14"
         );
@@ -252,26 +221,6 @@ export default function AdminDashboardPage() {
     navigate("/admin/profile");
   };
 
-  const handleUserManagement = () => {
-    navigate("/admin/users");
-  };
-
-  const handleTestResults = () => {
-    navigate("/admin/tests");
-  };
-
-  const handleQuestionManagement = () => {
-    navigate("/admin/questions");
-  };
-
-  const handleAnnouncementManagement = () => {
-    navigate("/admin/announcements");
-  };
-
-  const handleStatistics = () => {
-    navigate("/admin/statistics");
-  };
-
   if (loading || error || !stats) return null;
 
   return (
@@ -294,7 +243,7 @@ export default function AdminDashboardPage() {
         setTheme={toggleTheme}
         onProfile={handleProfile}
         onLogout={handleLogoutLocal}
-        onNotificationClick={() => setShowNotifications(true)}
+        onNotificationClick={() => {}}
         updateUserAvatar={(newAvatarUrl) => {
           // Cập nhật user object với avatar mới
           setUser((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
@@ -701,7 +650,7 @@ export function AdminProfilePage() {
 
   React.useEffect(() => {
     document.title = t("pageTitles.adminProfile");
-  }, []);
+  }, [t]);
 
   // Default user data from token (fallback)
   let user = {

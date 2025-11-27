@@ -3,9 +3,6 @@ import { useTranslation } from "react-i18next";
 import {
   XMarkIcon,
   CalendarIcon,
-  ClockIcon,
-  UserIcon,
-  MapPinIcon,
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { authFetch } from "../authFetch";
@@ -17,7 +14,7 @@ const AppointmentBookingModal = ({
   expertName,
   onAppointmentCreated,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -219,13 +216,6 @@ const AppointmentBookingModal = ({
     }
   };
 
-  const formatTime = (dateTimeString) => {
-    const date = new Date(dateTimeString);
-    return date.toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const formatDate = (date) => {
     return date.toLocaleDateString("vi-VN", {
