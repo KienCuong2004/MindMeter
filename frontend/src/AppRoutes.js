@@ -29,24 +29,14 @@ import StudentTestHistoryPage from "./pages/StudentTestHistoryPage";
 import StudentAppointmentsPage from "./pages/StudentAppointmentsPage";
 import UserGuidePage from "./pages/UserGuidePage";
 import TermsOfUse from "./pages/TermsOfUse";
-import BlogListPage from "./pages/BlogListPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import SavedArticlesPage from "./pages/SavedArticlesPage";
-import CreatePostPage from "./pages/CreatePostPage";
-import EditPostPage from "./pages/EditPostPage";
 import BlogErrorBoundary from "./components/BlogErrorBoundary";
 import Disclaimer from "./pages/Disclaimer";
 import SecurityPolicy from "./pages/SecurityPolicy";
-import ConsultTherapyPage from "./pages/ConsultTherapyPage";
 import ContactPage from "./pages/ContactPage";
-import PricingPage from "./pages/PricingPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import ExpertAppointmentsPage from "./pages/ExpertAppointmentsPage";
-import ExpertSchedulePage from "./pages/ExpertSchedulePage";
 import AccountLinkingNotification from "./components/AccountLinkingNotification";
-import PaymentMethodPage from "./pages/PaymentMethodPage";
-import PayPalPaymentPage from "./pages/PayPalPaymentPage";
-import VNPayPaymentPage from "./pages/VNPayPaymentPage";
 
 // Lazy load admin pages for better performance
 const UserManagementPage = lazy(() => import("./pages/UserManagementPage"));
@@ -61,6 +51,18 @@ const AnnouncementManagementPage = lazy(() =>
 const AdminStatisticsPage = lazy(() => import("./pages/AdminStatisticsPage"));
 const AdminTestResultsPage = lazy(() => import("./pages/AdminTestResultsPage"));
 const BlogManagementPage = lazy(() => import("./pages/BlogManagementPage"));
+
+// Lazy load large pages for better performance
+const PricingPage = lazy(() => import("./pages/PricingPage"));
+const ExpertAppointmentsPage = lazy(() => import("./pages/ExpertAppointmentsPage"));
+const ExpertSchedulePage = lazy(() => import("./pages/ExpertSchedulePage"));
+const PaymentMethodPage = lazy(() => import("./pages/PaymentMethodPage"));
+const PayPalPaymentPage = lazy(() => import("./pages/PayPalPaymentPage"));
+const VNPayPaymentPage = lazy(() => import("./pages/VNPayPaymentPage"));
+const ConsultTherapyPage = lazy(() => import("./pages/ConsultTherapyPage"));
+const BlogListPage = lazy(() => import("./pages/BlogListPage"));
+const CreatePostPage = lazy(() => import("./pages/CreatePostPage"));
+const EditPostPage = lazy(() => import("./pages/EditPostPage"));
 
 export default function AppRoutes() {
   const [user, setUser] = useState(null);
