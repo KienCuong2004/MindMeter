@@ -4879,9 +4879,54 @@ FROM system_announcements
 GROUP BY announcement_type 
 ORDER BY announcement_count DESC;
 
--- 10. Hiển thị tổng kết cuối cùng
+-- ========================================
+-- 10. PERFORMANCE OPTIMIZATION INDEXES
+-- ========================================
+
+
+-- Blog Post indexes for better query performance
+CREATE INDEX idx_blog_posts_status_pub_perf ON blog_posts(status, published_at DESC);
+CREATE INDEX idx_blog_posts_status_created_perf ON blog_posts(status, created_at DESC);
+CREATE INDEX idx_blog_posts_author_status_perf ON blog_posts(author_id, status);
+CREATE INDEX idx_blog_posts_featured_perf ON blog_posts(is_featured, status, published_at DESC);
+CREATE INDEX idx_blog_posts_slug_perf ON blog_posts(slug);
+
+-- Blog Comments indexes for faster comment loading
+CREATE INDEX idx_blog_comments_post_updated_perf ON blog_comments(post_id, status, updated_at DESC);
+CREATE INDEX idx_blog_comments_post_created_perf ON blog_comments(post_id, status, created_at DESC);
+CREATE INDEX idx_blog_comments_parent_perf ON blog_comments(parent_id, status, created_at ASC);
+CREATE INDEX idx_blog_comments_user_perf ON blog_comments(user_id, created_at DESC);
+CREATE INDEX idx_blog_comments_status_perf ON blog_comments(status, created_at DESC);
+
+
+-- Blog interactions indexes
+CREATE INDEX idx_blog_bookmarks_user_created ON blog_bookmarks(user_id, created_at DESC);
+CREATE INDEX idx_blog_views_post_viewed ON blog_post_views(post_id, viewed_at DESC);
+CREATE INDEX idx_blog_shares_post_created ON blog_shares(post_id, created_at DESC);
+
+-- Depression Test Results indexes for analytics
+CREATE INDEX idx_depression_user_tested_perf ON depression_test_results(user_id, tested_at DESC);
+CREATE INDEX idx_depression_severity_perf ON depression_test_results(severity_level);
+CREATE INDEX idx_depression_tested_at_perf ON depression_test_results(tested_at DESC);
+
+-- User indexes for authentication and management (skip duplicates)
+
+-- Appointment indexes for scheduling (skip duplicates - already exist above)
+
+-- Additional performance indexes (minimal set to avoid conflicts)
+CREATE INDEX idx_blog_featured_composite ON blog_posts(status, is_featured, published_at DESC);
+CREATE INDEX idx_blog_comment_composite ON blog_comments(post_id, parent_id, status);
+
+-- Optimize existing tables for better performance
+OPTIMIZE TABLE blog_posts;
+OPTIMIZE TABLE blog_comments;
+OPTIMIZE TABLE depression_test_results;
+OPTIMIZE TABLE users;
+OPTIMIZE TABLE appointments;
+
+-- 11. Hiển thị tổng kết cuối cùng
 SELECT 
     'Final Summary' as section,
     'MindMeter Database Optimization Complete!' as status,
-    'All indexes created successfully' as details,
+    'All indexes and optimizations applied successfully' as details,
     NOW() as completion_time;
