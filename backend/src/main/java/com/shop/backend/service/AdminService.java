@@ -5,6 +5,7 @@ import com.shop.backend.repository.*;
 import com.shop.backend.dto.depression.DepressionTestResultDTO;
 import com.shop.backend.dto.depression.CreateQuestionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -422,9 +423,10 @@ public class AdminService {
     }
     
     	// Thống kê hệ thống
-	@org.springframework.cache.annotation.Cacheable(value = "systemStats", key = "'overall'")
+    @org.springframework.cache.annotation.Cacheable(value = "statistics", key = "'overall'")
 	public Map<String, Object> getSystemStatistics() {
-        Map<String, Object> stats = new HashMap<>();
+        try {
+            Map<String, Object> stats = new HashMap<>();
         
         // Thống kê người dùng
         long totalUsers = userRepository.count();
@@ -465,14 +467,19 @@ public class AdminService {
         stats.put("totalQuestions", totalQuestions);
         stats.put("activeQuestions", activeQuestions);
         
-        // Thống kê tổng số lời khuyên đã gửi
-        long totalAdvices = adviceMessageRepository.count();
-        stats.put("totalAdvices", totalAdvices);
-        return stats;
+            // Thống kê tổng số lời khuyên đã gửi
+            long totalAdvices = adviceMessageRepository.count();
+            stats.put("totalAdvices", totalAdvices);
+            return stats;
+        } catch (Exception e) {
+            System.err.println("Error in getSystemStatistics: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to get system statistics", e);
+        }
     }
     
     	// Lấy danh sách kết quả test gần đây
-	@org.springframework.cache.annotation.Cacheable(value = "recentTestResults", key = "'recent'")
+	@org.springframework.cache.annotation.Cacheable(value = "statistics", key = "'recent'")
 	public List<DepressionTestResult> getRecentTestResults(int limit) {
 		return testResultRepository.findTop10ByOrderByTestedAtDesc();
 	}

@@ -6,6 +6,9 @@ import com.shop.backend.repository.*;
 import com.shop.backend.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -71,6 +74,7 @@ public class BlogService {
     private com.shop.backend.repository.UserRepository userRepository;
     
     // Blog Post Methods
+    @Cacheable(value = "blogPosts", key = "#pageable.pageNumber + '_' + #pageable.pageSize")
     public Page<BlogPostDTO> getAllPosts(Pageable pageable) {
         Page<BlogPost> posts = blogPostRepository.findByStatusAndPublishedAtBeforeOrderByPublishedAtDesc(
             BlogPost.BlogPostStatus.published, LocalDateTime.now(), pageable);
@@ -223,8 +227,8 @@ public class BlogService {
         if (keyword != null && !keyword.trim().isEmpty()) {
             posts = blogPostRepository.searchPosts(filterStatus, keyword.trim(), pageable);
         } else if (categoryIds != null && !categoryIds.isEmpty() && tagIds != null && !tagIds.isEmpty()) {
-            // Both category and tag filters - get all posts and filter in memory
-            posts = blogPostRepository.findByStatus(filterStatus, pageable);
+            // Both category and tag filters - use database query for better performance
+            posts = blogPostRepository.findByCategoryIdsAndTagIdsAndStatus(categoryIds, tagIds, filterStatus, pageable);
         } else if (categoryIds != null && !categoryIds.isEmpty()) {
             // Filter by multiple categories
             posts = blogPostRepository.findByCategoryIdsAndStatus(categoryIds, filterStatus, pageable);
@@ -337,6 +341,7 @@ public class BlogService {
         return getPostByIdPublic(id, null);
     }
     
+    @Cacheable(value = "blogPosts", key = "'public_' + #id + '_' + (#userEmail != null ? #userEmail : 'anonymous')")
     public BlogPostDTO getPostByIdPublic(Long id, String userEmail) {
         // For public access, only return published posts
         Optional<BlogPost> post = blogPostRepository.findByIdAndStatus(id, BlogPost.BlogPostStatus.published);
@@ -351,6 +356,7 @@ public class BlogService {
         return null;
     }
     
+    @CacheEvict(value = "blogPosts", allEntries = true)
     public BlogPostDTO createPost(BlogPostRequest request, String authorEmail) {
         User author = userRepository.findByEmail(authorEmail)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -398,6 +404,7 @@ public class BlogService {
         return convertToDTO(post);
     }
     
+    @CacheEvict(value = "blogPosts", allEntries = true)
     public BlogPostDTO updatePost(Long id, BlogPostRequest request, String authorEmail) {
         BlogPost post = blogPostRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -458,6 +465,7 @@ public class BlogService {
         return convertToDTO(post);
     }
     
+           @CacheEvict(value = "blogPosts", allEntries = true)
            public void deletePost(Long id, String authorEmail) {
                BlogPost post = blogPostRepository.findById(id)
                    .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -792,6 +800,7 @@ public class BlogService {
     }
     
     // Category Methods
+    @Cacheable(value = "blogCategories", key = "'all'")
     public List<BlogCategoryDTO> getAllCategories() {
         List<BlogCategory> categories = blogCategoryRepository.findByIsActiveTrueOrderByDisplayOrderAsc();
         return categories.stream().map(this::convertCategoryToDTO).collect(Collectors.toList());
@@ -871,6 +880,7 @@ public class BlogService {
     }
     
     // Tag Methods
+    @Cacheable(value = "blogTags", key = "'all'")
     public List<BlogTagDTO> getAllTags() {
         List<BlogTag> tags = blogTagRepository.findAll();
         return tags.stream().map(this::convertTagToDTO).collect(Collectors.toList());

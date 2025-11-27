@@ -43,17 +43,17 @@ public class DepressionTestService {
     @Autowired
     private OpenAITestResultService openAITestResultService;
     
-    	@org.springframework.cache.annotation.Cacheable(value = "testQuestions", key = "'all-vi'")
+    	@org.springframework.cache.annotation.Cacheable(value = "questions", key = "'all-vi'")
 	public List<DepressionQuestionVi> getActiveQuestionsVi() {
 		return questionViRepository.findByIsActiveTrue();
 	}
 	
-	@org.springframework.cache.annotation.Cacheable(value = "testQuestions", key = "'all-en'")
+	@org.springframework.cache.annotation.Cacheable(value = "questions", key = "'all-en'")
 	public List<DepressionQuestionEn> getActiveQuestionsEn() {
 		return questionEnRepository.findByIsActiveTrue();
 	}
     
-    	@org.springframework.cache.annotation.Cacheable(value = "testQuestions", key = "'dto-vi'")
+    	@org.springframework.cache.annotation.Cacheable(value = "questions", key = "'dto-vi'")
     public List<DepressionQuestionDTO> getActiveQuestionDTOsVi() {
         List<DepressionQuestionVi> questions = questionViRepository.findByIsActiveTrue();
         return questions.stream().map(q -> {
@@ -81,7 +81,7 @@ public class DepressionTestService {
         }).toList();
 	}
 	
-	@org.springframework.cache.annotation.Cacheable(value = "testQuestions", key = "'dto-en'")
+	@org.springframework.cache.annotation.Cacheable(value = "questions", key = "'dto-en'")
 	public List<DepressionQuestionDTO> getActiveQuestionDTOsEn() {
 		List<DepressionQuestionEn> questions = questionEnRepository.findByIsActiveTrue();
 		return questions.stream().map(q -> {

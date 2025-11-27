@@ -42,6 +42,18 @@ public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
     @Query("SELECT DISTINCT p FROM BlogPost p JOIN p.postCategories pc WHERE pc.category.id IN :categoryIds AND p.status = :status")
     Page<BlogPost> findByCategoryIdsAndStatus(@Param("categoryIds") List<Long> categoryIds, @Param("status") BlogPost.BlogPostStatus status, Pageable pageable);
     
+    // Find posts by both category and tag IDs (posts that have ANY of the categories AND ANY of the tags)
+    @Query("SELECT DISTINCT p FROM BlogPost p " +
+           "JOIN p.postCategories pc " +
+           "JOIN p.postTags pt " +
+           "WHERE pc.category.id IN :categoryIds " +
+           "AND pt.tag.id IN :tagIds " +
+           "AND p.status = :status")
+    Page<BlogPost> findByCategoryIdsAndTagIdsAndStatus(@Param("categoryIds") List<Long> categoryIds, 
+                                                       @Param("tagIds") List<Long> tagIds, 
+                                                       @Param("status") BlogPost.BlogPostStatus status, 
+                                                       Pageable pageable);
+    
     // Search posts by title or content
     @Query("SELECT p FROM BlogPost p WHERE (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND p.status = :status")
     Page<BlogPost> searchPosts(@Param("status") BlogPost.BlogPostStatus status, @Param("keyword") String keyword, Pageable pageable);
