@@ -1,0 +1,163 @@
+name: Code Coverage Report
+
+on:
+  pull_request:
+    branches: [master, develop]
+  push:
+    branches: [master, develop]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "18"
+  JAVA_VERSION: "17"
+
+jobs:
+  coverage:
+    name: Generate Coverage Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run frontend tests with coverage
+        working-directory: ./frontend
+        run: npm test -- --coverage --watchAll=false --passWithNoTests --ci
+        continue-on-error: true
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run backend tests with coverage
+        working-directory: ./backend
+        run: mvn test jacoco:report
+        continue-on-error: true
+
+      - name: Generate coverage summary
+        run: |
+          echo "### Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Frontend coverage
+          if [ -f "frontend/coverage/coverage-summary.json" ]; then
+            echo "#### Frontend Coverage" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Coverage report generated successfully" >> $GITHUB_STEP_SUMMARY
+            echo "- Report location: \`frontend/coverage/\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Backend coverage
+          if [ -d "backend/target/site/jacoco" ]; then
+            echo "#### Backend Coverage" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Coverage report generated successfully" >> $GITHUB_STEP_SUMMARY
+            echo "- Report location: \`backend/target/site/jacoco/\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "Coverage reports are available in the artifacts below." >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload frontend coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage-report
+          path: frontend/coverage/
+          retention-days: 30
+
+      - name: Upload backend coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage-report
+          path: backend/target/site/jacoco/
+          retention-days: 30
+
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            let comment = '## Code Coverage Report\n\n';
+
+            // Frontend coverage
+            const frontendCoverageFile = path.join(process.cwd(), 'frontend', 'coverage', 'coverage-summary.json');
+            if (fs.existsSync(frontendCoverageFile)) {
+              try {
+                const coverage = JSON.parse(fs.readFileSync(frontendCoverageFile, 'utf8'));
+                const total = coverage.total;
+                
+                comment += '### Frontend Coverage\n\n';
+                comment += '| Type | Coverage |\n';
+                comment += '|------|----------|\n';
+                comment += `| Statements | ${(total.statements.pct || 0).toFixed(2)}% |\n`;
+                comment += `| Branches | ${(total.branches.pct || 0).toFixed(2)}% |\n`;
+                comment += `| Functions | ${(total.functions.pct || 0).toFixed(2)}% |\n`;
+                comment += `| Lines | ${(total.lines.pct || 0).toFixed(2)}% |\n\n`;
+              } catch (e) {
+                comment += '### Frontend Coverage\n\n';
+                comment += 'Warning: Could not parse coverage data\n\n';
+              }
+            } else {
+              comment += '### Frontend Coverage\n\n';
+              comment += 'Warning: Coverage report not found\n\n';
+            }
+
+            comment += 'Full coverage reports are available in the workflow artifacts.\n';
+
+            // Find existing coverage comment
+            const prNumber = context.payload.pull_request.number;
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Code Coverage Report')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: comment
+              });
+            }

@@ -50,9 +50,18 @@ jobs:
             echo "Prettier not configured, skipping..."
           fi
 
-      - name: Run tests
+      - name: Run unit tests
         working-directory: ./frontend
         run: npm test -- --coverage --watchAll=false --passWithNoTests --ci || echo "Tests completed with some failures"
+        continue-on-error: true
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+          retention-days: 30
 
       - name: Build application
         working-directory: ./frontend
@@ -76,6 +85,55 @@ jobs:
           name: eslint-report
           path: frontend/eslint-report.json
           retention-days: 30
+
+  # Frontend E2E Tests
+  frontend-e2e:
+    name: Frontend E2E Tests
+    runs-on: ubuntu-latest
+    needs: frontend-ci
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        working-directory: ./frontend
+        run: npm run test:e2e || echo "E2E tests completed with some failures"
+        continue-on-error: true
+        env:
+          REACT_APP_API_URL: http://localhost:8080
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: frontend/test-results/
+          retention-days: 30
+
+      - name: Upload E2E test videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-videos
+          path: frontend/test-results/**/*.webm
+          retention-days: 7
 
   # Backend CI Pipeline
   backend-ci:
@@ -106,9 +164,9 @@ jobs:
         working-directory: ./backend
         run: mvn clean compile
 
-      - name: Run tests
+      - name: Run tests with coverage
         working-directory: ./backend
-        run: mvn test || echo "Tests completed with some failures - continuing"
+        run: mvn test jacoco:report || echo "Tests completed with some failures - continuing"
         continue-on-error: true
 
       - name: Generate test report
@@ -162,6 +220,14 @@ jobs:
           path: backend/target/surefire-reports/
           retention-days: 30
 
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/target/site/jacoco/
+          retention-days: 30
+
   # Security Scanning
   security-scan:
     name: Security Scan
@@ -191,11 +257,47 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # Coverage Reporting
+  coverage-report:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+    needs: [frontend-ci, backend-ci]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download frontend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+
+      - name: Download backend coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/target/site/jacoco/
+
+      - name: Coverage summary
+        run: |
+          echo "### Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f "frontend/coverage/coverage-summary.json" ]; then
+            echo "Frontend coverage report available" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -d "backend/target/site/jacoco" ]; then
+            echo "Backend coverage report available" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage reports are available in the artifacts" >> $GITHUB_STEP_SUMMARY
+
   # Build Summary (always runs)
   build-summary:
     name: Build Summary
     runs-on: ubuntu-latest
-    needs: [frontend-ci, backend-ci]
+    needs: [frontend-ci, backend-ci, frontend-e2e]
     if: always()
 
     steps:
@@ -203,10 +305,16 @@ jobs:
         run: |
           echo "Frontend CI: ${{ needs.frontend-ci.result }}"
           echo "Backend CI: ${{ needs.backend-ci.result }}"
+          echo "Frontend E2E: ${{ needs.frontend-e2e.result }}"
           echo "### Build Status Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Frontend CI | ${{ needs.frontend-ci.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Backend CI | ${{ needs.backend-ci.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend E2E | ${{ needs.frontend-e2e.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Build completed successfully**" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.frontend-ci.result }}" == "success" && "${{ needs.backend-ci.result }}" == "success" ]]; then
+            echo "**Build completed successfully**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Build completed with some failures**" >> $GITHUB_STEP_SUMMARY
+          fi
