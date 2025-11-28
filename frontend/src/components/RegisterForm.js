@@ -58,7 +58,7 @@ function RegisterForm({ onRegister, onSwitchForm }) {
 
     if (!agree) err.agree = t("validation.agreeRequired");
     setFieldError(err);
-    return Object.keys(err).length === 0;
+    return { isValid: Object.keys(err).length === 0, errors: err };
   };
 
   const handleChange = (e) => {
@@ -74,8 +74,9 @@ function RegisterForm({ onRegister, onSwitchForm }) {
     e.preventDefault();
     setError("");
     setSuccess("");
-    if (!validate()) {
-      const firstError = Object.values(fieldError)[0];
+    const validationResult = validate();
+    if (!validationResult.isValid) {
+      const firstError = Object.values(validationResult.errors)[0];
       if (firstError) {
         setBannerMessage(firstError);
         setTimeout(() => setBannerMessage(""), 3000);

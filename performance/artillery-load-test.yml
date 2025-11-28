@@ -1,0 +1,66 @@
+config:
+  target: "http://localhost:8080"
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 20
+      name: "Sustained load"
+    - duration: 60
+      arrivalRate: 50
+      name: "Spike test"
+  processor: "./artillery-functions.js"
+  plugins:
+    expect: {}
+  variables:
+    email: "test@example.com"
+    password: "password123"
+
+scenarios:
+  - name: "Public API Load Test"
+    flow:
+      - get:
+          url: "/api/blog/posts/public"
+          qs:
+            page: 0
+            size: 10
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: content
+
+  - name: "Authentication Flow"
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "{{ email }}"
+            password: "{{ password }}"
+          expect:
+            - statusCode: [200, 401]
+            - contentType: json
+
+  - name: "Blog Posts Pagination"
+    flow:
+      - get:
+          url: "/api/blog/posts/public"
+          qs:
+            page: "{{ $randomInt(0, 5) }}"
+            size: 10
+          expect:
+            - statusCode: 200
+
+  - name: "Mixed Workload"
+    weight: 50
+    flow:
+      - get:
+          url: "/api/blog/posts/public"
+          qs:
+            page: 0
+            size: 10
+      - think: 2
+      - get:
+          url: "/api/blog/categories"
+          expect:
+            - statusCode: 200
