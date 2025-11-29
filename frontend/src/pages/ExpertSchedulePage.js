@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FaBrain, FaClock } from "react-icons/fa";
 import DashboardHeader from "../components/DashboardHeader";
@@ -9,13 +9,12 @@ import { useTheme } from "../hooks/useTheme";
 
 export default function ExpertSchedulePage({ handleLogout }) {
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
 
   const [user, setUser] = useState(null);
 
   // Sử dụng theme từ context
-  const { theme, setTheme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const initializePage = async () => {
@@ -50,10 +49,6 @@ export default function ExpertSchedulePage({ handleLogout }) {
     };
 
     initializePage();
-  }, [navigate]);
-
-  const navigateToHome = useCallback(() => {
-    navigate("/expert/dashboard");
   }, [navigate]);
 
   const navigateToProfile = useCallback(() => {

@@ -9,7 +9,7 @@ const DualLanguageQuestionModal = ({
   onSave,
   isEdit = false,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   // State để kiểm soát form validation
   const [formErrors, setFormErrors] = React.useState({});

@@ -1,19 +1,11 @@
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import {
-  FaLock,
-  FaKey,
-  FaExclamationTriangle,
-  FaEye,
-  FaEyeSlash,
-} from "react-icons/fa";
+import { FaLock, FaKey } from "react-icons/fa";
 
 const ChangePasswordModal = ({
   isOpen,
   onClose,
   isTemporaryPassword = false,
 }) => {
-  const { t } = useTranslation();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

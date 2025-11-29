@@ -32,7 +32,7 @@ const BlogPostCard = ({
 }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { toggleSaveArticle, isArticleSaved, saveArticle, unsaveArticle } =
+  const { saveArticle, unsaveArticle } =
     useSavedArticles();
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);

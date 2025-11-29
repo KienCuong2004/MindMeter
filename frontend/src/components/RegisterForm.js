@@ -188,10 +188,6 @@ function RegisterForm({ onRegister, onSwitchForm }) {
 
   // Removed password strength meter (no longer used)
 
-  // Hiển thị lỗi đầu tiên (tránh tự ghép câu hardcode)
-  const allErrors = Object.values(fieldError);
-  const errorMsg = allErrors.length ? allErrors[0] : "";
-
   useEffect(() => {
     document.title = t("registerTitle") + " | MindMeter";
   }, [t]);

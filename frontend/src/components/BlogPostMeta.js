@@ -11,7 +11,6 @@ const BlogPostMeta = ({ post }) => {
     authorName,
     publishedAt,
     content,
-    slug,
   } = post;
 
   // Tạo URL đầy đủ cho blog post

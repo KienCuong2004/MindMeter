@@ -2,16 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { jwtDecode } from "jwt-decode";
 import {
-  FaUserCircle,
-  FaSignOutAlt,
-  FaMoon,
-  FaSun,
-  FaGlobe,
   FaChartPie,
-  FaArrowUp,
-  FaArrowDown,
-  FaExclamationTriangle,
-  FaUserGraduate,
   FaSmile,
   FaSadTear,
   FaVial,
@@ -24,19 +15,6 @@ import { useNavigate } from "react-router-dom";
 import DashboardHeader from "../components/DashboardHeader";
 import StatCard from "../components/StatCard";
 import DepressionStatsChart from "../components/DepressionStatsChart";
-import logo from "../logo.svg";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  Legend,
-  CartesianGrid,
-} from "recharts";
 import { authFetch } from "../authFetch";
 import FooterSection from "../components/FooterSection";
 import { useTheme } from "../hooks/useTheme";
@@ -47,8 +25,8 @@ export default function ExpertDashboardPage({
 }) {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [, setLoading] = useState(true);
+  const [, setError] = useState("");
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalAdvices: 0,
@@ -56,7 +34,6 @@ export default function ExpertDashboardPage({
     recentSurveys: [],
   });
   const [testStats, setTestStats] = useState(null);
-  const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
   const [sentAdviceCount, setSentAdviceCount] = useState(0);
 
@@ -88,7 +65,6 @@ export default function ExpertDashboardPage({
     return userObj;
   });
   const handleLogoutLocal = propHandleLogout || (() => handleLogout(navigate));
-  const handleLang = (lang) => i18n.changeLanguage(lang);
 
   useEffect(() => {
     document.title = t("expertDashboardTitle");
@@ -148,30 +124,7 @@ export default function ExpertDashboardPage({
       }
     };
     if (token) fetchStats();
-  }, [token]);
-
-  // Thêm AnimatedNumber giống AdminDashboardPage.js
-  const AnimatedNumber = ({ value }) => {
-    const [display, setDisplay] = useState(0);
-    useEffect(() => {
-      let start = 0;
-      const end = Number(value);
-      if (start === end) return;
-      let increment = end / 30;
-      let current = start;
-      const timer = setInterval(() => {
-        current += increment;
-        if (current >= end) {
-          setDisplay(end);
-          clearInterval(timer);
-        } else {
-          setDisplay(Math.floor(current));
-        }
-      }, 15);
-      return () => clearInterval(timer);
-    }, [value]);
-    return <span>{display}</span>;
-  };
+  }, [token, t]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-blue-100 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">

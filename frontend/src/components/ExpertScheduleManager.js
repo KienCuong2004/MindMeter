@@ -7,7 +7,6 @@ import {
   PencilIcon,
   TrashIcon,
   XMarkIcon,
-  CheckIcon,
 } from "@heroicons/react/24/outline";
 import { authFetch } from "../authFetch";
 

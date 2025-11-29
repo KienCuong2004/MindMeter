@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { FaComments, FaBrain } from "react-icons/fa";
+import { FaBrain } from "react-icons/fa";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { authFetch } from "../authFetch";
@@ -16,16 +16,9 @@ export default function AdviceSentPage() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [selectedAdvice, setSelectedAdvice] = useState(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // Khởi tạo user từ token
-  const [user, setUser] = useState(() => {
+  const [user] = useState(() => {
     let userObj = {
       firstName: "",
       lastName: "",
@@ -59,7 +52,6 @@ export default function AdviceSentPage() {
       setLoading(true);
       setError("");
       try {
-        const token = localStorage.getItem("token");
         const res = await authFetch("/api/expert/messages/sent");
         if (!res.ok)
           throw new Error("Không thể tải dữ liệu lời khuyên đã gửi!");

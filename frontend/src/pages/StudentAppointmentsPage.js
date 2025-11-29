@@ -1,30 +1,22 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  Suspense,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { authFetch } from "../authFetch";
 import AppointmentList from "../components/AppointmentList";
 import AppointmentBookingModal from "../components/AppointmentBookingModal";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
-import ErrorBoundary from "../components/ErrorBoundary";
 import NotificationModal from "../components/NotificationModal";
-import { FaPlus, FaCalendarAlt, FaBrain } from "react-icons/fa";
+import { FaBrain } from "react-icons/fa";
 import { useTheme } from "../hooks/useTheme";
 import { jwtDecode } from "jwt-decode";
 
 const StudentAppointmentsPage = ({ handleLogout }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Initialize user from token
-  const [user, setUser] = useState(() => {
+  const [user] = useState(() => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
@@ -148,47 +140,6 @@ const StudentAppointmentsPage = ({ handleLogout }) => {
     }
   }, [user?.id, user?.role, fetchAvailableExperts, fetchMyAppointments]);
 
-  const navigateToHome = useCallback(() => {
-    navigate("/home");
-  }, [navigate]);
-
-  const navigateToAppointments = useCallback(() => {
-    if (user?.role === "EXPERT") {
-      navigate("/expert/appointments");
-    } else if (user?.role === "ADMIN") {
-      navigate("/admin/dashboard");
-    } else {
-      navigate("/appointments");
-    }
-  }, [navigate, user?.role]);
-
-  const navigateToIntroduce = useCallback(() => {
-    navigate("/introduce");
-  }, [navigate]);
-
-  const navigateToStudentTest = useCallback(() => {
-    navigate("/student/test");
-  }, [navigate]);
-
-  const navigateToContact = useCallback(() => {
-    navigate("/contact");
-  }, [navigate]);
-
-  const openBookingModal = useCallback(() => {
-    if (availableExperts.length > 0) {
-      setShowBookingModal(true);
-    } else {
-      // Hiển thị thông báo nếu không có chuyên gia nào có sẵn
-      setNotificationModal({
-        isOpen: true,
-        type: "warning",
-        title: t("noExpertsAvailable"),
-        message: t("noExpertsAvailableForBooking"),
-        onConfirm: null,
-      });
-    }
-  }, [availableExperts.length, t]);
-
   const closeBookingModal = useCallback(() => {
     setShowBookingModal(false);
   }, []);
@@ -199,10 +150,6 @@ const StudentAppointmentsPage = ({ handleLogout }) => {
     // Không reload toàn bộ trang
     fetchMyAppointments(); // Refresh my appointments
   }, [fetchMyAppointments]);
-
-  const handleProfile = useCallback(() => {
-    navigate("/student/profile");
-  }, [navigate]);
 
   // Show loading only if we don't have user data yet
   if (!user) {

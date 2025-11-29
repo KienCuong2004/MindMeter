@@ -33,7 +33,6 @@ import { authFetch } from "../authFetch";
 import AppointmentBookingModal from "./AppointmentBookingModal";
 import NotificationModal from "./NotificationModal";
 import AppointmentHistoryService from "../services/appointmentHistoryService";
-import AnalyticsService from "../services/analyticsService";
 import { cleanupAnonymousChatHistory } from "../utils/cleanupStorage";
 import { sanitizeHtmlSafe } from "../utils/sanitizeHtml";
 
@@ -137,15 +136,14 @@ const ChatBotModal = ({ open, onClose, user }) => {
   const [conversationId] = useState(() =>
     AppointmentHistoryService.generateConversationId()
   );
-  const [sessionId] = useState(() => AnalyticsService.generateSessionId());
-  const [chatContext, setChatContext] = useState({
+  const [, setChatContext] = useState({
     conversationId: null,
     messageCount: 0,
     userIntent: "general",
     suggestedBy: "chatbot",
     keywords: [],
   });
-  const [responseStartTime, setResponseStartTime] = useState(null);
+  const [, setResponseStartTime] = useState(null);
   const messagesEndRef = useRef(null);
   const [showMenu, setShowMenu] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -393,10 +391,8 @@ const ChatBotModal = ({ open, onClose, user }) => {
                   } else {
                     // Nếu vẫn thất bại, format từ string gốc
                     if (result.appointmentDate.includes("T")) {
-                      const [datePart, timePart] =
-                        result.appointmentDate.split("T");
+                      const [datePart] = result.appointmentDate.split("T");
                       const [year, month, day] = datePart.split("-");
-                      const [hour, minute] = timePart.split(":");
 
                       formattedDate = `${day}/${month}/${year}`;
                       // Không ghi đè formattedTime vì đã set từ appointmentTime
@@ -410,10 +406,8 @@ const ChatBotModal = ({ open, onClose, user }) => {
                   // Fallback parsing failed
                   // Format từ string gốc
                   if (result.appointmentDate.includes("T")) {
-                    const [datePart, timePart] =
-                      result.appointmentDate.split("T");
+                    const [datePart] = result.appointmentDate.split("T");
                     const [year, month, day] = datePart.split("-");
-                    const [hour, minute] = timePart.split(":");
 
                     formattedDate = `${day}/${month}/${year}`;
                     // Không ghi đè formattedTime vì đã set từ appointmentTime

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { authFetch } from "../authFetch";
 
 export default function OtpResetPasswordForm({ email, onSuccess }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");

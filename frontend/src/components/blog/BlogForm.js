@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "@mui/material/styles";
-import { useTheme as useCustomTheme } from "../../hooks/useTheme";
 import blogService from "../../services/blogService";
 import logger from "../../utils/logger";
 
@@ -14,8 +12,6 @@ const BlogForm = ({
   success = "",
 }) => {
   const { t } = useTranslation();
-  const theme = useTheme();
-  const { theme: themeMode } = useCustomTheme();
 
   const [formData, setFormData] = useState({
     title: "",

@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import {
   FaFileContract,
   FaCheckCircle,
@@ -12,8 +11,7 @@ import {
 } from "react-icons/fa";
 
 export default function TermsModal({ open, onClose }) {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   if (!open) return null;
 
