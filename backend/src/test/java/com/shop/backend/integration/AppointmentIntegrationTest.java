@@ -57,7 +57,6 @@ class AppointmentIntegrationTest {
     private User studentUser;
     private User expertUser;
     private String studentToken;
-    private String expertToken;
     private ExpertSchedule schedule;
 
     @BeforeEach
@@ -82,7 +81,6 @@ class AppointmentIntegrationTest {
         expertUser.setRole(Role.EXPERT);
         expertUser.setStatus(User.Status.ACTIVE);
         expertUser = userRepository.save(expertUser);
-        expertToken = jwtService.generateTokenWithUserInfo(expertUser);
 
         // Create expert schedule
         schedule = new ExpertSchedule();

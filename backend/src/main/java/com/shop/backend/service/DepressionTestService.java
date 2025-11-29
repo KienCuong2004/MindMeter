@@ -170,26 +170,15 @@ public class DepressionTestService {
      * @return List of questions in the specified language
      */
     public List<DepressionQuestionDTO> getActiveQuestionDTOsByTestKeyAndLanguage(String testKey, String language) {
-        // Debug: Log input parameters
-        // System.out.println("[DEBUG] getActiveQuestionDTOsByTestKeyAndLanguage called");
-        // System.out.println("[DEBUG] Input testKey: " + testKey);
-        // System.out.println("[DEBUG] Input language: " + language);
-        
         // Determine the appropriate test key based on language
         String actualTestKey = testKey;
         if ("en".equals(language) && !testKey.endsWith("-EN")) {
             // If English is requested but testKey doesn't end with -EN, append it
             actualTestKey = testKey + "-EN";
-            // System.out.println("[DEBUG] Appending -EN suffix. New testKey: " + actualTestKey);
         } else if ("vi".equals(language) && testKey.endsWith("-EN")) {
             // If Vietnamese is requested but testKey ends with -EN, remove it
             actualTestKey = testKey.substring(0, testKey.length() - 3);
-            // System.out.println("[DEBUG] Removing -EN suffix. New testKey: " + actualTestKey);
-        } else {
-            // System.out.println("[DEBUG] No suffix change needed. Using testKey: " + actualTestKey);
         }
-        
-        // System.out.println("[DEBUG] Final testKey for database query: " + actualTestKey);
         
         // Query the appropriate repository based on language
         if ("en".equals(language)) {

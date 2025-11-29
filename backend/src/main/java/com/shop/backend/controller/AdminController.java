@@ -225,15 +225,6 @@ public class AdminController {
             dto.setQuestionTextEn(questionTextEn);
             dto.setQuestionTextVi(question.getQuestionText());
             
-            // Debug log cho câu hỏi mới tạo
-            if (question.getQuestionText().contains("Zachbocon")) {
-                System.out.println("DEBUG getAllQuestions - Found Zachbocon question:");
-                System.out.println("  - questionTextVi: " + question.getQuestionText());
-                System.out.println("  - questionTextEn: " + questionTextEn);
-                System.out.println("  - testKey: " + question.getTestKey());
-                System.out.println("  - order: " + question.getOrder());
-            }
-    
             
             // Lấy options và convert sang DTO để tránh circular reference
             List<DepressionQuestionOptionVi> optionsVi = allOptionsViMap.getOrDefault(question.getId(), new ArrayList<>());
@@ -317,32 +308,21 @@ public class AdminController {
             String testKey = question.getTestKey();
             Integer order = question.getOrder();
             
-            // System.out.println("Finding English options for question ID: " + question.getId() + ", testKey: " + testKey + ", order: " + order);
-            
             if (testKey != null && !testKey.endsWith("-EN")) {
-                // System.out.println("Looking for English options with baseKey: " + testKey);
-                
                 // Tìm trong enQuestionsByBaseKey để lấy câu hỏi tiếng Anh
                 // enQuestionsByBaseKey đã được map với baseKey (không có -EN)
                 List<DepressionQuestionEn> enQuestions = enQuestionsByBaseKey.get(testKey);
                 
                 if (enQuestions != null) {
-                    // System.out.println("Found " + enQuestions.size() + " English questions for options");
                     for (DepressionQuestionEn enQuestion : enQuestions) {
                         if (enQuestion.getOrder().equals(order)) {
-                            // System.out.println("Found English question for options: " + enQuestion.getId());
                             return allOptionsEnMap.getOrDefault(enQuestion.getId(), new ArrayList<>());
                         }
                     }
-                } else {
-                    // System.out.println("No English questions found for baseKey: " + testKey);
                 }
-            } else {
-                // System.out.println("Question is already in English (testKey ends with -EN): " + testKey);
             }
             return new ArrayList<>();
         } catch (Exception e) {
-            // System.out.println("Error in findEnglishOptionsFromCache: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -557,8 +537,6 @@ public class AdminController {
             Map<String, Object> stats = adminService.getSystemStatistics();
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
-            System.err.println("Error in AdminController.getSystemStatistics: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
@@ -727,30 +705,23 @@ public class AdminController {
     @GetMapping("/profile")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> getAdminProfile() {
-        // System.out.println("[DEBUG] getAdminProfile called");
-        
         // Lấy user từ SecurityContext thay vì @AuthenticationPrincipal
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        // System.out.println("[DEBUG] Authentication: " + authentication);
         
         if (authentication == null || !authentication.isAuthenticated()) {
-            // System.out.println("[DEBUG] Authentication is null or not authenticated");
             return ResponseEntity.badRequest().build();
         }
         
         var userDetails = (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
-        // System.out.println("[DEBUG] User email from SecurityContext: " + email);
         
         // Tìm user trong database
         var userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            // System.out.println("[DEBUG] User not found in database: " + email);
             return ResponseEntity.badRequest().build();
         }
         
         User user = userOpt.get();
-        // System.out.println("[DEBUG] User found: " + user.getEmail() + " with role: " + user.getRole());
         
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
@@ -813,7 +784,6 @@ public class AdminController {
             
             response.put("user", userInfo);
             
-            // System.out.println("Token refreshed successfully for admin: " + user.getEmail() + " with plan: " + user.getPlan());
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
@@ -826,30 +796,23 @@ public class AdminController {
     @PutMapping("/profile")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> updateAdminProfile(@RequestBody UserDTO updateRequest) {
-        // System.out.println("[DEBUG] updateAdminProfile called");
-        
         // Lấy user từ SecurityContext thay vì @AuthenticationPrincipal
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        // System.out.println("[DEBUG] Authentication: " + authentication);
         
         if (authentication == null || !authentication.isAuthenticated()) {
-            // System.out.println("[DEBUG] Authentication is null or not authenticated");
             return ResponseEntity.badRequest().build();
         }
         
         var userDetails = (org.springframework.security.core.userdetails.UserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
-        // System.out.println("[DEBUG] User email from SecurityContext: " + email);
         
         // Tìm user trong database
         var userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            // System.out.println("[DEBUG] User not found in database: " + email);
             return ResponseEntity.badRequest().build();
         }
         
         User currentUser = userOpt.get();
-        // System.out.println("[DEBUG] User found: " + currentUser.getEmail() + " with role: " + currentUser.getRole());
         
         try {
             // Cập nhật thông tin cơ bản
@@ -882,7 +845,6 @@ public class AdminController {
             
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
-            // System.out.println("[DEBUG] Error updating user: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
@@ -906,13 +868,6 @@ public class AdminController {
             
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found for email: " + email));
-            
-            // Log thông tin file
-            // System.out.println("=== ADMIN AVATAR UPLOAD DEBUG ===");
-            // System.out.println("File name: " + file.getOriginalFilename());
-            // System.out.println("File size: " + file.getSize() + " bytes");
-            // System.out.println("File content type: " + file.getContentType());
-            // System.out.println("Upload directory: " + AVATAR_UPLOAD_DIR);
             
             // Kiểm tra file
             if (file.isEmpty()) {
@@ -948,26 +903,16 @@ public class AdminController {
             Path filePath = Paths.get(AVATAR_UPLOAD_DIR + newFilename);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
             
-            // System.out.println("File saved to: " + filePath.toAbsolutePath());
-            // System.out.println("File exists after save: " + Files.exists(filePath));
-            
             // Cập nhật avatarUrl trong database
             String avatarUrl = "/uploads/avatars/" + newFilename;
             user.setAvatarUrl(avatarUrl);
             userRepository.save(user);
             
-            // System.out.println("Avatar URL saved to database: " + avatarUrl);
-            // System.out.println("=== END DEBUG ===");
-            
             return ResponseEntity.ok().body(Map.of("avatarUrl", avatarUrl));
             
         } catch (IOException e) {
-            System.err.println("IOException during upload: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Lỗi khi upload file: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Exception during upload: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Lỗi: " + e.getMessage());
         }
     }

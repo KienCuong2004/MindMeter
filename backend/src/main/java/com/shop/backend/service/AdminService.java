@@ -5,7 +5,6 @@ import com.shop.backend.repository.*;
 import com.shop.backend.dto.depression.DepressionTestResultDTO;
 import com.shop.backend.dto.depression.CreateQuestionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -472,8 +471,6 @@ public class AdminService {
             stats.put("totalAdvices", totalAdvices);
             return stats;
         } catch (Exception e) {
-            System.err.println("Error in getSystemStatistics: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Failed to get system statistics", e);
         }
     }

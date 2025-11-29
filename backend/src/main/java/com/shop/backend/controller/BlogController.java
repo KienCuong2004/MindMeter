@@ -202,22 +202,12 @@ public class BlogController {
            // Admin endpoints
            @PutMapping("/posts/{id}/status")
            public ResponseEntity<BlogPostDTO> updatePostStatus(@PathVariable Long id, @RequestBody Map<String, String> request, Authentication authentication) {
-               try {
-                   System.out.println("BlogController.updatePostStatus() called with id: " + id + ", request: " + request);
-                   String userEmail = getCurrentUserEmail(authentication);
-                   String status = request.get("status");
-                   String rejectionReason = request.get("rejectionReason");
-                   
-                   System.out.println("Extracted status: " + status + ", rejectionReason: " + rejectionReason + ", userEmail: " + userEmail);
-                   
-                   BlogPostDTO post = blogService.updatePostStatus(id, status, rejectionReason, userEmail);
-                   System.out.println("BlogService returned post: " + post.getTitle() + " with status: " + post.getStatus());
-                   return ResponseEntity.ok(post);
-               } catch (Exception e) {
-                   System.err.println("Error in BlogController.updatePostStatus: " + e.getMessage());
-                   e.printStackTrace();
-                   return ResponseEntity.status(500).build();
-               }
+               String userEmail = getCurrentUserEmail(authentication);
+               String status = request.get("status");
+               String rejectionReason = request.get("rejectionReason");
+               
+               BlogPostDTO post = blogService.updatePostStatus(id, status, rejectionReason, userEmail);
+               return ResponseEntity.ok(post);
            }
     
     // Like Endpoints
@@ -245,16 +235,8 @@ public class BlogController {
     
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<BlogCommentDTO>> getComments(@PathVariable Long postId, Pageable pageable) {
-        try {
-            System.out.println("BlogController.getComments() called with postId: " + postId);
-            Page<BlogCommentDTO> comments = blogService.getComments(postId, pageable);
-            System.out.println("BlogController.getComments() completed successfully, found " + comments.getTotalElements() + " comments");
-            return ResponseEntity.ok(comments);
-        } catch (Exception e) {
-            System.err.println("Error in BlogController.getComments(): " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(null);
-        }
+        Page<BlogCommentDTO> comments = blogService.getComments(postId, pageable);
+        return ResponseEntity.ok(comments);
     }
     
     @PutMapping("/comments/{commentId}")
@@ -306,16 +288,8 @@ public class BlogController {
     
     @PostMapping("/posts/{postId}/view/simple")
     public ResponseEntity<Void> recordViewSimple(@PathVariable Long postId) {
-        try {
-            System.out.println("BlogController.recordViewSimple() called with postId: " + postId);
-            blogService.recordView(postId);
-            System.out.println("BlogController.recordViewSimple() completed successfully");
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            System.err.println("Error in BlogController.recordViewSimple(): " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(500).build();
-        }
+        blogService.recordView(postId);
+        return ResponseEntity.ok().build();
     }
     
     // Category Endpoints

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -323,10 +322,6 @@ public class BlogService {
     public BlogPostDTO getPostById(Long id, String userEmail) {
         Optional<BlogPost> post = blogPostRepository.findById(id);
         if (post.isPresent()) {
-            // Debug comment count
-            long actualCommentCount = blogCommentRepository.countByPostIdAndStatus(id, BlogComment.CommentStatus.approved);
-            System.out.println("Post ID: " + id + ", Database comment count: " + post.get().getCommentCount() + ", Actual comment count: " + actualCommentCount);
-            
             // Force update comment count before returning
             updateCommentCount(id);
             
@@ -486,49 +481,31 @@ public class BlogService {
 
            // Admin method to update post status
            public BlogPostDTO updatePostStatus(Long id, String status, String rejectionReason, String adminEmail) {
+               BlogPost post = blogPostRepository.findById(id)
+                   .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+               // Check if user is admin
+               User user = userRepository.findByEmail(adminEmail)
+                   .orElseThrow(() -> new RuntimeException("User not found"));
+               
+               if (user.getRole() != Role.ADMIN) {
+                   throw new RuntimeException("Only admin can update post status");
+               }
+
+               // Update status
                try {
-                   System.out.println("BlogService.updatePostStatus() called with id: " + id + ", status: " + status + ", adminEmail: " + adminEmail);
+                   BlogPost.BlogPostStatus newStatus = BlogPost.BlogPostStatus.valueOf(status.toLowerCase());
+                   post.setStatus(newStatus);
                    
-                   BlogPost post = blogPostRepository.findById(id)
-                       .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
-
-                   System.out.println("Found post: " + post.getTitle() + " with current status: " + post.getStatus());
-
-                   // Check if user is admin
-                   User user = userRepository.findByEmail(adminEmail)
-                       .orElseThrow(() -> new RuntimeException("User not found"));
+                   // If approving, set published date
+                   if (newStatus == BlogPost.BlogPostStatus.published && post.getPublishedAt() == null) {
+                       post.setPublishedAt(LocalDateTime.now());
+                   }
                    
-                   if (user.getRole() != Role.ADMIN) {
-                       throw new RuntimeException("Only admin can update post status");
-                   }
-
-                   // Update status
-                   try {
-                       BlogPost.BlogPostStatus newStatus = BlogPost.BlogPostStatus.valueOf(status.toLowerCase());
-                       System.out.println("Converting status '" + status + "' to enum: " + newStatus);
-                       
-                       post.setStatus(newStatus);
-                       
-                       // If approving, set published date
-                       if (newStatus == BlogPost.BlogPostStatus.published && post.getPublishedAt() == null) {
-                           post.setPublishedAt(LocalDateTime.now());
-                           System.out.println("Set published date to: " + post.getPublishedAt());
-                       }
-                       
-                       post = blogPostRepository.save(post);
-                       System.out.println("Post saved successfully with new status: " + post.getStatus());
-                       
-                       BlogPostDTO dto = convertToDTO(post);
-                       System.out.println("DTO created successfully for post: " + dto.getTitle());
-                       return dto;
-                   } catch (IllegalArgumentException e) {
-                       System.err.println("Invalid status: " + status + ", error: " + e.getMessage());
-                       throw new RuntimeException("Invalid status: " + status + ". Valid statuses are: draft, pending, published, rejected");
-                   }
-               } catch (Exception e) {
-                   System.err.println("Error in updatePostStatus: " + e.getMessage());
-                   e.printStackTrace();
-                   throw e;
+                   post = blogPostRepository.save(post);
+                   return convertToDTO(post);
+               } catch (IllegalArgumentException e) {
+                   throw new RuntimeException("Invalid status: " + status + ". Valid statuses are: draft, pending, published, rejected", e);
                }
            }
     
@@ -603,7 +580,6 @@ public class BlogService {
         // Ensure updatedAt is not in the future (fix any data issues)
         LocalDateTime now = LocalDateTime.now();
         if (comment.getUpdatedAt().isAfter(now)) {
-            System.out.println("Warning: Comment " + comment.getId() + " has future updatedAt, fixing to current time");
             comment.setUpdatedAt(now);
             comment = blogCommentRepository.save(comment);
         }
@@ -614,37 +590,19 @@ public class BlogService {
     }
     
     public Page<BlogCommentDTO> getComments(Long postId, Pageable pageable) {
-        try {
-            System.out.println("BlogService.getComments() called with postId: " + postId);
-            System.out.println("Using new sorting method: findByPostIdAndStatusOrderByUpdatedAtDesc");
-            
-            // Use native query to bypass JPA cache completely
-            int pageNumber = pageable.getPageNumber();
-            int pageSize = pageable.getPageSize();
-            int offset = pageNumber * pageSize;
-            
-            List<BlogComment> commentList = blogCommentRepository.findCommentsByPostIdNative(
-                postId, "approved", pageSize, offset);
-            
-            // Create a simple Page object
-            Page<BlogComment> comments = new org.springframework.data.domain.PageImpl<>(
-                commentList, pageable, commentList.size());
-            System.out.println("BlogService.getComments() found " + comments.getTotalElements() + " comments");
-            
-            // Debug: Print comment order
-            System.out.println("Comment order (by updatedAt):");
-            for (BlogComment comment : comments.getContent()) {
-                System.out.println("Comment ID: " + comment.getId() + 
-                    ", createdAt: " + comment.getCreatedAt() + 
-                    ", updatedAt: " + comment.getUpdatedAt());
-            }
-            
-            return comments.map(this::convertCommentToDTO);
-        } catch (Exception e) {
-            System.err.println("Error in BlogService.getComments(): " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+        // Use native query to bypass JPA cache completely
+        int pageNumber = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        int offset = pageNumber * pageSize;
+        
+        List<BlogComment> commentList = blogCommentRepository.findCommentsByPostIdNative(
+            postId, "approved", pageSize, offset);
+        
+        // Create a simple Page object
+        Page<BlogComment> comments = new org.springframework.data.domain.PageImpl<>(
+            commentList, pageable, commentList.size());
+        
+        return comments.map(this::convertCommentToDTO);
     }
     
     public BlogCommentDTO updateComment(Long commentId, BlogCommentRequest request, String userEmail) {
@@ -770,33 +728,17 @@ public class BlogService {
     }
     
     public void recordView(Long postId) {
-        try {
-            System.out.println("BlogService.recordView() called with postId: " + postId);
-            
-            BlogPost post = blogPostRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
-            
-            System.out.println("Found post: " + post.getTitle());
-            
-            BlogPostView view = new BlogPostView();
-            view.setPost(post);
-            view.setUser(null);
-            view.setIpAddress("127.0.0.1");
-            view.setUserAgent("Unknown");
-            
-            System.out.println("Saving view...");
-            blogPostViewRepository.save(view);
-            System.out.println("View saved successfully");
-            
-            System.out.println("Updating view count...");
-            updateViewCount(postId);
-            System.out.println("View count updated successfully");
-            
-        } catch (Exception e) {
-            System.err.println("Error in recordView: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Failed to record view: " + e.getMessage(), e);
-        }
+        BlogPost post = blogPostRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+        
+        BlogPostView view = new BlogPostView();
+        view.setPost(post);
+        view.setUser(null);
+        view.setIpAddress("127.0.0.1");
+        view.setUserAgent("Unknown");
+        
+        blogPostViewRepository.save(view);
+        updateViewCount(postId);
     }
     
     // Category Methods
@@ -1150,28 +1092,20 @@ public class BlogService {
     }
     
     private BlogCommentDTO convertCommentToDTO(BlogComment comment) {
-        try {
-            System.out.println("BlogService.convertCommentToDTO() called for comment ID: " + comment.getId());
-            BlogCommentDTO dto = new BlogCommentDTO();
-            dto.setId(comment.getId());
-            dto.setPostId(comment.getPost().getId());
-            dto.setUserId(comment.getUser().getId());
-            dto.setUserName(comment.getUser().getFirstName() + " " + comment.getUser().getLastName());
-            dto.setUserAvatar(comment.getUser().getAvatarUrl());
-            dto.setUserEmail(comment.getUser().getEmail()); // Add user email
-            dto.setParentId(comment.getParent() != null ? comment.getParent().getId() : null);
-            dto.setContent(comment.getContent());
-            dto.setStatus(comment.getStatus());
-            dto.setLikeCount(comment.getLikeCount());
-            dto.setCreatedAt(comment.getCreatedAt());
-            dto.setUpdatedAt(comment.getUpdatedAt());
-            System.out.println("BlogService.convertCommentToDTO() completed successfully for comment ID: " + comment.getId());
-            return dto;
-        } catch (Exception e) {
-            System.err.println("Error in BlogService.convertCommentToDTO(): " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+        BlogCommentDTO dto = new BlogCommentDTO();
+        dto.setId(comment.getId());
+        dto.setPostId(comment.getPost().getId());
+        dto.setUserId(comment.getUser().getId());
+        dto.setUserName(comment.getUser().getFirstName() + " " + comment.getUser().getLastName());
+        dto.setUserAvatar(comment.getUser().getAvatarUrl());
+        dto.setUserEmail(comment.getUser().getEmail());
+        dto.setParentId(comment.getParent() != null ? comment.getParent().getId() : null);
+        dto.setContent(comment.getContent());
+        dto.setStatus(comment.getStatus());
+        dto.setLikeCount(comment.getLikeCount());
+        dto.setCreatedAt(comment.getCreatedAt());
+        dto.setUpdatedAt(comment.getUpdatedAt());
+        return dto;
     }
     
     private BlogCategoryDTO convertCategoryToDTO(BlogCategory category) {
@@ -1266,9 +1200,7 @@ public class BlogService {
             }
             return reports.map(this::convertReportToDTO);
         } catch (Exception e) {
-            System.err.println("Error in getAllReportsForAdmin: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error in getAllReportsForAdmin", e);
         }
     }
     
@@ -1292,9 +1224,7 @@ public class BlogService {
             }
             return reports.map(this::convertReportToDTO);
         } catch (Exception e) {
-            System.err.println("Error in getPendingReports: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Error in getPendingReports", e);
         }
     }
     
@@ -1351,9 +1281,7 @@ public class BlogService {
             dto.setUpdatedAt(report.getUpdatedAt());
             return dto;
         } catch (Exception e) {
-            System.err.println("Error converting BlogReport to DTO: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Error converting report to DTO: " + e.getMessage(), e);
+            throw new RuntimeException("Error converting report to DTO", e);
         }
     }
     
@@ -1469,9 +1397,7 @@ public class BlogService {
             
             return stats;
         } catch (Exception e) {
-            System.err.println("Error calculating blog stats: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Error calculating blog stats: " + e.getMessage(), e);
+            throw new RuntimeException("Error calculating blog stats", e);
         }
     }
 }
