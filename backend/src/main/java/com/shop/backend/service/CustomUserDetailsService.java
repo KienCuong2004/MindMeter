@@ -42,13 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
         }
 
-        // Debug: Log thông tin user và authorities
-        // System.out.println("[DEBUG] CustomUserDetailsService - Loading user: " + username);
-        // System.out.println("[DEBUG] User role: " + user.getRole());
-        // System.out.println("[DEBUG] User email: " + user.getEmail());
-        
         String authority = "ROLE_" + user.getRole().name();
-        // System.out.println("[DEBUG] Created authority: " + authority);
         
         return new org.springframework.security.core.userdetails.User(
                 username, // Sử dụng username gốc (email hoặc anonymous_id)

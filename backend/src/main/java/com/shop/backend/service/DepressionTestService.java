@@ -338,8 +338,7 @@ public class DepressionTestService {
             try {
                 emailService.sendTestResultEmail(userId, response, request.getTestType());
             } catch (Exception e) {
-                // Log error nhưng không ảnh hưởng đến việc submit test
-                System.err.println("Failed to send test result email: " + e.getMessage());
+                // Don't throw to avoid affecting test submission
             }
         }
         

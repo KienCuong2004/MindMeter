@@ -36,8 +36,6 @@ public class ReportReasonConverter implements AttributeConverter<BlogReport.Repo
             if (dbData.equalsIgnoreCase("false_info")) {
                 return BlogReport.ReportReason.FALSE_INFO;
             }
-            // Log error for debugging
-            System.err.println("Error converting ReportReason: " + dbData);
             throw new IllegalArgumentException("Unknown ReportReason value: " + dbData, e);
         }
     }

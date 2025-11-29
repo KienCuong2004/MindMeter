@@ -42,9 +42,7 @@ public class PasswordController {
             }
             
             // Check if user has temporary password
-            System.out.println("[PasswordController] Checking password change requirements for: " + email);
             boolean requiresChange = passwordValidationService.requiresPasswordChange(email);
-            System.out.println("[PasswordController] Requires password change: " + requiresChange);
             
             if (!requiresChange) {
                 return ResponseEntity.badRequest()

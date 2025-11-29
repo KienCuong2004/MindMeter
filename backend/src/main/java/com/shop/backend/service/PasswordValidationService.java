@@ -48,7 +48,6 @@ public class PasswordValidationService {
             user.setTempPasswordUsed(true);
             userRepository.save(user);
             
-            System.out.println("[PasswordValidation] Temporary password marked as used for user: " + user.getEmail());
         }
     }
     
@@ -77,7 +76,6 @@ public class PasswordValidationService {
             user.setTempPasswordUsed(false);
             userRepository.save(user);
             
-            System.out.println("[PasswordValidation] Temporary password flags cleared for user: " + user.getEmail());
         }
     }
     
@@ -98,20 +96,14 @@ public class PasswordValidationService {
      * @return true if user has temporary password that needs to be changed
      */
     public boolean requiresPasswordChange(String email) {
-        System.out.println("[PasswordValidationService] Checking requiresPasswordChange for: " + email);
-        
         if (email == null || email.trim().isEmpty()) {
-            System.out.println("[PasswordValidationService] Email is null or empty");
             return false;
         }
         
         return userRepository.findByEmail(email.trim().toLowerCase())
                 .map(user -> {
-                    System.out.println("[PasswordValidationService] User found - isTemporaryPassword: " + user.isTemporaryPassword() + ", tempPasswordUsed: " + user.isTempPasswordUsed());
                     // For Option 3: Allow password change for users with temporary password (used or unused)
-                    boolean result = user != null && user.isTemporaryPassword();
-                    System.out.println("[PasswordValidationService] requiresPasswordChange result: " + result);
-                    return result;
+                    return user != null && user.isTemporaryPassword();
                 })
                 .orElse(false);
     }

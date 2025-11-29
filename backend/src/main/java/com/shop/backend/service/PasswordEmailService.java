@@ -31,11 +31,7 @@ public class PasswordEmailService {
             helper.setText(html, true);
             
             mailSender.send(message);
-            
-            System.out.println("[PasswordEmail] Password email sent successfully to: " + email);
-            
         } catch (Exception e) {
-            System.err.println("[PasswordEmail] Failed to send password email to " + email + ": " + e.getMessage());
             // Don't throw exception to avoid breaking OAuth2 flow
         }
     }

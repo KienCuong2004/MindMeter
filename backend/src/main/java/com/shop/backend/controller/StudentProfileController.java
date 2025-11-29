@@ -117,25 +117,16 @@ public class StudentProfileController {
             Path filePath = Paths.get(AVATAR_UPLOAD_DIR + newFilename);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
             
-            // System.out.println("File saved to: " + filePath.toAbsolutePath());
-            // System.out.println("File exists after save: " + Files.exists(filePath));
-            
             // Cập nhật avatarUrl trong database
             String avatarUrl = "/uploads/avatars/" + newFilename;
             user.setAvatarUrl(avatarUrl);
             userRepository.save(user);
             
-            // System.out.println("Avatar URL saved to database: " + avatarUrl);
-            
             return ResponseEntity.ok().body(Map.of("avatarUrl", avatarUrl));
             
         } catch (IOException e) {
-            System.err.println("IOException during upload: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Lỗi khi upload file: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Exception during upload: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Lỗi: " + e.getMessage());
         }
     }

@@ -787,8 +787,6 @@ public class AdminController {
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            System.err.println("Error refreshing token: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Error refreshing token");
         }
     }

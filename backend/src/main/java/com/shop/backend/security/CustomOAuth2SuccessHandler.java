@@ -52,9 +52,6 @@ public class CustomOAuth2SuccessHandler implements org.springframework.security.
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         String email = oAuth2User.getAttribute("email");
         if (email == null || email.isEmpty()) {
-            // Có thể log thêm thông tin sub để debug
-            String sub = oAuth2User.getAttribute("sub");
-            System.err.println("[OAuth2] Không lấy được email từ Google! sub=" + sub);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Không lấy được email từ Google. Vui lòng cấp quyền truy cập email.");
             return;
         }

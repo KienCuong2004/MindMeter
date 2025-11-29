@@ -74,7 +74,6 @@ public class OpenAITestResultService {
             return getDefaultAnalysis(totalScore);
             
         } catch (Exception e) {
-            System.err.println("Error calling OpenAI API: " + e.getMessage());
             // Return default analysis on error
             return getDefaultAnalysis(totalScore);
         }
@@ -171,7 +170,6 @@ public class OpenAITestResultService {
                 return result;
             }
         } catch (Exception e) {
-            System.err.println("Error parsing AI response: " + e.getMessage());
         }
         
         // Fallback if parsing fails

@@ -53,7 +53,6 @@ public class ChangePasswordService {
         // Clear temporary password flags
         passwordValidationService.clearTemporaryPasswordFlags(user);
         
-        System.out.println("[ChangePassword] Temporary password changed successfully for user: " + email);
     }
     
     /**
@@ -93,7 +92,6 @@ public class ChangePasswordService {
         user.setPassword(passwordEncoder.encode(newPassword.trim()));
         userRepository.save(user);
         
-        System.out.println("[ChangePassword] Password changed successfully for user: " + email);
     }
     
     /**

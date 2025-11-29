@@ -40,8 +40,7 @@ public class TestResultEmailService {
             mailSender.send(message);
             
         } catch (Exception e) {
-            // Log error but don't throw to avoid affecting test submission
-            System.err.println("Failed to send test result email: " + e.getMessage());
+            // Don't throw to avoid affecting test submission
         }
     }
     

@@ -34,9 +34,6 @@ public class DepressionTestController {
             @RequestParam(value = "type", required = false) String testKey,
             @RequestParam(value = "lang", defaultValue = "vi") String language) {
         
-        // Debug logging
-        // System.out.println("[DEBUG] API called with testKey: " + testKey + ", language: " + language);
-        
         List<DepressionQuestionDTO> questions;
         if (testKey != null && !testKey.isEmpty()) {
             questions = depressionTestService.getActiveQuestionDTOsByTestKeyAndLanguage(testKey, language);
@@ -47,9 +44,6 @@ public class DepressionTestController {
                 questions = depressionTestService.getActiveQuestionDTOsVi();
             }
         }
-        
-        // Debug logging
-        // System.out.println("[DEBUG] Returning " + questions.size() + " questions");
         
         return ResponseEntity.ok(questions);
     }
@@ -120,15 +114,11 @@ public class DepressionTestController {
     @GetMapping("/history")
     public ResponseEntity<List<DepressionTestResultDTO>> getTestHistory(Authentication authentication) {
         String userEmail = authentication.getName();
-        // System.out.println("[DEBUG] Email from token: " + userEmail);
         User user = userRepository.findByEmail(userEmail).orElse(null);
         if (user == null) {
-            System.err.println("[DEBUG] User not found for email: " + userEmail);
             return ResponseEntity.ok(java.util.Collections.emptyList());
         }
-        // System.out.println("[DEBUG] User id: " + user.getId());
         List<DepressionTestResultDTO> history = depressionTestService.getTestHistoryForUser(user.getId());
-        // System.out.println("[DEBUG] History size: " + (history != null ? history.size() : 0));
         return ResponseEntity.ok(history);
     }
 } 

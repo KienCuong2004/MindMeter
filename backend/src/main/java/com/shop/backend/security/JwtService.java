@@ -59,14 +59,6 @@ public class JwtService {
         claims.put("planStartDate", user.getPlanStartDate() != null ? user.getPlanStartDate().toString() : null);
         claims.put("planExpiryDate", user.getPlanExpiryDate() != null ? user.getPlanExpiryDate().toString() : null);
         
-        // Debug: Log claims để kiểm tra
-        // System.out.println("[DEBUG] JWT Claims: " + claims);
-        // System.out.println("[DEBUG] User plan in claims: " + claims.get("plan"));
-        // System.out.println("[DEBUG] User phone in claims: " + claims.get("phone"));
-        // System.out.println("[DEBUG] User avatarUrl in claims: " + claims.get("avatarUrl"));
-        // System.out.println("[DEBUG] User planStartDate in claims: " + claims.get("planStartDate"));
-        // System.out.println("[DEBUG] User planExpiryDate in claims: " + claims.get("planExpiryDate"));
-        
         String token = Jwts.builder()
                 .claims(claims)
                 .subject(user.getEmail())
@@ -74,10 +66,6 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSigningKey())
                 .compact();
-        
-        // Debug: Log token để kiểm tra
-        // System.out.println("[DEBUG] Generated JWT token length: " + token.length());
-        // System.out.println("[DEBUG] JWT token starts with: " + token.substring(0, Math.min(50, token.length())));
         
         return token;
     }

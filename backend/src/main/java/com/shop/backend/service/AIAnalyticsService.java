@@ -31,8 +31,6 @@ public class AIAnalyticsService {
     
     @jakarta.annotation.PostConstruct
     public void init() {
-        System.out.println("AIAnalyticsService initialized");
-        
         // Force reload từ properties
         try {
             java.util.Properties props = new java.util.Properties();
@@ -41,19 +39,12 @@ public class AIAnalyticsService {
             fis.close();
             
             String apiKeyFromFile = props.getProperty("OPENAI_API_KEY");
-            System.out.println("API Key from fil: " + (apiKeyFromFile != null ? apiKeyFromFile.substring(0, Math.min(20, apiKeyFromFile.length())) + "..." : "NULL"));
             
             if (apiKeyFromFile != null && !apiKeyFromFile.trim().isEmpty()) {
                 this.openAiApiKey = apiKeyFromFile.trim();
-                System.out.println("API Key reloaded from file");
             }
         } catch (Exception e) {
-            System.err.println("Could not reload API key from file: " + e.getMessage());
-        }
-        
-        System.out.println("Final OpenAI API Key length: " + (openAiApiKey != null ? openAiApiKey.length() : "NULL"));
-        if (openAiApiKey != null) {
-            System.out.println("Final OpenAI API Key starts with: " + openAiApiKey.substring(0, Math.min(20, openAiApiKey.length())));
+            // API key will use default from @Value annotation
         }
     }
     
@@ -75,7 +66,6 @@ public class AIAnalyticsService {
         try {
             return callOpenAI(prompt, "gpt-4o-mini", 0.3, 1000);
         } catch (Exception e) {
-            System.err.println("AI Insights Error: " + e.getMessage());
             return generateFallbackInsights(statisticsData);
         }
     }
@@ -91,7 +81,6 @@ public class AIAnalyticsService {
         try {
             return callOpenAI(prompt, "gpt-4o-mini", 0.2, 800);
         } catch (Exception e) {
-            System.err.println("Trend Prediction Error: " + e.getMessage());
             return generateFallbackTrendPredictions(historicalData);
         }
     }
@@ -107,7 +96,6 @@ public class AIAnalyticsService {
         try {
             return callOpenAI(prompt, "gpt-4o-mini", 0.3, 600);
         } catch (Exception e) {
-            System.err.println("Recommendations Error: " + e.getMessage());
             return generateFallbackRecommendations(currentStats);
         }
     }
@@ -125,7 +113,6 @@ public class AIAnalyticsService {
         try {
             return callOpenAI(prompt, "gpt-4o-mini", 0.4, 500);
         } catch (Exception e) {
-            System.err.println("Executive Summary Error: " + e.getMessage());
             return "Executive summary temporarily unavailable. Please review statistics manually.";
         }
     }
@@ -134,9 +121,6 @@ public class AIAnalyticsService {
      * Call OpenAI API with specified parameters
      */
     private String callOpenAI(String prompt, String model, double temperature, int maxTokens) {
-        System.out.println("DEBUG: OpenAI API Key length: " + (openAiApiKey != null ? openAiApiKey.length() : "NULL"));
-        System.out.println("DEBUG: OpenAI API Key starts with: " + (openAiApiKey != null ? openAiApiKey.substring(0, Math.min(20, openAiApiKey.length())) : "NULL"));
-        
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + openAiApiKey);
         headers.set("Content-Type", "application/json");
@@ -173,9 +157,6 @@ public class AIAnalyticsService {
                     // Clean up response - remove markdown code blocks if present
                     content = cleanJsonResponse(content);
                     
-                    // Log the cleaned response for debugging
-                    System.out.println("DEBUG: AI Response (cleaned): " + content);
-                    
                     return content;
                 }
             }
@@ -183,8 +164,7 @@ public class AIAnalyticsService {
             throw new RuntimeException("Invalid OpenAI response structure");
             
         } catch (Exception e) {
-            System.err.println("OpenAI API Error: " + e.getMessage());
-            throw new RuntimeException("Failed to get AI response: " + e.getMessage());
+            throw new RuntimeException("Failed to get AI response: " + e.getMessage(), e);
         }
     }
     
@@ -207,7 +187,6 @@ public class AIAnalyticsService {
             return response;
         } catch (Exception e) {
             // If not valid JSON, wrap it in an object
-            System.err.println("Invalid JSON response from AI, wrapping in object: " + response);
             return "{\"message\": \"" + response.replace("\"", "\\\"").replace("\n", "\\n") + "\"}";
         }
     }

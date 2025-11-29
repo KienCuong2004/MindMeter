@@ -244,7 +244,6 @@ public class AuthService {
             response.setRequiresPasswordChange(true);
             response.setMessage("Mật khẩu tạm thời đã được sử dụng. Vui lòng đổi mật khẩu mới.");
             
-            System.out.println("[AuthService] Temporary password used for user: " + user.getEmail());
             return response;
         }
         
