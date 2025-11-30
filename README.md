@@ -105,8 +105,10 @@ MindMeter is a comprehensive mental health assessment platform designed for stud
 
 ### DevOps & Tools
 
+- Docker & Docker Compose for containerization
 - Maven for Java dependency management
 - npm for frontend package management
+- Nginx for reverse proxy and static file serving
 - Git for version control
 - VS Code and IntelliJ IDEA for development
 - Postman for API testing
@@ -188,6 +190,36 @@ npm start
 ```
 
 Frontend will start on `http://localhost:3000`
+
+### Docker Setup (Recommended)
+
+For easier deployment and consistent environments, you can use Docker Compose:
+
+```bash
+# Copy environment file
+cp docker-compose.env.example .env
+
+# Edit .env with your configuration
+# Database credentials, JWT secret, API keys, etc.
+
+# Start all services (development)
+docker-compose up -d
+
+# Or use helper scripts
+# Linux/Mac:
+./docker-start.sh
+
+# Windows PowerShell:
+./docker-start.ps1
+```
+
+Access the application:
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8080
+- MySQL: localhost:3306
+
+For production deployment, see [DOCKER.md](DOCKER.md) for detailed instructions.
 
 ### Database Setup
 
