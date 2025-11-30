@@ -12,7 +12,7 @@ services:
       MYSQL_USER: ${MYSQL_USER:-mindmeter}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mindmeter123}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/MindMeter.sql:/docker-entrypoint-initdb.d/init.sql:ro
