@@ -1,5 +1,6 @@
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
+import logger from "../utils/logger";
 
 class WebSocketService {
   constructor() {
@@ -37,7 +38,7 @@ class WebSocketService {
         this.onConnectionChange?.(true);
       },
       (error) => {
-        console.error("WebSocket connection error:", error);
+        logger.error("WebSocket connection error:", error);
         this.connected = false;
         this.onConnectionChange?.(false);
         this.handleReconnect();
@@ -66,7 +67,7 @@ class WebSocketService {
         const data = JSON.parse(message.body);
         callback(data);
       } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
+        logger.error("Error parsing WebSocket message:", error);
       }
     });
 
@@ -85,7 +86,7 @@ class WebSocketService {
     if (this.connected && this.stompClient) {
       this.stompClient.send(destination, {}, JSON.stringify(message));
     } else {
-      console.warn("WebSocket not connected. Cannot send message.");
+      logger.warn("WebSocket not connected. Cannot send message.");
     }
   }
 
@@ -97,7 +98,7 @@ class WebSocketService {
         this.connect();
       }, this.reconnectDelay * this.reconnectAttempts);
     } else {
-      console.error(
+      logger.error(
         "Max reconnection attempts reached. Please refresh the page."
       );
     }

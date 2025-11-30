@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import logger from "../utils/logger";
 
 const SavedArticlesContext = createContext();
 
@@ -25,7 +26,7 @@ export const SavedArticlesProvider = ({ children }) => {
           setSavedArticles(JSON.parse(saved));
         }
       } catch (error) {
-        console.error("Error loading saved articles:", error);
+        logger.error("Error loading saved articles:", error);
         setSavedArticles([]);
       }
     };
@@ -38,7 +39,7 @@ export const SavedArticlesProvider = ({ children }) => {
     try {
       localStorage.setItem("savedArticles", JSON.stringify(savedArticles));
     } catch (error) {
-      console.error("Error saving articles to localStorage:", error);
+      logger.error("Error saving articles to localStorage:", error);
     }
   }, [savedArticles]);
 

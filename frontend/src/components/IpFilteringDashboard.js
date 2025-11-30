@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import logger from "../utils/logger";
 import {
   FaShieldAlt,
   FaBan,
@@ -43,7 +44,7 @@ const IpFilteringDashboard = () => {
       if (suspiciousRes.ok)
         setSuspiciousIps(Object.keys(await suspiciousRes.json()));
     } catch (error) {
-      console.error("Error fetching IP filtering data:", error);
+      logger.error("Error fetching IP filtering data:", error);
     } finally {
       setLoading(false);
     }
@@ -68,7 +69,7 @@ const IpFilteringDashboard = () => {
         fetchData();
       }
     } catch (error) {
-      console.error("Error adding IP:", error);
+      logger.error("Error adding IP:", error);
     }
   };
 
@@ -85,7 +86,7 @@ const IpFilteringDashboard = () => {
         fetchData();
       }
     } catch (error) {
-      console.error("Error removing IP:", error);
+      logger.error("Error removing IP:", error);
     }
   };
 
@@ -104,7 +105,7 @@ const IpFilteringDashboard = () => {
         fetchData();
       }
     } catch (error) {
-      console.error("Error marking IP as suspicious:", error);
+      logger.error("Error marking IP as suspicious:", error);
     }
   };
 
@@ -122,7 +123,7 @@ const IpFilteringDashboard = () => {
         setTestResult(await response.json());
       }
     } catch (error) {
-      console.error("Error testing IP:", error);
+      logger.error("Error testing IP:", error);
     }
   };
 
@@ -141,7 +142,7 @@ const IpFilteringDashboard = () => {
         fetchData();
       }
     } catch (error) {
-      console.error("Error clearing lists:", error);
+      logger.error("Error clearing lists:", error);
     }
   };
 

@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import logger from "../utils/logger";
 
 class BlogErrorBoundary extends React.Component {
   constructor(props) {
@@ -13,10 +14,8 @@ class BlogErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log the error to console in development
-    if (process.env.NODE_ENV === "development") {
-      console.error("Blog Error Boundary caught an error:", error, errorInfo);
-    }
+    // Log the error using logger
+    logger.error("Blog Error Boundary caught an error:", error, errorInfo);
 
     this.setState({
       error: error,

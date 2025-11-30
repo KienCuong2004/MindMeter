@@ -30,7 +30,7 @@ const PaymentMethodPage = () => {
     try {
       return t(key) || fallback;
     } catch (error) {
-      console.warn(`Translation error for key "${key}":`, error);
+      logger.warn(`Translation error for key "${key}":`, error);
       return fallback;
     }
   };

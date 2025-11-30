@@ -196,7 +196,7 @@ const CommentSection = ({
         // setIsLiked(result);
         // setLikeCount(prev => result ? prev + 1 : prev - 1);
       } catch (error) {
-        console.error("Error toggling comment like:", error);
+        logger.error("Error toggling comment like:", error);
       } finally {
         setIsLoading(false);
       }
@@ -214,7 +214,7 @@ const CommentSection = ({
         await handleDeleteComment(comment.id);
         setShowDeleteModal(false);
       } catch (error) {
-        console.error("Error deleting comment:", error);
+        logger.error("Error deleting comment:", error);
       }
     };
 
@@ -247,7 +247,7 @@ const CommentSection = ({
           onCommentUpdate();
         }
       } catch (error) {
-        console.error("Error editing comment:", error);
+        logger.error("Error editing comment:", error);
         // Reset to original content on error
         setEditContent(comment.content);
       } finally {

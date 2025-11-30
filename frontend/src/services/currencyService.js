@@ -1,4 +1,6 @@
 // Currency Service để quản lý tỷ giá và giá VND
+import logger from "../utils/logger";
+
 class CurrencyService {
   constructor() {
     this.cache = {
@@ -37,7 +39,7 @@ class CurrencyService {
 
       return data;
     } catch (error) {
-      console.error("Error fetching VND pricing:", error);
+      logger.error("Error fetching VND pricing:", error);
 
       // Trả về fallback data nếu có cache cũ
       if (this.cache.data) {
@@ -66,7 +68,7 @@ class CurrencyService {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error("Error fetching VND rate:", error);
+      logger.error("Error fetching VND rate:", error);
       return {
         usdToVnd: 27469.67,
         fallback: true,

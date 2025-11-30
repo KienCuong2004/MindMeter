@@ -16,6 +16,7 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import blogService from "../services/blogService";
+import logger from "../utils/logger";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 import { useSavedArticles } from "../contexts/SavedArticlesContext";
@@ -111,7 +112,7 @@ const BlogPostCard = ({
       setLikeCount(updatedPost.likeCount);
       if (onLike) onLike(post.id, result);
     } catch (error) {
-      console.error("Error toggling like:", error);
+      logger.error("Error toggling like:", error);
     } finally {
       setIsLoading(false);
     }
@@ -145,7 +146,7 @@ const BlogPostCard = ({
       // Also call the original onBookmark callback if provided
       if (onBookmark) onBookmark(post.id, result);
     } catch (error) {
-      console.error("Error toggling bookmark:", error);
+      logger.error("Error toggling bookmark:", error);
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +164,7 @@ const BlogPostCard = ({
       setShareCount((prev) => prev + 1);
       if (onShare) onShare(post.id, platform);
     } catch (error) {
-      console.error("Error sharing:", error);
+      logger.error("Error sharing:", error);
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +180,7 @@ const BlogPostCard = ({
       setHasReported(true);
       setShowReportModal(false);
     } catch (error) {
-      console.error("Error reporting post:", error);
+      logger.error("Error reporting post:", error);
       throw error;
     }
   };
@@ -201,7 +202,7 @@ const BlogPostCard = ({
         await blogService.deletePost(post.id);
         if (onDelete) onDelete(post.id);
       } catch (error) {
-        console.error("Error deleting post:", error);
+        logger.error("Error deleting post:", error);
         alert(t("blog.post.delete.error") || "Có lỗi xảy ra khi xóa bài viết");
       }
     }

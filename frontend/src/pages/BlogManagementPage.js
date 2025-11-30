@@ -24,6 +24,7 @@ import { FaBrain, FaExclamationTriangle } from "react-icons/fa";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import blogService from "../services/blogService";
+import logger from "../utils/logger";
 
 const StatusChip = ({ status }) => {
   const { t } = useTranslation();
@@ -115,7 +116,7 @@ const BlogManagementPage = ({ handleLogout }) => {
         );
         setAvailableTags(Array.isArray(tagsData) ? tagsData : []);
       } catch (error) {
-        console.error("Error loading categories and tags:", error);
+        logger.error("Error loading categories and tags:", error);
       }
     };
     loadCategoriesAndTags();
@@ -154,7 +155,7 @@ const BlogManagementPage = ({ handleLogout }) => {
       setPosts(allPosts);
       setTotalPages(response.totalPages || 0);
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      logger.error("Error fetching posts:", error);
       setError(t("blog.admin.error.fetchPosts"));
     } finally {
       setLoading(false);
@@ -169,7 +170,7 @@ const BlogManagementPage = ({ handleLogout }) => {
         const decoded = jwtDecode(token);
         setUser(decoded);
       } catch (error) {
-        console.error("Error decoding token:", error);
+        logger.error("Error decoding token:", error);
       }
     }
 
@@ -199,7 +200,7 @@ const BlogManagementPage = ({ handleLogout }) => {
       setApproveDialogOpen(false);
       fetchPosts();
     } catch (error) {
-      console.error("Error approving post:", error);
+      logger.error("Error approving post:", error);
       setError(t("blog.admin.error.approveFailed"));
     } finally {
       setLoading(false);
@@ -219,7 +220,7 @@ const BlogManagementPage = ({ handleLogout }) => {
       setRejectionReason("");
       fetchPosts();
     } catch (error) {
-      console.error("Error rejecting post:", error);
+      logger.error("Error rejecting post:", error);
       setError(t("blog.admin.error.rejectFailed"));
     } finally {
       setLoading(false);
@@ -240,7 +241,7 @@ const BlogManagementPage = ({ handleLogout }) => {
       setDeletePostId(null);
       fetchPosts();
     } catch (error) {
-      console.error("Error deleting post:", error);
+      logger.error("Error deleting post:", error);
       setError(t("blog.admin.error.deleteFailed"));
     } finally {
       setDeleting(false);

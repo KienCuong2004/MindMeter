@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import blogService from "../../services/blogService";
+import logger from "../../utils/logger";
 import {
   Container,
   Paper,
@@ -90,7 +91,7 @@ const CreatePost = () => {
         );
         setAvailableTags(Array.isArray(tagsData) ? tagsData : []);
       } catch (error) {
-        console.error("Error loading categories and tags:", error);
+        logger.error("Error loading categories and tags:", error);
       } finally {
         setLoadingCategories(false);
         setLoadingTags(false);
@@ -205,7 +206,7 @@ const CreatePost = () => {
         navigate("/blog");
       }, 2000);
     } catch (err) {
-      console.error("Error creating post:", err);
+      logger.error("Error creating post:", err);
       const errorMessage =
         err.response?.data?.message ||
         err.message ||

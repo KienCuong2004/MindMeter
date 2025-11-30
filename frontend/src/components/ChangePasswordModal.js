@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaLock, FaKey } from "react-icons/fa";
+import logger from "../utils/logger";
 
 const ChangePasswordModal = ({
   isOpen,
@@ -109,7 +110,7 @@ const ChangePasswordModal = ({
               window.location.href = "/login";
             }
           } catch (error) {
-            console.error("Auto login failed:", error);
+            logger.error("Auto login failed:", error);
             // Fallback: redirect to login page
             onClose();
             window.location.href = "/login";

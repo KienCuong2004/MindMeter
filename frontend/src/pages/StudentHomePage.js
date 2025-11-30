@@ -28,6 +28,7 @@ import {
 import NotificationModal from "../components/NotificationModal";
 import { useTheme } from "../hooks/useTheme";
 import { handleLogout } from "../utils/logoutUtils";
+import logger from "../utils/logger";
 
 const StudentHomePage = () => {
   const navigate = useNavigate();
@@ -263,7 +264,7 @@ const StudentHomePage = () => {
       // Store timeout ID for cleanup if needed
       window.navigationTimeout = navigationTimeout;
     } catch (error) {
-      console.error("Error creating anonymous account:", error);
+      logger.error("Error creating anonymous account:", error);
 
       // Clear flag on error
       localStorage.removeItem("creatingAnonymousAccount");

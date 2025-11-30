@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { authFetch } from "../authFetch";
+import logger from "../utils/logger";
 
 const AppointmentBookingModal = ({
   isOpen,
@@ -140,7 +141,7 @@ const AppointmentBookingModal = ({
         }));
       }
     } catch (error) {
-      console.error("Error validating slot:", error);
+      logger.error("Error validating slot:", error);
       setSlotValidation((prev) => ({
         ...prev,
         [slotTime]: "error",

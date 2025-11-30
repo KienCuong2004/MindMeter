@@ -9,6 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { jwtDecode } from "jwt-decode";
+import logger from "../utils/logger";
 
 const AccountLinkingNotification = () => {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ const AccountLinkingNotification = () => {
           const loginTimeKey = `lastLogin_${user.email}`;
           localStorage.setItem(loginTimeKey, Date.now().toString());
         } catch (error) {
-          console.error(
+          logger.error(
             "[AccountLinkingNotification] Error decoding token:",
             error
           );

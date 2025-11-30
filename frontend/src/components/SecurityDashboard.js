@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import logger from "../utils/logger";
 import {
   FaShieldAlt,
   FaExclamationTriangle,
@@ -50,7 +51,7 @@ const SecurityDashboard = () => {
       setError(null);
     } catch (err) {
       setError(err.message);
-      console.error("Error fetching security metrics:", err);
+      logger.error("Error fetching security metrics:", err);
     } finally {
       setLoading(false);
     }

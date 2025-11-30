@@ -28,6 +28,7 @@ import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 import { useTheme } from "../hooks/useTheme";
 import { handleLogout } from "../utils/logoutUtils";
+import logger from "../utils/logger";
 import "../styles/blog.css";
 
 const BlogPostPage = () => {
@@ -147,7 +148,7 @@ const BlogPostPage = () => {
             setHasReported(reported);
           } catch (reportError) {
             // Silently ignore if checking report fails
-            console.error("Error checking if post reported:", reportError);
+            logger.error("Error checking if post reported:", reportError);
           }
         }
 
@@ -192,7 +193,7 @@ const BlogPostPage = () => {
         setShareCount(0);
       }
     } catch (err) {
-      console.error("Error loading post:", err);
+      logger.error("Error loading post:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -228,7 +229,7 @@ const BlogPostPage = () => {
       const updatedPost = await blogService.getPostById(post.id);
       setLikeCount(updatedPost.likeCount);
     } catch (error) {
-      console.error("Error toggling like:", error);
+      logger.error("Error toggling like:", error);
       setToastMessage(t("blog.post.likeError"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -263,7 +264,7 @@ const BlogPostPage = () => {
         unsaveArticle(post.id);
       }
     } catch (error) {
-      console.error("Error toggling bookmark:", error);
+      logger.error("Error toggling bookmark:", error);
       setToastMessage(t("blog.post.bookmarkError"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -352,7 +353,7 @@ const BlogPostPage = () => {
           setTimeout(() => setShowToast(false), 3000);
           return;
         } catch (err) {
-          console.error("Failed to copy: ", err);
+          logger.error("Failed to copy: ", err);
           setToastMessage(t("blog.post.share.copyError"));
           setShowToast(true);
           setTimeout(() => setShowToast(false), 3000);
@@ -378,7 +379,7 @@ const BlogPostPage = () => {
         });
         setShareCount((prev) => prev + 1);
       } catch (error) {
-        console.error("Error recording share:", error);
+        logger.error("Error recording share:", error);
       }
     }
 
@@ -410,7 +411,7 @@ const BlogPostPage = () => {
         navigate("/blog");
       }, 2000);
     } catch (error) {
-      console.error("Error deleting post:", error);
+      logger.error("Error deleting post:", error);
       setToastMessage(t("blog.post.delete.error"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);

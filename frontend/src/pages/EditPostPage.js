@@ -35,7 +35,7 @@ const EditPostPage = () => {
           return;
         }
       } catch (error) {
-        console.error("Error decoding token:", error);
+        logger.error("Error decoding token:", error);
         localStorage.removeItem("token");
         navigate("/login");
         return;
@@ -80,7 +80,7 @@ const EditPostPage = () => {
 
         setPostData(post);
       } catch (error) {
-        console.error("Error loading post:", error);
+        logger.error("Error loading post:", error);
         setError(
           error.response?.data?.message ||
             error.message ||
@@ -118,7 +118,7 @@ const EditPostPage = () => {
         state: { successMessage },
       });
     } catch (error) {
-      console.error("EditPostPage - Error updating post:", error);
+      logger.error("EditPostPage - Error updating post:", error);
       const errorMessage =
         error.response?.data?.message ||
         error.message ||

@@ -21,6 +21,7 @@ import { FaBrain, FaExclamationTriangle } from "react-icons/fa";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import blogService from "../services/blogService";
+import logger from "../utils/logger";
 
 const ReportStatusChip = ({ status }) => {
   const { t } = useTranslation();
@@ -97,7 +98,7 @@ const AdminBlogReportsPage = ({ handleLogout }) => {
         const decoded = jwtDecode(token);
         setUser(decoded);
       } catch (error) {
-        console.error("Error decoding token:", error);
+        logger.error("Error decoding token:", error);
       }
     }
 
@@ -127,7 +128,7 @@ const AdminBlogReportsPage = ({ handleLogout }) => {
       setReports(allReports);
       setTotalPages(response.totalPages || 0);
     } catch (error) {
-      console.error("Error fetching reports:", error);
+      logger.error("Error fetching reports:", error);
       setError(t("blog.reports.error.fetchFailed"));
     } finally {
       setLoading(false);
@@ -157,7 +158,7 @@ const AdminBlogReportsPage = ({ handleLogout }) => {
       setAdminNotes("");
       fetchReports();
     } catch (error) {
-      console.error("Error reviewing report:", error);
+      logger.error("Error reviewing report:", error);
       setError(t("blog.reports.error.reviewFailed"));
     } finally {
       setLoading(false);

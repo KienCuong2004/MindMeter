@@ -2,6 +2,7 @@
 // Integrates OpenAI GPT for intelligent data analysis and insights
 
 import i18n from "../i18n";
+import logger from "../utils/logger";
 
 const AI_STATISTICS_CONFIG = {
   model: "gpt-4o-mini", // Cost-effective for analytics
@@ -122,7 +123,7 @@ Keep responses professional but accessible. Focus on student mental health impac
       };
     }
   } catch (error) {
-    console.error("AI Statistics Error:", error);
+    logger.error("AI Statistics Error:", error);
     return {
       success: false,
       error: error.message,
@@ -201,11 +202,11 @@ IMPORTANT:
       const result = JSON.parse(aiResponse.content);
       return result;
     } catch (parseError) {
-      console.error("JSON Parse Error:", parseError);
+      logger.error("JSON Parse Error:", parseError);
       return generateFallbackPredictions(historicalData);
     }
   } catch (error) {
-    console.error("Trend Prediction Error:", error);
+    logger.error("Trend Prediction Error:", error);
     return generateFallbackPredictions(historicalData);
   }
 };
@@ -263,11 +264,11 @@ Format as JSON array.
       const result = JSON.parse(aiResponse.content);
       return result;
     } catch (parseError) {
-      console.error("JSON Parse Error:", parseError);
+      logger.error("JSON Parse Error:", parseError);
       return generateFallbackRecommendations(currentStats);
     }
   } catch (error) {
-    console.error("Recommendations Error:", error);
+    logger.error("Recommendations Error:", error);
     return generateFallbackRecommendations(currentStats);
   }
 };
@@ -318,7 +319,7 @@ Tone: Professional, data-driven, action-oriented.
     const aiResponse = await response.json();
     return aiResponse.content;
   } catch (error) {
-    console.error("Executive Summary Error:", error);
+    logger.error("Executive Summary Error:", error);
     return generateFallbackSummary(fullData);
   }
 };

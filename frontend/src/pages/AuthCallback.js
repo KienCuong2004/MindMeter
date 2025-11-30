@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation, Trans } from "react-i18next";
+import logger from "../utils/logger";
 
 export default function AuthCallback() {
   const { t } = useTranslation();
@@ -52,7 +53,7 @@ export default function AuthCallback() {
           }
         }
       } catch (error) {
-        console.error("[AuthCallback] Error decoding token:", error);
+        logger.error("[AuthCallback] Error decoding token:", error);
       }
 
       // Redirect dựa trên role với delay nhỏ để đảm bảo localStorage được lưu

@@ -26,7 +26,7 @@ const CreatePostPage = () => {
         const decoded = jwtDecode(token);
         setUser(decoded);
       } catch (error) {
-        console.error("Error decoding token:", error);
+        logger.error("Error decoding token:", error);
         localStorage.removeItem("token");
         navigate("/login");
       }
@@ -56,7 +56,7 @@ const CreatePostPage = () => {
         state: { successMessage },
       });
     } catch (error) {
-      console.error("CreatePostPage - Error creating post:", error);
+      logger.error("CreatePostPage - Error creating post:", error);
       const errorMessage =
         error.response?.data?.message ||
         error.message ||

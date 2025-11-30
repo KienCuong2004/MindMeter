@@ -47,7 +47,7 @@ const BlogForm = ({
         );
         setAvailableTags(Array.isArray(tagsData) ? tagsData : []);
       } catch (error) {
-        console.error("Error loading categories and tags:", error);
+        logger.error("Error loading categories and tags:", error);
       } finally {
         setLoadingCategories(false);
         setLoadingTags(false);
@@ -239,7 +239,7 @@ const BlogForm = ({
     try {
       await onSubmit(submitData);
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
+      logger.error("Error in handleSubmit:", error);
       // Error is handled by parent component (CreatePostPage)
     }
   };

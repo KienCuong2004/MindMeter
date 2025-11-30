@@ -25,6 +25,7 @@ import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
 import { jwtDecode } from "jwt-decode";
 import { handleLogout } from "../utils/logoutUtils";
+import logger from "../utils/logger";
 
 const SavedArticlesPage = () => {
   const { t, i18n } = useTranslation();
@@ -90,7 +91,7 @@ const SavedArticlesPage = () => {
         }
         return false; // No user
       } catch (error) {
-        console.error("Error loading user:", error);
+        logger.error("Error loading user:", error);
         setUser(null);
         return false;
       }
@@ -133,7 +134,7 @@ const SavedArticlesPage = () => {
       setHasMore(!response.last);
       setTotalElements(response.totalElements || 0);
     } catch (error) {
-      console.error("Error loading bookmarks:", error);
+      logger.error("Error loading bookmarks:", error);
       setError(t("blog.savedArticles.loadError") || "Failed to load saved articles");
       if (error.response?.status === 401) {
         // User not authenticated
@@ -192,7 +193,7 @@ const SavedArticlesPage = () => {
       setSavedArticles(prev => prev.filter(article => article.id !== articleId));
       setTotalElements(prev => prev - 1);
     } catch (error) {
-      console.error("Error unsaving article:", error);
+      logger.error("Error unsaving article:", error);
       setError(t("blog.savedArticles.unsaveError") || "Failed to unsave article");
     }
   };
@@ -202,7 +203,7 @@ const SavedArticlesPage = () => {
       // Unbookmark all articles
       const promises = savedArticles.map(article => 
         blogService.toggleBookmark(article.id).catch(err => {
-          console.error(`Error unsaving article ${article.id}:`, err);
+          logger.error(`Error unsaving article ${article.id}:`, err);
           return null;
         })
       );
@@ -214,7 +215,7 @@ const SavedArticlesPage = () => {
       setTotalElements(0);
       setShowClearConfirm(false);
     } catch (error) {
-      console.error("Error clearing all bookmarks:", error);
+      logger.error("Error clearing all bookmarks:", error);
       setError(t("blog.savedArticles.clearError") || "Failed to clear all bookmarks");
     }
   };

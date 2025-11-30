@@ -219,7 +219,7 @@ export default function PricingPage() {
       // Navigate to payment method selection page
       navigate(`/payment-method?plan=${plan}`);
     } catch (err) {
-      console.error("Navigation error:", err);
+      logger.error("Navigation error:", err);
       setNotificationModal({
         isOpen: true,
         type: "error",
