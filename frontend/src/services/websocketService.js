@@ -1,6 +1,9 @@
 import SockJS from "sockjs-client";
-import { Stomp } from "@stomp/stompjs";
+import { Client } from "@stomp/stompjs";
 import logger from "../utils/logger";
+
+// Get API URL from environment or use default
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 class WebSocketService {
   constructor() {
@@ -13,19 +16,19 @@ class WebSocketService {
   }
 
   connect() {
-    if (this.connected) return;
+    if (this.connected || this.stompClient?.connected) return;
 
-    const socket = new SockJS("/ws");
-    this.stompClient = Stomp.over(socket);
-
-    // Disable debug logs in production
-    this.stompClient.debug = (str) => {
-      // Debug logging disabled
-    };
-
-    this.stompClient.connect(
-      {},
-      (frame) => {
+    // Sử dụng Client class thay vì Stomp.over()
+    // Sử dụng API_BASE_URL để kết nối đến backend
+    this.stompClient = new Client({
+      webSocketFactory: () => new SockJS(`${API_BASE_URL}/ws`),
+      reconnectDelay: this.reconnectDelay,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+      debug: (str) => {
+        // Debug logging disabled
+      },
+      onConnect: (frame) => {
         this.connected = true;
         this.reconnectAttempts = 0;
 
@@ -37,43 +40,65 @@ class WebSocketService {
         // Notify connection listeners
         this.onConnectionChange?.(true);
       },
-      (error) => {
+      onStompError: (frame) => {
+        logger.error("WebSocket STOMP error:", frame);
+        this.connected = false;
+        this.onConnectionChange?.(false);
+        this.handleReconnect();
+      },
+      onWebSocketClose: (event) => {
+        logger.warn("WebSocket closed:", event);
+        this.connected = false;
+        this.onConnectionChange?.(false);
+        if (!event.wasClean) {
+          this.handleReconnect();
+        }
+      },
+      onWebSocketError: (error) => {
         logger.error("WebSocket connection error:", error);
         this.connected = false;
         this.onConnectionChange?.(false);
         this.handleReconnect();
-      }
-    );
+      },
+    });
+
+    this.stompClient.activate();
   }
 
   disconnect() {
-    if (this.stompClient && this.connected) {
-      this.stompClient.disconnect(() => {
-        this.connected = false;
-        this.onConnectionChange?.(false);
-      });
+    if (this.stompClient) {
+      this.stompClient.deactivate();
+      this.connected = false;
+      this.onConnectionChange?.(false);
     }
   }
 
   subscribe(topic, callback) {
-    if (!this.connected) {
+    if (!this.connected || !this.stompClient?.connected) {
       // Store subscription for later when connected
       this.subscriptions.set(topic, callback);
-      return;
+      return null;
     }
 
-    const subscription = this.stompClient.subscribe(topic, (message) => {
-      try {
-        const data = JSON.parse(message.body);
-        callback(data);
-      } catch (error) {
-        logger.error("Error parsing WebSocket message:", error);
-      }
-    });
+    try {
+      const subscription = this.stompClient.subscribe(topic, (message) => {
+        try {
+          const data = JSON.parse(message.body);
+          callback(data);
+        } catch (error) {
+          logger.error("Error parsing WebSocket message:", error);
+        }
+      });
 
-    // Store subscription for reconnection
-    this.subscriptions.set(topic, callback);
-    return subscription;
+      // Store subscription for reconnection
+      this.subscriptions.set(topic, callback);
+      return subscription;
+    } catch (error) {
+      logger.error("Error subscribing to topic:", error);
+      // Store subscription for later retry
+      this.subscriptions.set(topic, callback);
+      return null;
+    }
   }
 
   unsubscribe(topic) {
@@ -83,8 +108,15 @@ class WebSocketService {
   }
 
   send(destination, message) {
-    if (this.connected && this.stompClient) {
-      this.stompClient.send(destination, {}, JSON.stringify(message));
+    if (this.connected && this.stompClient?.connected) {
+      try {
+        this.stompClient.publish({
+          destination: destination,
+          body: JSON.stringify(message),
+        });
+      } catch (error) {
+        logger.error("Error sending WebSocket message:", error);
+      }
     } else {
       logger.warn("WebSocket not connected. Cannot send message.");
     }
@@ -109,7 +141,7 @@ class WebSocketService {
   }
 
   isConnected() {
-    return this.connected;
+    return this.connected && this.stompClient?.connected;
   }
 }
 

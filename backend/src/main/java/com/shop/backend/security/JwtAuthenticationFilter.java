@@ -26,24 +26,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserDetailsService userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        // Skip JWT filter for WebSocket endpoints
+        String path = request.getRequestURI();
+        return path.startsWith("/ws/");
+    }
+
+    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
-        logger.info("[JwtAuthFilter] Incoming request: {} {}", request.getMethod(), request.getRequestURI());
         final String authHeader = request.getHeader("Authorization");
-        logger.info("[JwtAuthFilter] Authorization header: {}", authHeader);
-        
-        // Debug: Log tất cả headers
-        java.util.Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            String headerValue = request.getHeader(headerName);
-            logger.info("[JwtAuthFilter] Header {}: {}", headerName, headerValue);
-        }
         
         final String jwt;
         final String username;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logger.warn("[JwtAuthFilter] No Authorization header or not Bearer");
+            // Skip authentication if no JWT token (let Spring Security handle it)
             filterChain.doFilter(request, response);
             return;
         }
