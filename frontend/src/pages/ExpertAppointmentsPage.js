@@ -931,6 +931,30 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
                                   >
                                     {appointment.meetingLink}
                                   </a>
+                                  {/* Thông báo nếu link là fallback (link demo) */}
+                                  {appointment.meetingLink &&
+                                    (() => {
+                                      // Kiểm tra xem link có phải là link demo không
+                                      // Link thật từ Google Calendar thường có format khác hoặc có thêm params
+                                      // Link demo thường chỉ có format: https://meet.google.com/xxx-xxxx-xxx
+                                      const isDemoLink =
+                                        appointment.meetingLink.match(
+                                          /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}$/
+                                        );
+                                      return isDemoLink ? (
+                                        <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-xs text-yellow-700 dark:text-yellow-300">
+                                          <p className="font-semibold mb-1">
+                                            ⚠️ Link demo
+                                          </p>
+                                          <p>
+                                            Link này là link demo và không hoạt
+                                            động. Để có link Google Meet thật,
+                                            vui lòng setup Google Calendar API
+                                            trong backend.
+                                          </p>
+                                        </div>
+                                      ) : null;
+                                    })()}
                                 </div>
                               </div>
                             </div>

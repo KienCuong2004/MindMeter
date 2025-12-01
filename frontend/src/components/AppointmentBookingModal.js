@@ -29,7 +29,6 @@ const AppointmentBookingModal = ({
   const [error, setError] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdAppointment, setCreatedAppointment] = useState(null);
-  const [slotValidation, setSlotValidation] = useState({});
 
   // Lấy ngày hiện tại và 7 ngày tiếp theo
   const getAvailableDates = () => {
@@ -43,64 +42,78 @@ const AppointmentBookingModal = ({
     return dates;
   };
 
-  // Tạo thời gian slots dựa trên giờ làm việc cơ bản
-  const generateAvailableSlots = (date) => {
-    const slots = [];
-    const selectedDate = new Date(date);
-    const dayOfWeek = selectedDate.getDay(); // 0 = Chủ nhật, 1 = Thứ 2, ...
-
-    // Định nghĩa giờ làm việc cho từng ngày
-    let workingHours;
-    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-      // Ngày trong tuần: 9:00 - 17:00
-      workingHours = { start: 9, end: 17 };
-    } else if (dayOfWeek === 6) {
-      // Thứ 7: 9:00 - 12:00
-      workingHours = { start: 9, end: 12 };
-    } else if (dayOfWeek === 0) {
-      // Chủ nhật: 10:00 - 14:00
-      workingHours = { start: 10, end: 14 };
-    } else {
-      return slots; // Không có giờ làm việc
-    }
-
-    // Tạo slots theo giờ làm việc
-    if (workingHours) {
-      for (let hour = workingHours.start; hour < workingHours.end; hour++) {
-        // Tạo date object theo giờ địa phương
-        const slotTime = new Date(
-          selectedDate.getFullYear(),
-          selectedDate.getMonth(),
-          selectedDate.getDate(),
-          hour,
-          0,
-          0,
-          0
-        );
-
-        // Chỉ tạo slots cho tương lai (không phải quá khứ)
-        if (slotTime > new Date()) {
-          slots.push({
-            startTime: slotTime.toISOString(), // Vẫn dùng toISOString để backend parse được
-            durationMinutes: 60,
-            available: true,
-            displayTime: `${hour.toString().padStart(2, "0")}:00`,
-          });
-        }
-      }
-    }
-
-    return slots;
-  };
-
-  // Tìm slot trống khi chọn ngày
+  // Fetch available slots từ API khi chọn ngày
   useEffect(() => {
-    if (selectedDate) {
-      const slots = generateAvailableSlots(selectedDate);
-      setAvailableSlots(slots);
-      setError(""); // Clear any previous errors
+    if (selectedDate && expertId && selectedDuration) {
+      const fetchAvailableSlots = async () => {
+        try {
+          setLoading(true);
+          const response = await authFetch(
+            "/api/appointments/available-slots",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                expertId: expertId,
+                startDate: selectedDate,
+                endDate: selectedDate,
+                durationMinutes: selectedDuration,
+                consultationType: consultationType || "ONLINE",
+              }),
+            }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            // Format slots từ API để hiển thị
+            const formattedSlots =
+              data.availableSlots?.map((slot) => {
+                const slotDate = new Date(slot.startTime);
+                return {
+                  startTime: slot.startTime,
+                  durationMinutes: slot.durationMinutes || selectedDuration,
+                  isAvailable: slot.isAvailable !== false,
+                  displayTime: `${slotDate
+                    .getHours()
+                    .toString()
+                    .padStart(2, "0")}:${slotDate
+                    .getMinutes()
+                    .toString()
+                    .padStart(2, "0")}`,
+                };
+              }) || [];
+            setAvailableSlots(formattedSlots);
+            setError(""); // Clear any previous errors
+          } else {
+            const errorText = await response.text();
+            logger.error("Error fetching available slots:", {
+              status: response.status,
+              body: errorText,
+            });
+            setError(
+              t("errorFetchingSlots") || "Không thể tải danh sách giờ hẹn"
+            );
+            setAvailableSlots([]);
+          }
+        } catch (error) {
+          logger.error("Error fetching available slots:", error);
+          setError(
+            t("errorFetchingSlots") || "Không thể tải danh sách giờ hẹn"
+          );
+          setAvailableSlots([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchAvailableSlots();
+    } else {
+      setAvailableSlots([]);
     }
-  }, [selectedDate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, expertId, selectedDuration, consultationType]);
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
@@ -108,45 +121,9 @@ const AppointmentBookingModal = ({
   };
 
   const handleTimeSelect = (slot) => {
-    setSelectedTime(slot.startTime);
-    // Validate slot availability in real-time
-    validateSlotAvailability(slot.startTime);
-  };
-
-  // Validate slot availability
-  const validateSlotAvailability = async (slotTime) => {
-    try {
-      const response = await authFetch("/api/appointments/available-slots", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          expertId: expertId,
-          startDate: selectedDate,
-          endDate: selectedDate,
-          durationMinutes: selectedDuration,
-          consultationType: consultationType,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const isAvailable = data.availableSlots.some(
-          (slot) => slot.startTime === slotTime && slot.isAvailable
-        );
-
-        setSlotValidation((prev) => ({
-          ...prev,
-          [slotTime]: isAvailable ? "available" : "unavailable",
-        }));
-      }
-    } catch (error) {
-      logger.error("Error validating slot:", error);
-      setSlotValidation((prev) => ({
-        ...prev,
-        [slotTime]: "error",
-      }));
+    // Chỉ cho phép chọn slot khả dụng
+    if (slot.isAvailable !== false) {
+      setSelectedTime(slot.startTime);
     }
   };
 
@@ -160,18 +137,31 @@ const AppointmentBookingModal = ({
     setError("");
 
     try {
+      // Format appointmentDate để match với backend pattern: yyyy-MM-dd'T'HH:mm:ss
+      // Backend expect LocalDateTime format without timezone
+      let formattedAppointmentDate = selectedTime;
+      if (selectedTime) {
+        // Parse và format lại để đảm bảo format đúng (không có timezone, không có milliseconds)
+        const date = new Date(selectedTime);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        const seconds = String(date.getSeconds()).padStart(2, "0");
+        formattedAppointmentDate = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+      }
+
       // Tạo appointment payload theo định dạng backend mong đợi
-      // Backend cần appointmentDate là LocalDateTime (ISO string)
       const appointmentData = {
         expertId,
-        appointmentDate: selectedTime, // ISO string chứa cả ngày và giờ
+        appointmentDate: formattedAppointmentDate,
         durationMinutes: selectedDuration,
         consultationType,
         notes,
         meetingLocation:
           consultationType === "IN_PERSON" ? meetingLocation : "",
-        meetingLink:
-          consultationType === "ONLINE" ? meetingLink : "", // Có thể để trống để backend tự generate
+        meetingLink: consultationType === "ONLINE" ? meetingLink : "", // Có thể để trống để backend tự generate
         status: "PENDING",
       };
 
@@ -219,7 +209,6 @@ const AppointmentBookingModal = ({
       setLoading(false);
     }
   };
-
 
   const formatDate = (date) => {
     return date.toLocaleDateString("vi-VN", {
@@ -319,29 +308,31 @@ const AppointmentBookingModal = ({
                     {t("workingHours")}
                   </span>
                 </div>
-                {availableSlots.length > 0 ? (
+                {loading ? (
+                  <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    {t("loading") || "Đang tải..."}
+                  </div>
+                ) : availableSlots.length > 0 ? (
                   <div className="grid grid-cols-3 gap-2">
                     {availableSlots.map((slot, index) => {
-                      const validationStatus = slotValidation[slot.startTime];
-                      const isUnavailable = validationStatus === "unavailable";
-                      const isError = validationStatus === "error";
+                      const isUnavailable = slot.isAvailable === false;
 
                       return (
                         <button
                           key={index}
                           onClick={() => handleTimeSelect(slot)}
-                          disabled={isUnavailable || isError}
+                          disabled={isUnavailable}
                           className={`p-3 text-center rounded-lg border transition-colors ${
                             selectedTime === slot.startTime
                               ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                              : isUnavailable || isError
+                              : isUnavailable
                               ? "border-red-300 bg-red-50 dark:bg-red-900/20 opacity-50 cursor-not-allowed"
                               : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
                           }`}
                         >
                           <div
                             className={`font-medium ${
-                              isUnavailable || isError
+                              isUnavailable
                                 ? "text-red-600 dark:text-red-400"
                                 : "text-gray-900 dark:text-white"
                             }`}
@@ -350,14 +341,13 @@ const AppointmentBookingModal = ({
                           </div>
                           <div
                             className={`text-sm ${
-                              isUnavailable || isError
+                              isUnavailable
                                 ? "text-red-500 dark:text-red-400"
                                 : "text-gray-500 dark:text-gray-400"
                             }`}
                           >
                             {slot.durationMinutes} {t("minutes")}
                             {isUnavailable && " - " + t("unavailable")}
-                            {isError && " - " + t("error")}
                           </div>
                         </button>
                       );
@@ -366,8 +356,10 @@ const AppointmentBookingModal = ({
                 ) : (
                   <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                     {selectedDate
-                      ? t("noWorkingHoursToday")
-                      : t("selectDateToSeeWorkingHours")}
+                      ? t("noWorkingHoursToday") ||
+                        "Không có giờ làm việc trong ngày này"
+                      : t("selectDateToSeeWorkingHours") ||
+                        "Vui lòng chọn ngày để xem giờ làm việc"}
                   </div>
                 )}
               </div>
@@ -440,10 +432,14 @@ const AppointmentBookingModal = ({
                       value={meetingLink}
                       onChange={(e) => setMeetingLink(e.target.value)}
                       className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      placeholder={t("meetingLinkPlaceholder") || "Link Zoom/Google Meet (để trống để hệ thống tự tạo)"}
+                      placeholder={
+                        t("meetingLinkPlaceholder") ||
+                        "Link Zoom/Google Meet (để trống để hệ thống tự tạo)"
+                      }
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {t("meetingLinkHint") || "Nếu để trống, hệ thống sẽ tự động tạo link Google Meet khi chuyên gia xác nhận"}
+                      {t("meetingLinkHint") ||
+                        "Nếu để trống, hệ thống sẽ tự động tạo link Google Meet khi chuyên gia xác nhận"}
                     </p>
                   </div>
                 )}
@@ -555,21 +551,24 @@ const AppointmentBookingModal = ({
                           : t("inPersonConsultation")}
                       </span>
                     </div>
-                    {createdAppointment.consultationType === "ONLINE" && createdAppointment.meetingLink && (
-                      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">{t("meetingLink")}:</span>
-                          <a
-                            href={createdAppointment.meetingLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline break-all"
-                          >
-                            {createdAppointment.meetingLink}
-                          </a>
+                    {createdAppointment.consultationType === "ONLINE" &&
+                      createdAppointment.meetingLink && (
+                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {t("meetingLink")}:
+                            </span>
+                            <a
+                              href={createdAppointment.meetingLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline break-all"
+                            >
+                              {createdAppointment.meetingLink}
+                            </a>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 </div>
               )}

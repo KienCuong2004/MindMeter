@@ -137,7 +137,33 @@ public class AppointmentService {
         // Tạo meeting link nếu là tư vấn trực tuyến và chưa có link
         if (appointment.getConsultationType() == Appointment.ConsultationType.ONLINE 
             && (appointment.getMeetingLink() == null || appointment.getMeetingLink().trim().isEmpty())) {
-            appointment.setMeetingLink(meetingLinkService.generateMeetingLink());
+            try {
+                // Tạo Google Meet link thật qua Google Calendar API (non-blocking)
+                String summary = String.format("Tư vấn với %s", appointment.getStudent().getFirstName() + " " + appointment.getStudent().getLastName());
+                LocalDateTime startTime = appointment.getAppointmentDate();
+                LocalDateTime endTime = startTime.plusMinutes(appointment.getDurationMinutes());
+                String description = appointment.getNotes() != null ? appointment.getNotes() : "Cuộc tư vấn tâm lý";
+                
+                String meetLink = meetingLinkService.generateGoogleMeetLink(
+                    summary,
+                    startTime,
+                    endTime,
+                    "Asia/Ho_Chi_Minh",
+                    description
+                );
+                
+                // Nếu Google Calendar API trả về null (chưa authenticate hoặc lỗi), dùng fallback
+                if (meetLink == null || meetLink.isEmpty()) {
+                    log.warn("Google Calendar API không khả dụng, sử dụng link demo. Vui lòng setup Google Calendar API để có link thật.");
+                    meetLink = meetingLinkService.generateGoogleMeetLink(); // Fallback to fake link
+                }
+                
+                appointment.setMeetingLink(meetLink);
+            } catch (Exception e) {
+                // Nếu có lỗi, dùng fallback link để không block request
+                log.warn("Error generating Google Meet link, using fallback: {}", e.getMessage());
+                appointment.setMeetingLink(meetingLinkService.generateGoogleMeetLink());
+            }
         }
         
         Appointment savedAppointment = appointmentRepository.save(appointment);
@@ -261,7 +287,11 @@ public class AppointmentService {
                     }
                     
                     // Chuyển sang slot tiếp theo (có tính thời gian nghỉ)
-                    currentTime = currentTime.plusMinutes(request.getDurationMinutes() + expertSchedule.getBreakDurationMinutes());
+                    // Xử lý trường hợp breakDurationMinutes null (dùng giá trị mặc định 15 phút)
+                    int breakDuration = expertSchedule.getBreakDurationMinutes() != null 
+                        ? expertSchedule.getBreakDurationMinutes() 
+                        : 15;
+                    currentTime = currentTime.plusMinutes(request.getDurationMinutes() + breakDuration);
                 }
             }
             

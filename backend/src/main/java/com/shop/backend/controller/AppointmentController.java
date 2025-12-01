@@ -78,13 +78,31 @@ public class AppointmentController {
      * Tìm slot trống cho lịch hẹn
      */
     @PostMapping("/available-slots")
-    public ResponseEntity<AvailableSlotResponse> findAvailableSlots(@RequestBody AvailableSlotRequest request) {
+    public ResponseEntity<?> findAvailableSlots(@RequestBody AvailableSlotRequest request) {
         try {
+            // Validate request
+            if (request == null) {
+                log.error("Request body is null");
+                return ResponseEntity.badRequest().body("Request body is required");
+            }
+            if (request.getExpertId() == null) {
+                log.error("Expert ID is null");
+                return ResponseEntity.badRequest().body("Expert ID is required");
+            }
+            if (request.getStartDate() == null || request.getEndDate() == null) {
+                log.error("Start date or end date is null. StartDate: {}, EndDate: {}", 
+                    request.getStartDate(), request.getEndDate());
+                return ResponseEntity.badRequest().body("Start date and end date are required");
+            }
+            
             AvailableSlotResponse response = appointmentService.findAvailableSlots(request);
             return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            log.error("Lỗi khi tìm slot trống: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         } catch (Exception e) {
-            log.error("Lỗi khi tìm slot trống: ", e);
-            return ResponseEntity.badRequest().build();
+            log.error("Lỗi không mong đợi khi tìm slot trống: ", e);
+            return ResponseEntity.badRequest().body("Unexpected error: " + e.getMessage());
         }
     }
     

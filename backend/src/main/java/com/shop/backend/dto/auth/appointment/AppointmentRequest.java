@@ -15,7 +15,7 @@ public class AppointmentRequest {
     
     private Long expertId;
     
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime appointmentDate;
     
     private Integer durationMinutes = 60;
