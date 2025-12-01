@@ -236,7 +236,8 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const locale = t("_lang", { defaultValue: "en-GB" }) || "en-GB";
+    // Sử dụng locale tiếng Việt
+    const locale = i18n.language === "vi" ? "vi-VN" : "en-GB";
     return date.toLocaleDateString(locale, {
       weekday: "long",
       year: "numeric",
@@ -786,7 +787,32 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
                       >
                         <div className="flex items-center justify-between mb-6">
                           <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 rounded-full flex items-center justify-center shadow-md">
+                            {appointment.studentAvatarUrl ? (
+                              <img
+                                src={
+                                  appointment.studentAvatarUrl.startsWith(
+                                    "http"
+                                  )
+                                    ? appointment.studentAvatarUrl
+                                    : `${window.location.origin}${appointment.studentAvatarUrl}`
+                                }
+                                alt={appointment.studentName || t("student")}
+                                className="w-12 h-12 rounded-full object-cover shadow-md border-2 border-indigo-200 dark:border-indigo-700"
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                  const fallback =
+                                    e.target.parentElement.querySelector(
+                                      ".avatar-fallback"
+                                    );
+                                  if (fallback) fallback.style.display = "flex";
+                                }}
+                              />
+                            ) : null}
+                            <div
+                              className={`w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 rounded-full items-center justify-center shadow-md avatar-fallback ${
+                                appointment.studentAvatarUrl ? "hidden" : "flex"
+                              }`}
+                            >
                               <FaUser className="text-indigo-600 dark:text-indigo-300 text-lg" />
                             </div>
                             <div>
@@ -874,6 +900,42 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
                           </div>
                         )}
 
+                        {appointment.consultationType === "ONLINE" &&
+                          appointment.meetingLink && (
+                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-4 border border-green-200 dark:border-green-700 mb-6">
+                              <div className="flex items-start space-x-3">
+                                <div className="w-6 h-6 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <svg
+                                    className="w-3 h-3 text-green-600 dark:text-green-300"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                    />
+                                  </svg>
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-xs text-green-600 dark:text-green-400 font-semibold uppercase tracking-wide mb-1">
+                                    {t("meetingLink") || "Link Google Meet"}
+                                  </p>
+                                  <a
+                                    href={appointment.meetingLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-green-700 dark:text-green-300 hover:text-green-800 dark:hover:text-green-200 underline break-all"
+                                  >
+                                    {appointment.meetingLink}
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                         {/* Appointment Actions */}
                         <div className="mt-6 flex flex-wrap gap-3">
                           {appointment.status === "PENDING" && (
@@ -882,7 +944,10 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
                                 onClick={() =>
                                   handleConfirmAppointment(appointment.id)
                                 }
-                                disabled={confirmingAppointmentId === appointment.id || cancellingAppointmentId === appointment.id}
+                                disabled={
+                                  confirmingAppointmentId === appointment.id ||
+                                  cancellingAppointmentId === appointment.id
+                                }
                                 className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold rounded-lg hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
                               >
                                 {confirmingAppointmentId === appointment.id ? (
@@ -913,7 +978,10 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
                                 onClick={() =>
                                   handleCancelAppointment(appointment.id)
                                 }
-                                disabled={confirmingAppointmentId === appointment.id || cancellingAppointmentId === appointment.id}
+                                disabled={
+                                  confirmingAppointmentId === appointment.id ||
+                                  cancellingAppointmentId === appointment.id
+                                }
                                 className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-semibold rounded-lg hover:from-red-600 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
                               >
                                 {cancellingAppointmentId === appointment.id ? (
@@ -947,7 +1015,9 @@ export default function ExpertAppointmentsPage({ handleLogout }) {
                               onClick={() =>
                                 handleCancelAppointment(appointment.id)
                               }
-                              disabled={cancellingAppointmentId === appointment.id}
+                              disabled={
+                                cancellingAppointmentId === appointment.id
+                              }
                               className="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-semibold rounded-lg hover:from-red-600 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
                             >
                               {cancellingAppointmentId === appointment.id ? (

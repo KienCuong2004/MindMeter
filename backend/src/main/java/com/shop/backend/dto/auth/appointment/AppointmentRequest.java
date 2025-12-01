@@ -22,4 +22,5 @@ public class AppointmentRequest {
     private Appointment.ConsultationType consultationType = Appointment.ConsultationType.ONLINE;
     private String notes;
     private String meetingLocation;
+    private String meetingLink; // Link Zoom/Google Meet cho tư vấn trực tuyến
 }

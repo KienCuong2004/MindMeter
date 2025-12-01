@@ -67,4 +67,26 @@ public class NotificationService {
 
         messagingTemplate.convertAndSend("/topic/system", notification);
     }
+
+    /**
+     * Gửi cập nhật appointment qua WebSocket cho học sinh và chuyên gia
+     */
+    public void sendAppointmentUpdate(com.shop.backend.dto.auth.appointment.AppointmentResponse appointment) {
+        // Gửi cho tất cả clients đang lắng nghe
+        messagingTemplate.convertAndSend("/topic/appointment-updates", appointment);
+        
+        // Gửi riêng cho học sinh
+        messagingTemplate.convertAndSendToUser(
+            appointment.getStudentId().toString(),
+            "/queue/appointment-updates",
+            appointment
+        );
+        
+        // Gửi riêng cho chuyên gia
+        messagingTemplate.convertAndSendToUser(
+            appointment.getExpertId().toString(),
+            "/queue/appointment-updates",
+            appointment
+        );
+    }
 }

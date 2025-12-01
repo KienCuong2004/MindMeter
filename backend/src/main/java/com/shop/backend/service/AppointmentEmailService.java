@@ -484,6 +484,13 @@ public class AppointmentEmailService {
         String appointmentDateTime = formatDateTime(appointment);
         String consultationType = getConsultationTypeText(appointment.getConsultationType());
         String duration = appointment.getDurationMinutes() + " phút";
+        String meetingInfo = "";
+        
+        if (appointment.getConsultationType() == Appointment.ConsultationType.ONLINE && appointment.getMeetingLink() != null) {
+            meetingInfo = "<p style='margin:8px 0;color:#475569;'><strong>Link meeting:</strong> <a href='" + appointment.getMeetingLink() + "' style='color:#2563eb;'>" + appointment.getMeetingLink() + "</a></p>";
+        } else if (appointment.getConsultationType() == Appointment.ConsultationType.IN_PERSON && appointment.getMeetingLocation() != null) {
+            meetingInfo = "<p style='margin:8px 0;color:#475569;'><strong>Địa điểm:</strong> " + escapeHtml(appointment.getMeetingLocation()) + "</p>";
+        }
         
         return String.format("""
             <div style='max-width:600px;margin:40px auto;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.1);padding:32px;font-family:Segoe UI,Roboto,Arial,sans-serif;'>
@@ -524,6 +531,8 @@ public class AppointmentEmailService {
                     <span style='color:#1e293b;font-weight:600;'>%s</span>
                   </div>
                 </div>
+                
+                %s
               </div>
               
               <div style='background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin:16px 0;'>
@@ -551,7 +560,7 @@ public class AppointmentEmailService {
             </div>
             """, 
             expertName, studentName, studentName, appointment.getStudent().getEmail(), 
-            appointmentDateTime, duration, consultationType, frontendUrl
+            appointmentDateTime, duration, consultationType, meetingInfo, frontendUrl
         );
     }
     

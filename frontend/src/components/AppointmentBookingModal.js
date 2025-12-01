@@ -23,6 +23,7 @@ const AppointmentBookingModal = ({
   const [consultationType, setConsultationType] = useState("ONLINE");
   const [notes, setNotes] = useState("");
   const [meetingLocation, setMeetingLocation] = useState("");
+  const [meetingLink, setMeetingLink] = useState("");
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -169,6 +170,8 @@ const AppointmentBookingModal = ({
         notes,
         meetingLocation:
           consultationType === "IN_PERSON" ? meetingLocation : "",
+        meetingLink:
+          consultationType === "ONLINE" ? meetingLink : "", // Có thể để trống để backend tự generate
         status: "PENDING",
       };
 
@@ -426,6 +429,25 @@ const AppointmentBookingModal = ({
                   />
                 </div>
 
+                {/* Link meeting (nếu tư vấn trực tuyến) */}
+                {consultationType === "ONLINE" && (
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t("meetingLink")} ({t("optional")})
+                    </label>
+                    <input
+                      type="text"
+                      value={meetingLink}
+                      onChange={(e) => setMeetingLink(e.target.value)}
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      placeholder={t("meetingLinkPlaceholder") || "Link Zoom/Google Meet (để trống để hệ thống tự tạo)"}
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {t("meetingLinkHint") || "Nếu để trống, hệ thống sẽ tự động tạo link Google Meet khi chuyên gia xác nhận"}
+                    </p>
+                  </div>
+                )}
+
                 {/* Địa điểm (nếu tư vấn trực tiếp) */}
                 {consultationType === "IN_PERSON" && (
                   <div className="space-y-2">
@@ -533,6 +555,21 @@ const AppointmentBookingModal = ({
                           : t("inPersonConsultation")}
                       </span>
                     </div>
+                    {createdAppointment.consultationType === "ONLINE" && createdAppointment.meetingLink && (
+                      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{t("meetingLink")}:</span>
+                          <a
+                            href={createdAppointment.meetingLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline break-all"
+                          >
+                            {createdAppointment.meetingLink}
+                          </a>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -564,6 +601,7 @@ const AppointmentBookingModal = ({
                     setConsultationType("ONLINE");
                     setNotes("");
                     setMeetingLocation("");
+                    setMeetingLink("");
 
                     // Gọi callback khi user ấn "Đặt lịch khác"
                     if (onAppointmentCreated) {

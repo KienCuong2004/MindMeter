@@ -37,6 +37,8 @@ public class AppointmentService {
     private final UserRepository userRepository;
     private final AppointmentEmailService appointmentEmailService;
     private final AppointmentHistoryRepository appointmentHistoryRepository;
+    private final MeetingLinkService meetingLinkService;
+    private final com.shop.backend.service.NotificationService notificationService;
     
     /**
      * Tạo lịch hẹn mới
@@ -81,6 +83,14 @@ public class AppointmentService {
         appointment.setConsultationType(request.getConsultationType());
         appointment.setNotes(request.getNotes());
         appointment.setMeetingLocation(request.getMeetingLocation());
+        
+        // Lưu meeting link nếu được cung cấp từ frontend (không tự động tạo khi đặt lịch)
+        // Link sẽ được tự động tạo khi chuyên gia xác nhận
+        if (request.getConsultationType() == Appointment.ConsultationType.ONLINE 
+            && request.getMeetingLink() != null && !request.getMeetingLink().trim().isEmpty()) {
+            appointment.setMeetingLink(request.getMeetingLink());
+        }
+        
         appointment.setStatus(Appointment.AppointmentStatus.PENDING);
         
         Appointment savedAppointment = appointmentRepository.save(appointment);
@@ -123,6 +133,13 @@ public class AppointmentService {
         
         Appointment.AppointmentStatus oldStatus = appointment.getStatus();
         appointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
+        
+        // Tạo meeting link nếu là tư vấn trực tuyến và chưa có link
+        if (appointment.getConsultationType() == Appointment.ConsultationType.ONLINE 
+            && (appointment.getMeetingLink() == null || appointment.getMeetingLink().trim().isEmpty())) {
+            appointment.setMeetingLink(meetingLinkService.generateMeetingLink());
+        }
+        
         Appointment savedAppointment = appointmentRepository.save(appointment);
         
         // Ghi log lịch sử xác nhận lịch hẹn
@@ -144,7 +161,17 @@ public class AppointmentService {
             // Không throw exception để không ảnh hưởng đến việc xác nhận appointment
         }
         
-        return convertToResponse(savedAppointment);
+        AppointmentResponse response = convertToResponse(savedAppointment);
+        
+        // Gửi cập nhật qua WebSocket để cập nhật real-time
+        try {
+            notificationService.sendAppointmentUpdate(response);
+        } catch (Exception e) {
+            log.error("Lỗi khi gửi WebSocket update cho appointment: {}", e.getMessage(), e);
+            // Không throw exception để không ảnh hưởng đến việc xác nhận appointment
+        }
+        
+        return response;
     }
     
     /**
@@ -353,6 +380,7 @@ public class AppointmentService {
         response.setStudentId(appointment.getStudent().getId());
         response.setStudentName(appointment.getStudent().getFirstName() + " " + appointment.getStudent().getLastName());
         response.setStudentEmail(appointment.getStudent().getEmail());
+        response.setStudentAvatarUrl(appointment.getStudent().getAvatarUrl());
         response.setExpertId(appointment.getExpert().getId());
         response.setExpertName(appointment.getExpert().getFirstName() + " " + appointment.getExpert().getLastName());
         response.setExpertEmail(appointment.getExpert().getEmail());

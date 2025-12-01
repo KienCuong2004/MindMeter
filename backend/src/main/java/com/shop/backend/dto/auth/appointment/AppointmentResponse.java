@@ -16,6 +16,7 @@ public class AppointmentResponse {
     private Long studentId;
     private String studentName;
     private String studentEmail;
+    private String studentAvatarUrl;
     private Long expertId;
     private String expertName;
     private String expertEmail;
