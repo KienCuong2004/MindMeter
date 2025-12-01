@@ -231,6 +231,22 @@ vnpay:
 # OpenAI API Configuration
 OPENAI_API_KEY: sk-proj-your_openai_api_key_here
 
+# Google Calendar API Configuration
+# To enable Google Calendar API for creating real Google Meet links:
+# 1. Go to https://console.cloud.google.com/
+# 2. Create a new project or select existing one
+# 3. Enable Google Calendar API
+# 4. Create OAuth 2.0 credentials (Desktop app or Web application)
+# 5. Download credentials.json and place it in src/main/resources/
+# 6. Set google.calendar.enabled=true
+# 7. On first run, the app will open browser for OAuth consent
+google:
+  calendar:
+    enabled: false  # Set to true to enable Google Calendar API integration
+    service-account:
+      enabled: false  # Set to true if using Service Account instead of OAuth
+      email: your-service-account@project-id.iam.gserviceaccount.com
+
 # Cache Configuration
 cache:
   enabled: true
