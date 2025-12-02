@@ -7,6 +7,7 @@ import {
   FaEdit,
   FaTrash,
   FaEllipsisV,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import blogService from "../services/blogService";
 import { formatDistanceToNow } from "date-fns";
@@ -297,37 +298,39 @@ const CommentSection = ({
                   </div>
                 </div>
 
-                {/* Menu button for comment author or admin */}
-                {canDeleteComment && canDeleteComment(comment) && (
-                  <div className="relative" ref={menuRef}>
-                    <button
-                      onClick={() => setShowMenu(!showMenu)}
-                      className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                    >
-                      <FaEllipsisV className="text-gray-400 text-xs" />
-                    </button>
+                {/* Menu button for comment author or admin - Hidden for flagged comments */}
+                {!comment.isFlagged &&
+                  canDeleteComment &&
+                  canDeleteComment(comment) && (
+                    <div className="relative" ref={menuRef}>
+                      <button
+                        onClick={() => setShowMenu(!showMenu)}
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                      >
+                        <FaEllipsisV className="text-gray-400 text-xs" />
+                      </button>
 
-                    {/* Dropdown Menu */}
-                    {showMenu && (
-                      <div className="absolute right-0 top-8 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10 min-w-[120px]">
-                        <button
-                          onClick={handleEdit}
-                          className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center space-x-2"
-                        >
-                          <FaEdit className="text-xs" />
-                          <span>{t("blog.comment.edit")}</span>
-                        </button>
-                        <button
-                          onClick={handleDelete}
-                          className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center space-x-2"
-                        >
-                          <FaTrash className="text-xs" />
-                          <span>{t("blog.comment.delete")}</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      {/* Dropdown Menu */}
+                      {showMenu && (
+                        <div className="absolute right-0 top-8 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-10 min-w-[120px]">
+                          <button
+                            onClick={handleEdit}
+                            className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center space-x-2"
+                          >
+                            <FaEdit className="text-xs" />
+                            <span>{t("blog.comment.edit")}</span>
+                          </button>
+                          <button
+                            onClick={handleDelete}
+                            className="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center space-x-2"
+                          >
+                            <FaTrash className="text-xs" />
+                            <span>{t("blog.comment.delete")}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
 
               {isEditing ? (
@@ -356,35 +359,51 @@ const CommentSection = ({
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-3">
-                  {comment.content}
-                </p>
+                <div className="mb-3">
+                  {comment.isFlagged ? (
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
+                      <div className="flex items-start space-x-2">
+                        <FaExclamationTriangle className="text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                        <p className="text-yellow-800 dark:text-yellow-200 text-sm leading-relaxed">
+                          {t(comment.content, comment.content)}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                      {comment.content}
+                    </p>
+                  )}
+                </div>
               )}
 
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={handleLike}
-                  disabled={isLoading}
-                  className={`flex items-center space-x-1 text-xs transition-colors ${
-                    isLiked
-                      ? "text-red-500"
-                      : "text-gray-500 hover:text-red-500"
-                  }`}
-                >
-                  <FaHeart className={isLiked ? "fill-current" : ""} />
-                  <span>{likeCount}</span>
-                </button>
-
-                {level === 0 && (
+              {/* Like and Reply buttons - Hidden for flagged comments */}
+              {!comment.isFlagged && (
+                <div className="flex items-center space-x-4">
                   <button
-                    onClick={() => handleReply(comment.id)}
-                    className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-500 transition-colors"
+                    onClick={handleLike}
+                    disabled={isLoading}
+                    className={`flex items-center space-x-1 text-xs transition-colors ${
+                      isLiked
+                        ? "text-red-500"
+                        : "text-gray-500 hover:text-red-500"
+                    }`}
                   >
-                    <FaReply />
-                    <span>{t("blog.comment.reply")}</span>
+                    <FaHeart className={isLiked ? "fill-current" : ""} />
+                    <span>{likeCount}</span>
                   </button>
-                )}
-              </div>
+
+                  {level === 0 && (
+                    <button
+                      onClick={() => handleReply(comment.id)}
+                      className="flex items-center space-x-1 text-xs text-gray-500 hover:text-blue-500 transition-colors"
+                    >
+                      <FaReply />
+                      <span>{t("blog.comment.reply")}</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

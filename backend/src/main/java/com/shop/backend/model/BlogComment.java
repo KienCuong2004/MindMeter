@@ -43,6 +43,15 @@ public class BlogComment {
     @Column(name = "like_count")
     private Integer likeCount = 0;
     
+    @Column(name = "is_flagged", nullable = false)
+    private Boolean isFlagged = false;
+    
+    @Column(name = "violation_type", length = 50)
+    private String violationType; // PROFANITY, RACISM, MULTIPLE
+    
+    @Column(name = "violation_reason", columnDefinition = "TEXT")
+    private String violationReason;
+    
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

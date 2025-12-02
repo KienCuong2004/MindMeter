@@ -197,10 +197,10 @@ CREATE TABLE system_announcements (
 INSERT INTO users (email, password, first_name, last_name, phone, avatar_url, role, status, anonymous, plan, plan_start_date, plan_expiry_date) VALUES
 -- Admin (PRO plan - gói vĩnh viễn)
 ('nguyenthidung21022003@gmail.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Nguyễn Thị', 'Dung', '0396225584', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'ADMIN', 'ACTIVE', false, 'PRO', NULL, NULL),
-('trankiencuong30072003@gmail.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Trần Kiên', 'Cường', '0369702376', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'ADMIN', 'ACTIVE', false, 'PRO', NULL, NULL),
+('trankiencuong30072003@gmail.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Trần Kiên', 'Cường', '0369702376', 'https://lh3.googleusercontent.com/a/ACg8ocK4kXzbTg9EYtNKV9tF9kU6YEnVnM_vluWuSdyM5vwQaR-DiD3M=s96-c', 'ADMIN', 'ACTIVE', false, 'PRO', NULL, NULL),
 
 -- Experts (Chuyên gia tâm lý) - FREE plan không có thời hạn
-('cuongcodehub@gmail.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Trần Kiên', 'Cường', '0369702376', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'EXPERT', 'ACTIVE', false, 'FREE', NULL, NULL),
+('cuongcodehub@gmail.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Trần Kiên', 'Cường', '0369702376', '/uploads/avatars/2ee9a6fa-0dc6-4938-9912-5761e7649f50.jpg', 'EXPERT', 'ACTIVE', false, 'FREE', NULL, NULL),
 ('expert2@mindmeter.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Trần Văn', 'Hùng', '0987654323', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'EXPERT', 'ACTIVE', false, 'FREE', NULL, NULL),
 ('expert3@mindmeter.com', '$2a$10$oMvmyp3yQ2Yz3nOHdd/ymOGbWXOgf5Cq.qWUUJ9ahvpW/xaBvpxOW', 'Lê Thị', 'Thu Hà', '0987654324', 'https://www.svgrepo.com/show/384674/account-avatar-profile-user-11.svg', 'EXPERT', 'ACTIVE', false, 'FREE', NULL, NULL),
 
@@ -3815,6 +3815,9 @@ CREATE TABLE blog_comments (
     content TEXT NOT NULL,
     status ENUM('pending', 'approved', 'rejected', 'spam') DEFAULT 'pending',
     like_count INT DEFAULT 0,
+    is_flagged BOOLEAN DEFAULT FALSE,
+    violation_type VARCHAR(50) NULL,
+    violation_reason TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE,
@@ -3823,7 +3826,8 @@ CREATE TABLE blog_comments (
     INDEX idx_post (post_id),
     INDEX idx_user (user_id),
     INDEX idx_parent (parent_id),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    INDEX idx_flagged (is_flagged)
 );
 
 -- Blog comment likes table

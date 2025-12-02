@@ -1940,6 +1940,12 @@
       "edit": "Chỉnh sửa",
       "delete": "Xóa",
       "edited": "Đã chỉnh sửa",
+      "flagged": {
+        "profanity": "Bình luận chứa từ nhạy cảm",
+        "racism": "Bình luận chứa từ phân biệt chủng tộc",
+        "multiple": "Bình luận vi phạm nhiều quy tắc cộng đồng",
+        "default": "Bình luận chứa nội dung không phù hợp"
+      },
       "empty": {
         "title": "Chưa có bình luận nào",
         "description": "Hãy là người đầu tiên chia sẻ suy nghĩ của bạn về bài viết này."

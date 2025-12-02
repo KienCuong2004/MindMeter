@@ -1941,6 +1941,12 @@
       "edit": "Edit",
       "delete": "Delete",
       "edited": "Edited",
+      "flagged": {
+        "profanity": "Comment contains sensitive words",
+        "racism": "Comment contains racist language",
+        "multiple": "Comment violates multiple community rules",
+        "default": "Comment contains inappropriate content"
+      },
       "empty": {
         "title": "No comments yet",
         "description": "Be the first to share your thoughts on this post."

@@ -31,4 +31,9 @@ public class BlogCommentDTO {
     
     // User interaction flags
     private Boolean isLiked;
+    
+    // Content moderation flags
+    private Boolean isFlagged;
+    private String violationType;
+    private String violationReason;
 }

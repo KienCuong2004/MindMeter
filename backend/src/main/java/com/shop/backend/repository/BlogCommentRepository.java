@@ -47,4 +47,16 @@ public interface BlogCommentRepository extends JpaRepository<BlogComment, Long> 
     // Native query to bypass JPA cache completely
     @Query(value = "SELECT SQL_NO_CACHE * FROM blog_comments WHERE post_id = :postId AND status = :status ORDER BY updated_at DESC, created_at DESC LIMIT :limit OFFSET :offset", nativeQuery = true)
     List<BlogComment> findCommentsByPostIdNative(@Param("postId") Long postId, @Param("status") String status, @Param("limit") int limit, @Param("offset") int offset);
+    
+    // Find flagged comments (pending status with isFlagged = true)
+    Page<BlogComment> findByPostIdAndStatusAndIsFlagged(Long postId, BlogComment.CommentStatus status, Boolean isFlagged, Pageable pageable);
+    
+    // Find comments by post: approved OR (pending AND isFlagged = true)
+    @Query("SELECT c FROM BlogComment c WHERE c.post.id = :postId AND (c.status = :approvedStatus OR (c.status = :pendingStatus AND c.isFlagged = true)) ORDER BY c.updatedAt DESC, c.createdAt DESC")
+    Page<BlogComment> findByPostIdWithApprovedOrFlagged(
+        @Param("postId") Long postId,
+        @Param("approvedStatus") BlogComment.CommentStatus approvedStatus,
+        @Param("pendingStatus") BlogComment.CommentStatus pendingStatus,
+        Pageable pageable
+    );
 }

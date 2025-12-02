@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 public class BlogService {
@@ -44,6 +46,12 @@ public class BlogService {
     
     @Autowired
     private BlogCommentRepository blogCommentRepository;
+    
+    @Autowired
+    private ContentModerationService contentModerationService;
+    
+    @Autowired
+    private NotificationService notificationService;
     
     @PersistenceContext
     private EntityManager entityManager;
@@ -557,11 +565,36 @@ public class BlogService {
         User user = userRepository.findByEmail(userEmail)
             .orElseThrow(() -> new RuntimeException("User not found"));
         
+        // Kiểm tra nội dung comment
+        log.info("BlogService: Checking content moderation for comment: '{}'", request.getContent());
+        ContentModerationService.ModerationResult moderationResult = 
+            contentModerationService.checkContent(request.getContent());
+        
+        log.info("BlogService: Moderation result - Flagged: {}, Type: {}, Reason: {}", 
+            moderationResult.isFlagged(), 
+            moderationResult.getViolationType(), 
+            moderationResult.getReason());
+        
         BlogComment comment = new BlogComment();
         comment.setPost(post);
         comment.setUser(user);
         comment.setContent(request.getContent());
-        comment.setStatus(BlogComment.CommentStatus.approved); // Set status to approved
+        
+        // Nếu comment vi phạm, đánh dấu và đặt status là pending để admin review
+        if (moderationResult.isFlagged()) {
+            log.warn("BlogService: Comment flagged! Setting status to pending. Content: '{}'", request.getContent());
+            comment.setIsFlagged(true);
+            comment.setViolationType(moderationResult.getViolationType().name());
+            comment.setViolationReason(moderationResult.getReason());
+            comment.setStatus(BlogComment.CommentStatus.pending); // Chờ admin duyệt
+            
+            // Gửi thông báo cho user về vi phạm
+            sendCommentViolationNotification(user.getId(), moderationResult);
+        } else {
+            log.info("BlogService: Comment approved. Content: '{}'", request.getContent());
+            comment.setIsFlagged(false);
+            comment.setStatus(BlogComment.CommentStatus.approved); // Tự động approve
+        }
         
         if (request.getParentId() != null) {
             BlogComment parent = blogCommentRepository.findById(request.getParentId())
@@ -589,18 +622,29 @@ public class BlogService {
         return convertCommentToDTO(comment);
     }
     
+    /**
+     * Gửi thông báo cho user khi comment bị đánh dấu vi phạm
+     */
+    private void sendCommentViolationNotification(Long userId, ContentModerationService.ModerationResult result) {
+        String title = "Cảnh báo: Comment của bạn đã bị đánh dấu vi phạm";
+        String message = String.format(
+            "Comment của bạn đã bị hệ thống phát hiện vi phạm quy tắc cộng đồng. " +
+            "Lý do: %s. Comment đang được xem xét bởi quản trị viên.",
+            result.getReason()
+        );
+        
+        notificationService.sendCommentViolationNotification(userId, title, message, result.getViolationType().name());
+    }
+    
     public Page<BlogCommentDTO> getComments(Long postId, Pageable pageable) {
-        // Use native query to bypass JPA cache completely
-        int pageNumber = pageable.getPageNumber();
-        int pageSize = pageable.getPageSize();
-        int offset = pageNumber * pageSize;
-        
-        List<BlogComment> commentList = blogCommentRepository.findCommentsByPostIdNative(
-            postId, "approved", pageSize, offset);
-        
-        // Create a simple Page object
-        Page<BlogComment> comments = new org.springframework.data.domain.PageImpl<>(
-            commentList, pageable, commentList.size());
+        // Get both approved comments and flagged (pending) comments
+        // Query gets: approved OR (pending AND isFlagged = true)
+        Page<BlogComment> comments = blogCommentRepository.findByPostIdWithApprovedOrFlagged(
+            postId,
+            BlogComment.CommentStatus.approved,
+            BlogComment.CommentStatus.pending,
+            pageable
+        );
         
         return comments.map(this::convertCommentToDTO);
     }
@@ -1100,11 +1144,43 @@ public class BlogService {
         dto.setUserAvatar(comment.getUser().getAvatarUrl());
         dto.setUserEmail(comment.getUser().getEmail());
         dto.setParentId(comment.getParent() != null ? comment.getParent().getId() : null);
-        dto.setContent(comment.getContent());
+        
+        // Content moderation information
+        boolean isFlagged = comment.getIsFlagged() != null ? comment.getIsFlagged() : false;
+        dto.setIsFlagged(isFlagged);
+        dto.setViolationType(comment.getViolationType());
+        dto.setViolationReason(comment.getViolationReason());
+        
+        // Nếu comment bị flagged, thay thế nội dung bằng translation key
+        if (isFlagged) {
+            String translationKey = "";
+            if (comment.getViolationType() != null) {
+                switch (comment.getViolationType()) {
+                    case "PROFANITY":
+                        translationKey = "blog.comment.flagged.profanity";
+                        break;
+                    case "RACISM":
+                        translationKey = "blog.comment.flagged.racism";
+                        break;
+                    case "MULTIPLE":
+                        translationKey = "blog.comment.flagged.multiple";
+                        break;
+                    default:
+                        translationKey = "blog.comment.flagged.default";
+                }
+            } else {
+                translationKey = "blog.comment.flagged.default";
+            }
+            dto.setContent(translationKey);
+        } else {
+            dto.setContent(comment.getContent());
+        }
+        
         dto.setStatus(comment.getStatus());
         dto.setLikeCount(comment.getLikeCount());
         dto.setCreatedAt(comment.getCreatedAt());
         dto.setUpdatedAt(comment.getUpdatedAt());
+        
         return dto;
     }
     

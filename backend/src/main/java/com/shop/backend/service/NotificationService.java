@@ -89,4 +89,29 @@ public class NotificationService {
             appointment
         );
     }
+
+    /**
+     * Gửi thông báo vi phạm comment cho user
+     */
+    public void sendCommentViolationNotification(Long userId, String title, String message, String violationType) {
+        NotificationMessage notification = new NotificationMessage();
+        notification.setType("COMMENT_VIOLATION");
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setUserId(userId);
+        notification.setSeverity(violationType); // Sử dụng severity field để lưu violation type
+        notification.setPriority("MEDIUM");
+        notification.setTimestamp(System.currentTimeMillis());
+        notification.setActionUrl("/blog/comments"); // Link đến trang comment
+
+        // Gửi thông báo cho user cụ thể
+        messagingTemplate.convertAndSendToUser(
+            userId.toString(),
+            "/queue/notifications",
+            notification
+        );
+
+        // Gửi thông báo cho admin để review
+        messagingTemplate.convertAndSend("/topic/admin-violations", notification);
+    }
 }
