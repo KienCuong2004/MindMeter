@@ -173,6 +173,31 @@ export default function AdminDashboardPage() {
   // State để force re-render khi avatar thay đổi
   const [avatarUpdateKey, setAvatarUpdateKey] = useState(0);
 
+  // Fetch profile từ API để lấy avatar mới nhất
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await authFetch("/api/admin/profile");
+        if (res.ok) {
+          const data = await res.json();
+          // Cập nhật user với avatar mới nhất từ backend
+          setUser((prev) => ({
+            ...prev,
+            avatarUrl: data.avatarUrl || data.avatar || prev.avatarUrl || null,
+            avatar: data.avatarUrl || data.avatar || prev.avatar || null,
+            firstName: data.firstName || prev.firstName || "",
+            lastName: data.lastName || prev.lastName || "",
+            phone: data.phone || prev.phone || "",
+            plan: data.plan || prev.plan || "FREE",
+          }));
+        }
+      } catch (err) {
+        // Silently fail, fallback to token data
+      }
+    };
+    fetchProfile();
+  }, []);
+
   useEffect(() => {
     document.title =
       t("pageTitles.adminDashboard") || "Admin Dashboard | MindMeter";
@@ -731,6 +756,7 @@ export function AdminProfilePage() {
     };
 
     fetchUserProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   React.useEffect(() => {
