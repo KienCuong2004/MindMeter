@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserCircle, FaArrowLeft, FaBrain } from "react-icons/fa";
+import { FaArrowLeft, FaBrain } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { jwtDecode } from "jwt-decode";
 
@@ -48,8 +48,8 @@ export default function ExpertProfilePage() {
         userObj.createdAt = decoded.createdAt
           ? new Date(decoded.createdAt).toLocaleString()
           : "";
-        if (decoded.avatar) userObj.avatar = decoded.avatar;
-        if (decoded.avatarUrl) userObj.avatarUrl = decoded.avatarUrl;
+        userObj.avatar = decoded.avatarUrl || decoded.avatar || null;
+        userObj.avatarUrl = decoded.avatarUrl || decoded.avatar || null;
         if (decoded.plan) userObj.plan = decoded.plan;
         if (decoded.planStartDate)
           userObj.planStartDate = decoded.planStartDate;
@@ -93,8 +93,8 @@ export default function ExpertProfilePage() {
         userObj.createdAt = decoded.createdAt
           ? new Date(decoded.createdAt).toLocaleString()
           : "";
-        if (decoded.avatar) userObj.avatar = decoded.avatar;
-        if (decoded.avatarUrl) userObj.avatarUrl = decoded.avatarUrl;
+        userObj.avatar = decoded.avatarUrl || decoded.avatar || null;
+        userObj.avatarUrl = decoded.avatarUrl || decoded.avatar || null;
         if (decoded.plan) userObj.plan = decoded.plan;
         if (decoded.planStartDate)
           userObj.planStartDate = decoded.planStartDate;
@@ -127,8 +127,8 @@ export default function ExpertProfilePage() {
           createdAt: updatedUser.createdAt
             ? new Date(updatedUser.createdAt).toLocaleString()
             : "",
-          avatar: updatedUser.avatarUrl || null,
-          avatarUrl: updatedUser.avatarUrl || null,
+          avatar: updatedUser.avatarUrl || updatedUser.avatar || null,
+          avatarUrl: updatedUser.avatarUrl || updatedUser.avatar || null,
           plan: updatedUser.plan || "FREE",
           planStartDate: updatedUser.planStartDate || null,
           planExpiryDate: updatedUser.planExpiryDate || null,
@@ -154,8 +154,8 @@ export default function ExpertProfilePage() {
             createdAt: data.createdAt
               ? new Date(data.createdAt).toLocaleString()
               : user.createdAt,
-            avatar: data.avatarUrl || user.avatar,
-            avatarUrl: data.avatarUrl || user.avatarUrl,
+            avatar: data.avatarUrl || data.avatar || user.avatar || null,
+            avatarUrl: data.avatarUrl || data.avatar || user.avatarUrl || null,
             plan: data.plan || "FREE",
             planStartDate: data.planStartDate || null,
             planExpiryDate: data.planExpiryDate || null,

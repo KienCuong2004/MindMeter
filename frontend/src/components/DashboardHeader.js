@@ -29,10 +29,20 @@ function getOptimizedAvatarUrl(avatarUrl, timestamp = null) {
 
   let optimizedUrl = avatarUrl;
 
+  // Xử lý relative path (ví dụ: /uploads/avatars/...)
+  if (!avatarUrl.startsWith("http")) {
+    // Nếu là relative path, thêm base URL
+    const API_BASE_URL =
+      process.env.REACT_APP_API_URL || "http://localhost:8080";
+    optimizedUrl = avatarUrl.startsWith("/")
+      ? `${API_BASE_URL}${avatarUrl}`
+      : `${API_BASE_URL}/${avatarUrl}`;
+  }
+
   // If it's a Google Profile Image, optimize it
-  if (avatarUrl.includes("googleusercontent.com")) {
+  if (optimizedUrl.includes("googleusercontent.com")) {
     // Remove size parameters and add our own for better control
-    const baseUrl = avatarUrl.split("=")[0];
+    const baseUrl = optimizedUrl.split("=")[0];
     optimizedUrl = `${baseUrl}=s96-c`;
   }
 
@@ -928,10 +938,15 @@ export default function DashboardHeader({
               >
                 {/* Container cho avatar với VIP badge */}
                 <div className="relative">
-                  {user.avatarUrl ? (
+                  {user.avatarUrl || user.avatar ? (
                     <img
-                      key={`avatar-${user.avatarUrl}-${avatarKey}`}
-                      src={getOptimizedAvatarUrl(user.avatarUrl, avatarKey)}
+                      key={`avatar-${
+                        user.avatarUrl || user.avatar
+                      }-${avatarKey}`}
+                      src={getOptimizedAvatarUrl(
+                        user.avatarUrl || user.avatar,
+                        avatarKey
+                      )}
                       alt="avatar"
                       className={`w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 xl:w-10 xl:h-10 border-2 shadow hover:scale-105 transition ${
                         user.plan === "PRO"
@@ -965,7 +980,9 @@ export default function DashboardHeader({
                         ? "rounded-full border-green-500 dark:border-green-400 shadow-lg shadow-green-200 dark:shadow-green-900/50"
                         : "rounded-full border-indigo-200 dark:border-indigo-300"
                     }`}
-                    style={{ display: user.avatarUrl ? "none" : "block" }}
+                    style={{
+                      display: user.avatarUrl || user.avatar ? "none" : "block",
+                    }}
                   />
 
                   {/* VIP Badge cho user có gói PRO */}

@@ -164,10 +164,20 @@ export default function ProfileForm({
 
     let optimizedUrl = avatarUrl;
 
+    // Xử lý relative path (ví dụ: /uploads/avatars/...)
+    if (!avatarUrl.startsWith("http")) {
+      // Nếu là relative path, thêm base URL
+      const API_BASE_URL =
+        process.env.REACT_APP_API_URL || "http://localhost:8080";
+      optimizedUrl = avatarUrl.startsWith("/")
+        ? `${API_BASE_URL}${avatarUrl}`
+        : `${API_BASE_URL}/${avatarUrl}`;
+    }
+
     // Nếu là Google Profile Image, optimize nó
-    if (avatarUrl.includes("googleusercontent.com")) {
+    if (optimizedUrl.includes("googleusercontent.com")) {
       // Remove size parameters và add our own để có control tốt hơn
-      const baseUrl = avatarUrl.split("=")[0];
+      const baseUrl = optimizedUrl.split("=")[0];
       optimizedUrl = `${baseUrl}=s96-c`;
     }
 
