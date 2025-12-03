@@ -160,28 +160,30 @@ export default function ProfileForm({
 
   // Function để xử lý Google avatar URL (tương tự DashboardHeader)
   const processAvatarUrl = (avatarUrl, timestamp = null) => {
-    if (!avatarUrl) return null;
+    if (!avatarUrl) return avatarUrl; // Return original value instead of null
 
-    let optimizedUrl = avatarUrl;
+    let optimizedUrl = String(avatarUrl).trim(); // Ensure it's a string
 
     // Xử lý relative path (ví dụ: /uploads/avatars/...)
-    if (!avatarUrl.startsWith("http")) {
-      // Nếu là relative path, thêm base URL
+    if (!optimizedUrl.startsWith("http") && !optimizedUrl.startsWith("/")) {
+      // Nếu là relative path không bắt đầu bằng /, thêm base URL
       const API_BASE_URL =
         process.env.REACT_APP_API_URL || "http://localhost:8080";
-      optimizedUrl = avatarUrl.startsWith("/")
-        ? `${API_BASE_URL}${avatarUrl}`
-        : `${API_BASE_URL}/${avatarUrl}`;
+      optimizedUrl = `${API_BASE_URL}/${optimizedUrl}`;
+    } else if (optimizedUrl.startsWith("/")) {
+      // Nếu là absolute path relative to host, thêm base URL
+      const API_BASE_URL =
+        process.env.REACT_APP_API_URL || "http://localhost:8080";
+      optimizedUrl = `${API_BASE_URL}${optimizedUrl}`;
     }
 
-    // Nếu là Google Profile Image, optimize nó
+    // Nếu là Google Profile Image, không thêm cache-busting để tránh làm hỏng URL
+    // Google URL đã được optimize từ backend và có thể không hỗ trợ query parameters
     if (optimizedUrl.includes("googleusercontent.com")) {
-      // Remove size parameters và add our own để có control tốt hơn
-      const baseUrl = optimizedUrl.split("=")[0];
-      optimizedUrl = `${baseUrl}=s96-c`;
+      return optimizedUrl; // Return Google URL as-is
     }
 
-    // Add cache-busting parameter nếu timestamp được provide
+    // Add cache-busting parameter nếu timestamp được provide (chỉ cho non-Google URLs)
     if (timestamp) {
       const separator = optimizedUrl.includes("?") ? "&" : "?";
       // Sử dụng timestamp + random number để đảm bảo URL luôn khác nhau
@@ -238,12 +240,16 @@ export default function ProfileForm({
           // Hiển thị avatar hiện tại
           <div className="relative">
             <img
-              src={processAvatarUrl(
-                profile?.avatar || profile?.avatarUrl,
-                Date.now()
-              )}
+              src={
+                processAvatarUrl(
+                  profile?.avatar || profile?.avatarUrl,
+                  Date.now()
+                ) ||
+                profile?.avatar ||
+                profile?.avatarUrl
+              }
               alt="avatar"
-              className={`w-24 h-24 border-2 shadow hover:scale-105 transition mb-4 ${getAvatarBorderClass(
+              className={`w-24 h-24 border-2 shadow hover:scale-105 transition mb-4 object-cover ${getAvatarBorderClass(
                 profile?.plan
               )}`}
               onError={(e) => {
