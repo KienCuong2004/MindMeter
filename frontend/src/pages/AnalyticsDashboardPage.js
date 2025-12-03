@@ -103,7 +103,8 @@ export default function AnalyticsDashboardPage() {
     }
 
     fetchAnalyticsData();
-  }, [fetchAnalyticsData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleExport = async (type) => {
     try {

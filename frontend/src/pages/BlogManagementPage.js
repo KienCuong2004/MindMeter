@@ -18,13 +18,30 @@ import {
   Cancel as RejectIcon,
   Search as SearchIcon,
   FilterList as FilterIcon,
-  Report as ReportIcon,
 } from "@mui/icons-material";
 import { FaBrain, FaExclamationTriangle } from "react-icons/fa";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import blogService from "../services/blogService";
 import logger from "../utils/logger";
+
+// Hàm tạo pagination với tối đa 5 nút
+function getPagination(current, total) {
+  const delta = 1; // số trang lân cận
+  const range = [];
+  for (
+    let i = Math.max(0, current - delta);
+    i <= Math.min(total - 1, current + delta);
+    i++
+  ) {
+    range.push(i);
+  }
+  if (range[0] > 1) range.unshift("...");
+  if (range[0] !== 0) range.unshift(0);
+  if (range[range.length - 1] < total - 2) range.push("...");
+  if (range[range.length - 1] !== total - 1) range.push(total - 1);
+  return range;
+}
 
 const StatusChip = ({ status }) => {
   const { t } = useTranslation();
@@ -81,16 +98,12 @@ const BlogManagementPage = ({ handleLogout }) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [page, setPage] = useState(0);
-  const [size] = useState(10);
+  const [size] = useState(5); // Hiển thị 5 items mỗi trang giống UserManagementPage
   const [totalPages, setTotalPages] = useState(0);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState([]);
-  const [tagFilter, setTagFilter] = useState([]);
-  const [availableCategories, setAvailableCategories] = useState([]);
-  const [availableTags, setAvailableTags] = useState([]);
 
   // Dialog states
   const [selectedPost, setSelectedPost] = useState(null);
@@ -102,25 +115,6 @@ const BlogManagementPage = ({ handleLogout }) => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deletePostId, setDeletePostId] = useState(null);
   const [deleting, setDeleting] = useState(false);
-
-  // Load categories and tags
-  useEffect(() => {
-    const loadCategoriesAndTags = async () => {
-      try {
-        const [categoriesData, tagsData] = await Promise.all([
-          blogService.getAllCategories(),
-          blogService.getAllTags(),
-        ]);
-        setAvailableCategories(
-          Array.isArray(categoriesData) ? categoriesData : []
-        );
-        setAvailableTags(Array.isArray(tagsData) ? tagsData : []);
-      } catch (error) {
-        logger.error("Error loading categories and tags:", error);
-      }
-    };
-    loadCategoriesAndTags();
-  }, []);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -141,14 +135,6 @@ const BlogManagementPage = ({ handleLogout }) => {
         params.keyword = searchQuery.trim();
       }
 
-      if (categoryFilter.length > 0) {
-        params.categoryIds = categoryFilter;
-      }
-
-      if (tagFilter.length > 0) {
-        params.tagIds = tagFilter;
-      }
-
       const response = await blogService.getAdminPosts(params);
 
       const allPosts = response.content || [];
@@ -160,7 +146,7 @@ const BlogManagementPage = ({ handleLogout }) => {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, searchQuery, categoryFilter, tagFilter, size, t]);
+  }, [page, statusFilter, searchQuery, size, t]);
 
   useEffect(() => {
     // Get user info from token
@@ -256,26 +242,6 @@ const BlogManagementPage = ({ handleLogout }) => {
   const handleClearFilters = () => {
     setStatusFilter("ALL");
     setSearchQuery("");
-    setCategoryFilter([]);
-    setTagFilter([]);
-    setPage(0);
-  };
-
-  const toggleCategoryFilter = (categoryId) => {
-    setCategoryFilter((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
-    );
-    setPage(0);
-  };
-
-  const toggleTagFilter = (tagId) => {
-    setTagFilter((prev) =>
-      prev.includes(tagId)
-        ? prev.filter((id) => id !== tagId)
-        : [...prev, tagId]
-    );
     setPage(0);
   };
 
@@ -357,116 +323,27 @@ const BlogManagementPage = ({ handleLogout }) => {
                 {t("blog.admin.clearFilters")}
               </button>
             </div>
-
-            {/* Category and Tag filters */}
-            <div className="flex flex-wrap gap-4 items-center justify-center">
-              {/* Category filter */}
-              <div className="min-w-[200px]">
-                <select
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      toggleCategoryFilter(Number(e.target.value));
-                      e.target.value = "";
-                    }
-                  }}
-                  className="w-full px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-400 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                >
-                  <option value="">{t("blog.admin.filter.byCategory")}</option>
-                  {availableCategories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/* Selected categories */}
-              {categoryFilter.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {categoryFilter.map((catId) => {
-                    const category = availableCategories.find(
-                      (c) => c.id === catId
-                    );
-                    return category ? (
-                      <span
-                        key={catId}
-                        onClick={() => toggleCategoryFilter(catId)}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer"
-                        style={{
-                          backgroundColor: `${category.color || "#10B981"}20`,
-                          color: category.color || "#10B981",
-                          border: `1px solid ${category.color || "#10B981"}`,
-                        }}
-                      >
-                        {category.name} ×
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-              )}
-
-              {/* Tag filter */}
-              <div className="min-w-[200px]">
-                <select
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      toggleTagFilter(Number(e.target.value));
-                      e.target.value = "";
-                    }
-                  }}
-                  className="w-full px-4 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-400 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                >
-                  <option value="">{t("blog.admin.filter.byTag")}</option>
-                  {availableTags.map((tag) => (
-                    <option key={tag.id} value={tag.id}>
-                      {tag.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/* Selected tags */}
-              {tagFilter.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {tagFilter.map((tagId) => {
-                    const tag = availableTags.find((t) => t.id === tagId);
-                    return tag ? (
-                      <span
-                        key={tagId}
-                        onClick={() => toggleTagFilter(tagId)}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer"
-                        style={{
-                          backgroundColor: `${tag.color || "#3B82F6"}20`,
-                          color: tag.color || "#3B82F6",
-                          border: `1px solid ${tag.color || "#3B82F6"}`,
-                        }}
-                      >
-                        {tag.name} ×
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Posts Table */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full table-fixed">
-                <thead className="bg-gray-100 dark:bg-gray-700">
+                <thead className="bg-blue-50 dark:bg-gray-900">
                   <tr>
-                    <th className="w-2/5 px-4 py-4 text-left text-sm font-bold text-gray-800 dark:text-white">
+                    <th className="w-2/5 px-4 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.admin.table.title")}
                     </th>
-                    <th className="w-1/5 px-3 py-4 text-left text-sm font-bold text-gray-800 dark:text-white">
+                    <th className="w-1/5 px-3 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.admin.table.author")}
                     </th>
-                    <th className="w-1/10 px-2 py-4 text-left text-sm font-bold text-gray-800 dark:text-white">
+                    <th className="w-1/10 px-2 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.admin.table.status")}
                     </th>
-                    <th className="w-1/10 px-2 py-4 text-left text-sm font-bold text-gray-800 dark:text-white">
+                    <th className="w-1/10 px-2 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.admin.table.createdAt")}
                     </th>
-                    <th className="w-1/5 px-3 py-4 text-center text-sm font-bold text-gray-800 dark:text-white">
+                    <th className="w-1/5 px-3 py-4 text-center text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.admin.table.actions")}
                     </th>
                   </tr>
@@ -542,27 +419,77 @@ const BlogManagementPage = ({ handleLogout }) => {
           </div>
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-6">
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setPage(Math.max(0, page - 1))}
-                  disabled={page === 0}
-                  className="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          {totalPages > 0 && (
+            <div className="flex gap-2 justify-center mt-8">
+              {/* Nút prev */}
+              <button
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shadow transition
+                  ${
+                    page === 0
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
+                      : "bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 hover:border-blue-400 dark:bg-gray-800 dark:text-blue-300 dark:border-gray-600"
+                  }
+                `}
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0}
+                aria-label="Trang trước"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
                 >
-                  Previous
-                </button>
-                <span className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {page + 1} / {totalPages}
-                </span>
-                <button
-                  onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-                  disabled={page >= totalPages - 1}
-                  className="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  <path d="M13 15l-5-5 5-5" />
+                </svg>
+              </button>
+              {/* Số trang - tối đa 5 nút */}
+              {getPagination(page, totalPages).map((pageIndex, idx) =>
+                pageIndex === "..." ? (
+                  <span
+                    key={`ellipsis-${idx}`}
+                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-gray-500 dark:text-gray-400"
+                  >
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={pageIndex}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shadow transition
+                      ${
+                        page === pageIndex
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-200 text-gray-900 border border-gray-200 dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                      }
+                    `}
+                    onClick={() => setPage(pageIndex)}
+                  >
+                    {pageIndex + 1}
+                  </button>
+                )
+              )}
+              {/* Nút next */}
+              <button
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shadow transition
+                  ${
+                    page >= totalPages - 1 || totalPages === 0
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500"
+                      : "bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 hover:border-blue-400 dark:bg-gray-800 dark:text-blue-300 dark:border-gray-600"
+                  }
+                `}
+                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1 || totalPages === 0}
+                aria-label="Trang sau"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
                 >
-                  Next
-                </button>
-              </div>
+                  <path d="M7 5l5 5-5 5" />
+                </svg>
+              </button>
             </div>
           )}
         </div>
