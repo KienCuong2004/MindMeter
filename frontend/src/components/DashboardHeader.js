@@ -7,6 +7,7 @@ import {
   FaGlobe,
   FaChevronDown,
   FaHistory,
+  FaChartLine,
   FaCreditCard,
   FaCalendarAlt,
   FaClock,
@@ -1068,6 +1069,22 @@ export default function DashboardHeader({
                     >
                       <FaHistory className="text-gray-500 dark:text-gray-300" />
                       <span>{t("history")}</span>
+                    </div>
+                  )}
+                  {/* Analytics Dashboard - chỉ cho STUDENT */}
+                  {user.role === "STUDENT" && !isAnonymousUser(user) && (
+                    <div
+                      className="px-4 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/analytics");
+                        setShowMenu(false);
+                      }}
+                    >
+                      <FaChartLine className="text-indigo-500 dark:text-indigo-300" />
+                      <span>
+                        {t("analytics.title") || "Analytics Dashboard"}
+                      </span>
                     </div>
                   )}
                   {/* Bài viết đã lưu - chỉ cho STUDENT */}

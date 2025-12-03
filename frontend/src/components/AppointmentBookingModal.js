@@ -46,27 +46,27 @@ const AppointmentBookingModal = ({
   useEffect(() => {
     if (selectedDate && expertId && selectedDuration) {
       const fetchAvailableSlots = async () => {
-        try {
+    try {
           setLoading(true);
           const response = await authFetch(
             "/api/appointments/available-slots",
             {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                expertId: expertId,
-                startDate: selectedDate,
-                endDate: selectedDate,
-                durationMinutes: selectedDuration,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          expertId: expertId,
+          startDate: selectedDate,
+          endDate: selectedDate,
+          durationMinutes: selectedDuration,
                 consultationType: consultationType || "ONLINE",
-              }),
+        }),
             }
           );
 
-          if (response.ok) {
-            const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
             // Format slots từ API để hiển thị
             const formattedSlots =
               data.availableSlots?.map((slot) => {
@@ -96,8 +96,8 @@ const AppointmentBookingModal = ({
               t("errorFetchingSlots") || "Không thể tải danh sách giờ hẹn"
             );
             setAvailableSlots([]);
-          }
-        } catch (error) {
+      }
+    } catch (error) {
           logger.error("Error fetching available slots:", error);
           setError(
             t("errorFetchingSlots") || "Không thể tải danh sách giờ hẹn"
@@ -553,22 +553,22 @@ const AppointmentBookingModal = ({
                     </div>
                     {createdAppointment.consultationType === "ONLINE" &&
                       createdAppointment.meetingLink && (
-                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                          <div className="flex justify-between items-center">
+                      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-600 dark:text-gray-400">
                               {t("meetingLink")}:
                             </span>
-                            <a
-                              href={createdAppointment.meetingLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline break-all"
-                            >
-                              {createdAppointment.meetingLink}
-                            </a>
-                          </div>
+                          <a
+                            href={createdAppointment.meetingLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline break-all"
+                          >
+                            {createdAppointment.meetingLink}
+                          </a>
                         </div>
-                      )}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

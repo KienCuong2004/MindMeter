@@ -1769,6 +1769,30 @@
     "mediumRisk": "Medium Risk (4-6)",
     "highRisk": "High Risk (7-10)"
   },
+  "analytics": {
+    "title": "Analytics Dashboard",
+    "totalTests": "Total Tests",
+    "averageScore": "Average Score",
+    "currentSeverity": "Current Severity",
+    "improvementRate": "Improvement Rate",
+    "trendsChart": "Mental Health Trends",
+    "progressChart": "Progress Chart",
+    "severityDistribution": "Severity Distribution",
+    "testComparison": "Test Comparison",
+    "testDate": "Test Date",
+    "testType": "Test Type",
+    "score": "Score",
+    "severity": "Severity",
+    "change": "Change",
+    "days": "Days",
+    "fetchError": "Failed to load analytics data",
+    "exportError": "Failed to export data",
+    "exportPdf": "PDF",
+    "exportExcel": "Excel",
+    "exportCsv": "CSV",
+    "notAvailable": "N/A",
+    "backToHome": "Back to Home"
+  },
   "blog": {
     "title": "Blog",
     "subtitle": "Share your mental health journey and connect with others",
@@ -1862,7 +1886,6 @@
         "submitFailed": "Failed to submit report. Please try again."
       }
     },
-    "loading": "Loading...",
     "createPostForm": {
       "title": "Create New Post",
       "subtitle": "Share your mental health journey and help others",

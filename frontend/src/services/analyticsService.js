@@ -1,307 +1,166 @@
+import { authFetch } from "../authFetch";
+
 /**
- * Service để theo dõi analytics và tỷ lệ thành công của auto-booking
+ * Service để gọi các API analytics và reporting
  */
 class AnalyticsService {
   /**
-   * Ghi lại sự kiện auto-booking
-   * @param {Object} eventData - Dữ liệu sự kiện
-   * @returns {Promise<Object>} - Kết quả ghi sự kiện
+   * Lấy xu hướng sức khỏe tâm thần theo thời gian
+   * @param {number} days - Số ngày (mặc định 365)
+   * @returns {Promise<Array>} - Danh sách xu hướng
    */
-  static async trackAutoBookingEvent(eventData) {
+  async getMentalHealthTrends(days = 365) {
     try {
-      const analyticsData = {
-        eventType: "auto_booking",
-        timestamp: new Date().toISOString(),
-        userId: eventData.userId,
-        sessionId: eventData.sessionId,
-        conversationId: eventData.conversationId,
-        data: {
-          success: eventData.success,
-          appointmentId: eventData.appointmentId,
-          expertId: eventData.expertId,
-          expertName: eventData.expertName,
-          appointmentTime: eventData.appointmentTime,
-          bookingMethod: eventData.bookingMethod || "auto",
-          userIntent: eventData.userIntent,
-          keywords: eventData.keywords || [],
-          responseTime: eventData.responseTime,
-          errorMessage: eventData.errorMessage,
-          userRole: eventData.userRole,
-          userPlan: eventData.userPlan,
-        },
-      };
-
-      const response = await fetch("/api/analytics/track", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(analyticsData),
-      });
-
-      if (response.ok) {
-        return {
-          success: true,
-          message: "Sự kiện đã được ghi lại",
-        };
-      } else {
-        throw new Error("Không thể ghi sự kiện analytics");
+      const response = await authFetch(`/api/analytics/trends?days=${days}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch mental health trends");
       }
+      return await response.json();
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      console.error("Error fetching mental health trends:", error);
+      throw error;
     }
   }
 
   /**
-   * Lấy thống kê tỷ lệ thành công auto-booking
-   * @param {Object} filters - Bộ lọc thời gian và điều kiện
-   * @returns {Promise<Object>} - Thống kê auto-booking
+   * So sánh kết quả test theo thời gian
+   * @returns {Promise<Array>} - Danh sách so sánh
    */
-  static async getAutoBookingStats(filters = {}) {
+  async compareTestResults() {
     try {
-      const queryParams = new URLSearchParams({
-        ...filters,
-      });
+      const response = await authFetch("/api/analytics/compare");
+      if (!response.ok) {
+        throw new Error("Failed to fetch test comparisons");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching test comparisons:", error);
+      throw error;
+    }
+  }
 
-      const response = await fetch(
-        `/api/analytics/auto-booking-stats?${queryParams}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+  /**
+   * Lấy dữ liệu cho biểu đồ tiến độ cá nhân
+   * @param {number} days - Số ngày (mặc định 90)
+   * @returns {Promise<Object>} - Dữ liệu biểu đồ
+   */
+  async getProgressChart(days = 90) {
+    try {
+      const response = await authFetch(`/api/analytics/progress?days=${days}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch progress chart");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching progress chart:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Lấy tổng quan analytics
+   * @returns {Promise<Object>} - Tổng quan analytics
+   */
+  async getAnalyticsSummary() {
+    try {
+      const response = await authFetch("/api/analytics/summary");
+      if (!response.ok) {
+        throw new Error("Failed to fetch analytics summary");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching analytics summary:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Export test result to PDF
+   * @param {number} testResultId - ID của test result
+   * @returns {Promise<Blob>} - PDF file
+   */
+  async exportTestResultPDF(testResultId) {
+    try {
+      const response = await authFetch(
+        `/api/analytics/export/pdf/test/${testResultId}`
       );
-
-      if (response.ok) {
-        const result = await response.json();
-        return {
-          success: true,
-          data: result,
-        };
-      } else {
-        throw new Error("Không thể lấy thống kê auto-booking");
+      if (!response.ok) {
+        throw new Error("Failed to export test result PDF");
       }
+      return await response.blob();
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-        data: null,
-      };
+      console.error("Error exporting test result PDF:", error);
+      throw error;
     }
   }
 
   /**
-   * Lấy thống kê tổng quan chatbot
-   * @param {Object} filters - Bộ lọc
-   * @returns {Promise<Object>} - Thống kê chatbot
+   * Export analytics summary to PDF
+   * @returns {Promise<Blob>} - PDF file
    */
-  static async getChatbotStats(filters = {}) {
+  async exportAnalyticsPDF() {
     try {
-      const queryParams = new URLSearchParams({
-        ...filters,
-      });
-
-      const response = await fetch(
-        `/api/analytics/chatbot-stats?${queryParams}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        return {
-          success: true,
-          data: result,
-        };
-      } else {
-        throw new Error("Không thể lấy thống kê chatbot");
+      const response = await authFetch("/api/analytics/export/pdf/summary");
+      if (!response.ok) {
+        throw new Error("Failed to export analytics PDF");
       }
+      return await response.blob();
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-        data: null,
-      };
+      console.error("Error exporting analytics PDF:", error);
+      throw error;
     }
   }
 
   /**
-   * Lấy thống kê user engagement
-   * @param {Object} filters - Bộ lọc
-   * @returns {Promise<Object>} - Thống kê engagement
+   * Export test results to CSV
+   * @returns {Promise<Blob>} - CSV file
    */
-  static async getUserEngagementStats(filters = {}) {
+  async exportToCSV() {
     try {
-      const queryParams = new URLSearchParams({
-        ...filters,
-      });
-
-      const response = await fetch(
-        `/api/analytics/user-engagement?${queryParams}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const result = await response.json();
-        return {
-          success: true,
-          data: result,
-        };
-      } else {
-        throw new Error("Không thể lấy thống kê engagement");
+      const response = await authFetch("/api/analytics/export/csv");
+      if (!response.ok) {
+        throw new Error("Failed to export to CSV");
       }
+      return await response.blob();
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-        data: null,
-      };
+      console.error("Error exporting to CSV:", error);
+      throw error;
     }
   }
 
   /**
-   * Lấy dashboard analytics cho admin
-   * @param {Object} filters - Bộ lọc
-   * @returns {Promise<Object>} - Dashboard analytics
+   * Export test results to Excel
+   * @returns {Promise<Blob>} - Excel file
    */
-  static async getDashboardAnalytics(filters = {}) {
+  async exportToExcel() {
     try {
-      const queryParams = new URLSearchParams({
-        ...filters,
-      });
-
-      const response = await fetch(`/api/analytics/dashboard?${queryParams}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        return {
-          success: true,
-          data: result,
-        };
-      } else {
-        throw new Error("Không thể lấy dashboard analytics");
+      const response = await authFetch("/api/analytics/export/excel");
+      if (!response.ok) {
+        throw new Error("Failed to export to Excel");
       }
+      return await response.blob();
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-        data: null,
-      };
+      console.error("Error exporting to Excel:", error);
+      throw error;
     }
   }
 
   /**
-   * Ghi lại sự kiện user interaction
-   * @param {string} eventType - Loại sự kiện
-   * @param {Object} eventData - Dữ liệu sự kiện
-   * @returns {Promise<Object>} - Kết quả ghi sự kiện
+   * Helper method để download file
+   * @param {Blob} blob - File blob
+   * @param {string} filename - Tên file
    */
-  static async trackUserInteraction(eventType, eventData) {
-    try {
-      const analyticsData = {
-        eventType: eventType,
-        timestamp: new Date().toISOString(),
-        userId: eventData.userId,
-        sessionId: eventData.sessionId,
-        data: eventData,
-      };
-
-      const response = await fetch("/api/analytics/track-interaction", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(analyticsData),
-      });
-
-      if (response.ok) {
-        return {
-          success: true,
-          message: "Sự kiện interaction đã được ghi lại",
-        };
-      } else {
-        throw new Error("Không thể ghi sự kiện interaction");
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  }
-
-  /**
-   * Tính toán tỷ lệ thành công
-   * @param {Array} events - Danh sách sự kiện
-   * @returns {Object} - Tỷ lệ thành công
-   */
-  static calculateSuccessRate(events) {
-    if (!events || events.length === 0) {
-      return {
-        total: 0,
-        successful: 0,
-        failed: 0,
-        successRate: 0,
-      };
-    }
-
-    const successful = events.filter((event) => event.success).length;
-    const failed = events.length - successful;
-    const successRate = (successful / events.length) * 100;
-
-    return {
-      total: events.length,
-      successful: successful,
-      failed: failed,
-      successRate: Math.round(successRate * 100) / 100,
-    };
-  }
-
-  /**
-   * Tạo session ID duy nhất
-   * @returns {string} - Session ID
-   */
-  static generateSessionId() {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  /**
-   * Lấy thời gian phản hồi trung bình
-   * @param {Array} events - Danh sách sự kiện
-   * @returns {number} - Thời gian phản hồi trung bình (ms)
-   */
-  static calculateAverageResponseTime(events) {
-    if (!events || events.length === 0) return 0;
-
-    const responseTimes = events
-      .filter((event) => event.responseTime)
-      .map((event) => event.responseTime);
-
-    if (responseTimes.length === 0) return 0;
-
-    const total = responseTimes.reduce((sum, time) => sum + time, 0);
-    return Math.round(total / responseTimes.length);
+  downloadFile(blob, filename) {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 }
 
-export default AnalyticsService;
+const analyticsServiceInstance = new AnalyticsService();
+export default analyticsServiceInstance;

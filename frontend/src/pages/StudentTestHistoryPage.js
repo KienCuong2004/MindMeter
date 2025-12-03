@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Trans } from "react-i18next";
 import {
   ComposedChart,
   Bar,
@@ -11,14 +10,13 @@ import {
   Tooltip,
   Legend,
   CartesianGrid,
-  ResponsiveContainer,
 } from "recharts";
 import { authFetch } from "../authFetch";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { useTheme } from "../hooks/useTheme";
 import { getCurrentUser } from "../services/anonymousService";
-import { FaHistory, FaBrain } from "react-icons/fa";
+import { FaBrain, FaChartLine } from "react-icons/fa";
 
 const severityLevels = ["MINIMAL", "MILD", "MODERATE", "SEVERE"];
 const severityColors = {
@@ -252,6 +250,13 @@ const StudentTestHistoryPage = () => {
               {t("testHistory.subtitle") ||
                 "Xem lại tiến trình tâm lý của bạn qua từng lần test"}
             </p>
+            <button
+              onClick={() => navigate("/analytics")}
+              className="mt-4 flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl font-semibold"
+            >
+              <FaChartLine />
+              <span>{t("analytics.title") || "View Analytics Dashboard"}</span>
+            </button>
           </div>
           {/* FILTER UI ĐẸP HƠN */}
           <div className="flex flex-wrap gap-2 items-center mb-6 w-full max-w-2xl mx-auto justify-center">

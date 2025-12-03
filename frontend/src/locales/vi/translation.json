@@ -1768,6 +1768,30 @@
     "mediumRisk": "Rủi ro trung bình (4-6)",
     "highRisk": "Rủi ro cao (7-10)"
   },
+  "analytics": {
+    "title": "Bảng phân tích",
+    "totalTests": "Tổng số test",
+    "averageScore": "Điểm trung bình",
+    "currentSeverity": "Mức độ hiện tại",
+    "improvementRate": "Tỷ lệ cải thiện",
+    "trendsChart": "Xu hướng sức khỏe tâm thần",
+    "progressChart": "Biểu đồ tiến độ",
+    "severityDistribution": "Phân bố mức độ",
+    "testComparison": "So sánh kết quả test",
+    "testDate": "Ngày test",
+    "testType": "Loại test",
+    "score": "Điểm số",
+    "severity": "Mức độ",
+    "change": "Thay đổi",
+    "days": "Ngày",
+    "fetchError": "Không thể tải dữ liệu phân tích",
+    "exportError": "Không thể xuất dữ liệu",
+    "exportPdf": "PDF",
+    "exportExcel": "Excel",
+    "exportCsv": "CSV",
+    "notAvailable": "Không có",
+    "backToHome": "Về trang chủ"
+  },
   "blog": {
     "title": "Bài viết",
     "subtitle": "Chia sẻ hành trình sức khỏe tâm thần và kết nối với cộng đồng",
@@ -1861,7 +1885,6 @@
         "submitFailed": "Không thể gửi báo cáo. Vui lòng thử lại."
       }
     },
-    "loading": "Đang tải...",
     "createPostForm": {
       "title": "Tạo Bài Viết Mới",
       "subtitle": "Chia sẻ hành trình sức khỏe tâm thần và giúp đỡ người khác",

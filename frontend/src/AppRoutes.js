@@ -27,6 +27,7 @@ import IntroduceMindMeterPage from "./pages/IntroduceMindMeterPage";
 import StudentTestResultPage from "./pages/StudentTestResultPage";
 import StudentTestHistoryPage from "./pages/StudentTestHistoryPage";
 import StudentAppointmentsPage from "./pages/StudentAppointmentsPage";
+import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
 import UserGuidePage from "./pages/UserGuidePage";
 import TermsOfUse from "./pages/TermsOfUse";
 import BlogPostPage from "./pages/BlogPostPage";
@@ -54,7 +55,9 @@ const BlogManagementPage = lazy(() => import("./pages/BlogManagementPage"));
 
 // Lazy load large pages for better performance
 const PricingPage = lazy(() => import("./pages/PricingPage"));
-const ExpertAppointmentsPage = lazy(() => import("./pages/ExpertAppointmentsPage"));
+const ExpertAppointmentsPage = lazy(() =>
+  import("./pages/ExpertAppointmentsPage")
+);
 const ExpertSchedulePage = lazy(() => import("./pages/ExpertSchedulePage"));
 const PaymentMethodPage = lazy(() => import("./pages/PaymentMethodPage"));
 const PayPalPaymentPage = lazy(() => import("./pages/PayPalPaymentPage"));
@@ -304,7 +307,7 @@ export default function AppRoutes() {
             navigate("/expert/dashboard", { replace: true });
           }
         } else if (decoded.role === "STUDENT") {
-          // Student được ở /home, /student/*, /appointments, /blog/edit/:id, hoặc public paths
+          // Student được ở /home, /student/*, /appointments, /analytics, /blog/edit/:id, hoặc public paths
           const isBlogEditPath =
             window.location.pathname.startsWith("/blog/edit/");
           if (
@@ -313,6 +316,7 @@ export default function AppRoutes() {
               window.location.pathname !== "/home" &&
               window.location.pathname !== "/appointments" &&
               window.location.pathname !== "/saved-articles" &&
+              window.location.pathname !== "/analytics" &&
               !isBlogEditPath &&
               !publicPaths.includes(window.location.pathname) &&
               !isBlogPostPath)
@@ -796,6 +800,7 @@ export default function AppRoutes() {
               </BlogErrorBoundary>
             }
           />
+          <Route path="/analytics" element={<AnalyticsDashboardPage />} />
           <Route
             path="/login"
             element={

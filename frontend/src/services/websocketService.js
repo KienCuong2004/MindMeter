@@ -26,7 +26,7 @@ class WebSocketService {
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       debug: (str) => {
-        // Debug logging disabled
+      // Debug logging disabled
       },
       onConnect: (frame) => {
         this.connected = true;
@@ -68,8 +68,8 @@ class WebSocketService {
   disconnect() {
     if (this.stompClient) {
       this.stompClient.deactivate();
-      this.connected = false;
-      this.onConnectionChange?.(false);
+        this.connected = false;
+        this.onConnectionChange?.(false);
     }
   }
 
@@ -81,18 +81,18 @@ class WebSocketService {
     }
 
     try {
-      const subscription = this.stompClient.subscribe(topic, (message) => {
-        try {
-          const data = JSON.parse(message.body);
-          callback(data);
-        } catch (error) {
-          logger.error("Error parsing WebSocket message:", error);
-        }
-      });
+    const subscription = this.stompClient.subscribe(topic, (message) => {
+      try {
+        const data = JSON.parse(message.body);
+        callback(data);
+      } catch (error) {
+        logger.error("Error parsing WebSocket message:", error);
+      }
+    });
 
-      // Store subscription for reconnection
-      this.subscriptions.set(topic, callback);
-      return subscription;
+    // Store subscription for reconnection
+    this.subscriptions.set(topic, callback);
+    return subscription;
     } catch (error) {
       logger.error("Error subscribing to topic:", error);
       // Store subscription for later retry

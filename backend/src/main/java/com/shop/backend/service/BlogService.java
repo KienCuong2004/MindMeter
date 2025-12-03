@@ -1173,7 +1173,7 @@ public class BlogService {
             }
             dto.setContent(translationKey);
         } else {
-            dto.setContent(comment.getContent());
+        dto.setContent(comment.getContent());
         }
         
         dto.setStatus(comment.getStatus());

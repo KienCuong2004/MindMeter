@@ -192,6 +192,20 @@
 			<artifactId>google-auth-library-oauth2-http</artifactId>
 			<version>1.19.0</version>
 		</dependency>
+		
+		<!-- Apache PDFBox for PDF generation -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		
+		<!-- Apache POI for Excel export -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.2.5</version>
+		</dependency>
 	</dependencies>
 
 	<build>
