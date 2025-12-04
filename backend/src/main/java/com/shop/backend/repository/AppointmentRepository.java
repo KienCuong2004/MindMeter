@@ -64,4 +64,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     
     // Phân trang lịch hẹn theo chuyên gia
     Page<Appointment> findByExpert(User expert, Pageable pageable);
+    
+    // Tìm lịch hẹn sắp tới trong khoảng thời gian cho reminder
+    @Query("SELECT a FROM Appointment a WHERE a.appointmentDate >= :startTime " +
+           "AND a.appointmentDate <= :endTime " +
+           "AND a.status = :status")
+    List<Appointment> findUpcomingAppointments(@Param("startTime") LocalDateTime startTime,
+                                             @Param("endTime") LocalDateTime endTime,
+                                             @Param("status") Appointment.AppointmentStatus status);
 }

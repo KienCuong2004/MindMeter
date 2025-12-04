@@ -2144,5 +2144,28 @@
     "welcomeMessage": "Welcome <0>{{name}}</0>! Your account has been successfully linked.",
     "redirectingMessage": "You will be redirected shortly...",
     "pleaseWait": "Please wait a moment..."
+  },
+  "newsletter": {
+    "title": "Subscribe to Newsletter",
+    "description": "Get the latest mental health articles and updates delivered to your inbox.",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "emailPlaceholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "subscribing": "Subscribing...",
+    "successTitle": "Subscription Successful!",
+    "successMessage": "Please check your email to verify your subscription.",
+    "subscribeError": "Failed to subscribe. Please try again."
+  },
+  "messaging": {
+    "conversations": "Conversations",
+    "user": "User",
+    "online": "Online",
+    "noMessages": "No messages yet. Start a conversation!",
+    "noConversations": "No conversations yet.",
+    "selectConversation": "Select a conversation to start messaging",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "sendError": "Failed to send message"
   }
 }

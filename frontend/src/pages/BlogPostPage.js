@@ -23,6 +23,7 @@ import BlogPostMeta from "../components/BlogPostMeta";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import ReportPostModal from "../components/blog/ReportPostModal";
+import NewsletterSubscription from "../components/NewsletterSubscription";
 import { useSavedArticles } from "../contexts/SavedArticlesContext";
 import { formatDistanceToNow } from "date-fns";
 import { vi, enUS } from "date-fns/locale";
@@ -694,6 +695,11 @@ const BlogPostPage = () => {
             canDeleteComment={canDeleteComment}
             onDeleteComment={handleDeleteComment}
           />
+        </div>
+
+        {/* Newsletter Subscription */}
+        <div className="mt-8">
+          <NewsletterSubscription />
         </div>
       </div>
 

@@ -26,6 +26,20 @@ function App() {
     localStorage.setItem(THEME_CONSTANTS.STORAGE_KEY, theme);
   }, [theme]);
 
+  // Register service worker for PWA
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then(() => {
+          // Service Worker registered successfully
+        })
+        .catch(() => {
+          // Service Worker registration failed - silently fail
+        });
+    }
+  }, []);
+
   return (
     <HelmetProvider>
       <ThemeContext.Provider value={{ theme, setTheme }}>

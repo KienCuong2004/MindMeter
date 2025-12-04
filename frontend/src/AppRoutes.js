@@ -32,6 +32,7 @@ import UserGuidePage from "./pages/UserGuidePage";
 import TermsOfUse from "./pages/TermsOfUse";
 import BlogPostPage from "./pages/BlogPostPage";
 import SavedArticlesPage from "./pages/SavedArticlesPage";
+import MessagingPage from "./pages/MessagingPage";
 import BlogErrorBoundary from "./components/BlogErrorBoundary";
 import Disclaimer from "./pages/Disclaimer";
 import SecurityPolicy from "./pages/SecurityPolicy";
@@ -307,9 +308,12 @@ export default function AppRoutes() {
             navigate("/expert/dashboard", { replace: true });
           }
         } else if (decoded.role === "STUDENT") {
-          // Student được ở /home, /student/*, /appointments, /analytics, /blog/edit/:id, hoặc public paths
+          // Student được ở /home, /student/*, /appointments, /analytics, /messaging, /blog/edit/:id, hoặc public paths
           const isBlogEditPath =
             window.location.pathname.startsWith("/blog/edit/");
+          const isMessagingPath =
+            window.location.pathname === "/messaging" ||
+            window.location.pathname.startsWith("/messaging/");
           if (
             window.location.pathname === "/" ||
             (!window.location.pathname.startsWith("/student") &&
@@ -317,6 +321,7 @@ export default function AppRoutes() {
               window.location.pathname !== "/appointments" &&
               window.location.pathname !== "/saved-articles" &&
               window.location.pathname !== "/analytics" &&
+              !isMessagingPath &&
               !isBlogEditPath &&
               !publicPaths.includes(window.location.pathname) &&
               !isBlogPostPath)
@@ -740,6 +745,8 @@ export default function AppRoutes() {
             path="/expert/appointments"
             element={<ExpertAppointmentsPage handleLogout={handleLogout} />}
           />
+          <Route path="/messaging" element={<MessagingPage />} />
+          <Route path="/messaging/:otherUserId" element={<MessagingPage />} />
           <Route
             path="/expert/schedule"
             element={<ExpertSchedulePage handleLogout={handleLogout} />}
@@ -843,6 +850,8 @@ export default function AppRoutes() {
             path="/student/appointments"
             element={<StudentAppointmentsPage handleLogout={handleLogout} />}
           />
+          <Route path="/messaging" element={<MessagingPage />} />
+          <Route path="/messaging/:otherUserId" element={<MessagingPage />} />
         </>
       ) : (
         <>
@@ -900,6 +909,7 @@ export default function AppRoutes() {
             path="/appointments"
             element={<StudentAppointmentsPage handleLogout={handleLogout} />}
           />
+          <Route path="/messaging" element={<MessagingPage />} />
           <Route
             path="/student/appointments"
             element={<StudentAppointmentsPage handleLogout={handleLogout} />}

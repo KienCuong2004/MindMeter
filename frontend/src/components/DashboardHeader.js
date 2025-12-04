@@ -14,6 +14,7 @@ import {
   FaRocket,
   FaBullseye,
   FaBookmark,
+  FaComments,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -23,6 +24,7 @@ import { authFetch } from "../authFetch";
 import { isAnonymousUser } from "../services/anonymousService";
 import { THEME_CONSTANTS } from "../constants/theme";
 import SavedArticlesBadge from "./SavedArticlesBadge";
+import MessagingService from "../services/messagingService";
 
 // Utility function to handle Google Profile Image URLs
 function getOptimizedAvatarUrl(avatarUrl, timestamp = null) {
@@ -90,6 +92,7 @@ export default function DashboardHeader({
   onProfile, // optional
   updateUserAvatar, // optional
   onStartTour, // optional - callback để bắt đầu tour
+  messagingUnreadCount, // optional - số tin nhắn chưa đọc (undefined nếu không được truyền vào)
   className,
 }) {
   // Force re-render khi user thay đổi
@@ -208,6 +211,8 @@ export default function DashboardHeader({
   const [loadingNoti, setLoadingNoti] = useState(false);
   const [filterType, setFilterType] = useState("all");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [internalMessagingUnreadCount, setInternalMessagingUnreadCount] =
+    useState(0);
 
   // Fetch notifications khi mở popup
   useEffect(() => {
@@ -277,6 +282,46 @@ export default function DashboardHeader({
       setShowNotifications(false);
     }
   }, [user]);
+
+  // Fetch messaging unread count nếu không được truyền vào
+  useEffect(() => {
+    // Chỉ fetch nếu không được truyền vào từ prop
+    if (messagingUnreadCount === undefined || messagingUnreadCount === null) {
+      const fetchMessagingUnreadCount = () => {
+        if (
+          (user?.role === "STUDENT" || user?.role === "EXPERT") &&
+          !isAnonymousUser(user)
+        ) {
+          MessagingService.getUnreadCount()
+            .then((count) => {
+              setInternalMessagingUnreadCount(count || 0);
+            })
+            .catch(() => {
+              setInternalMessagingUnreadCount(0);
+            });
+        } else {
+          setInternalMessagingUnreadCount(0);
+        }
+      };
+
+      // Fetch ngay lập tức
+      fetchMessagingUnreadCount();
+
+      // Refresh messaging unread count every 30 seconds
+      const interval = setInterval(fetchMessagingUnreadCount, 30000);
+      return () => clearInterval(interval);
+    } else {
+      // Nếu được truyền vào từ prop, reset internal state
+      setInternalMessagingUnreadCount(0);
+    }
+  }, [user, messagingUnreadCount]);
+
+  // Sử dụng messagingUnreadCount từ prop hoặc internal state
+  // Nếu prop được truyền vào (kể cả 0), sử dụng prop. Nếu không (undefined), dùng internal state
+  const displayMessagingUnreadCount =
+    messagingUnreadCount !== undefined
+      ? messagingUnreadCount
+      : internalMessagingUnreadCount;
 
   // Đánh dấu đã đọc
   const markAsRead = (id) => {
@@ -1134,6 +1179,28 @@ export default function DashboardHeader({
                       >
                         <FaCalendarAlt className="text-blue-500 dark:text-blue-400" />
                         <span>{t("appointments")}</span>
+                      </div>
+                    )}
+                  {/* Messaging - cho STUDENT và EXPERT */}
+                  {(user.role === "STUDENT" || user.role === "EXPERT") &&
+                    !isAnonymousUser(user) && (
+                      <div
+                        className="px-4 py-2 flex items-center gap-2 text-gray-700 dark:text-gray-100 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer relative"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/messaging");
+                          setShowMenu(false);
+                        }}
+                      >
+                        <FaComments className="text-purple-500 dark:text-purple-400" />
+                        <span>{t("messaging.conversations")}</span>
+                        {displayMessagingUnreadCount > 0 && (
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
+                            {displayMessagingUnreadCount > 99
+                              ? "99+"
+                              : displayMessagingUnreadCount}
+                          </span>
+                        )}
                       </div>
                     )}
                   {user.role === "STUDENT" && !isAnonymousUser(user) && (

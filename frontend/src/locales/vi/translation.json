@@ -2143,5 +2143,28 @@
     "welcomeMessage": "Chào mừng <0>{{name}}</0>! Tài khoản của bạn đã được liên kết thành công.",
     "redirectingMessage": "Bạn sẽ được chuyển hướng trong giây lát...",
     "pleaseWait": "Vui lòng đợi trong giây lát..."
+  },
+  "newsletter": {
+    "title": "Đăng ký nhận bản tin",
+    "description": "Nhận các bài viết và cập nhật mới nhất về sức khỏe tâm thần qua email.",
+    "firstName": "Tên",
+    "lastName": "Họ",
+    "emailPlaceholder": "Nhập email của bạn",
+    "subscribe": "Đăng ký",
+    "subscribing": "Đang đăng ký...",
+    "successTitle": "Đăng ký thành công!",
+    "successMessage": "Vui lòng kiểm tra email để xác nhận đăng ký.",
+    "subscribeError": "Đăng ký thất bại. Vui lòng thử lại."
+  },
+  "messaging": {
+    "conversations": "Cuộc trò chuyện",
+    "user": "Người dùng",
+    "online": "Đang online",
+    "noMessages": "Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!",
+    "noConversations": "Chưa có cuộc trò chuyện nào.",
+    "selectConversation": "Chọn một cuộc trò chuyện để bắt đầu nhắn tin",
+    "typeMessage": "Nhập tin nhắn...",
+    "send": "Gửi",
+    "sendError": "Gửi tin nhắn thất bại"
   }
 }

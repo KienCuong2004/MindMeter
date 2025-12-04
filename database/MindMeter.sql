@@ -189,6 +189,22 @@ CREATE TABLE system_announcements (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE newsletter_subscriptions (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    is_active BOOLEAN DEFAULT TRUE,
+    subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    unsubscribed_at TIMESTAMP NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    verification_token VARCHAR(255),
+    is_verified BOOLEAN DEFAULT FALSE,
+    verified_at TIMESTAMP NULL,
+    user_id BIGINT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
 -- ========================================
 -- 5. SAMPLE DATA
 -- ========================================
@@ -2649,8 +2665,62 @@ INSERT INTO depression_test_answers (test_result_id, question_id, answer_value, 
 (60, 135, 2, 'vi', 'depression_questions_vi'), (60, 136, 2, 'vi', 'depression_questions_vi'), (60, 137, 2, 'vi', 'depression_questions_vi'), (60, 138, 2, 'vi', 'depression_questions_vi'), (60, 139, 2, 'vi', 'depression_questions_vi'), (60, 140, 2, 'vi', 'depression_questions_vi'), (60, 141, 2, 'vi', 'depression_questions_vi'), (60, 142, 2, 'vi', 'depression_questions_vi'), (60, 143, 2, 'vi', 'depression_questions_vi'), (60, 144, 2, 'vi', 'depression_questions_vi');
 
 -- Advice Messages
+-- Cuộc hội thoại giữa Expert 3 (Trần Kiên Cường) và Student 6 (Nguyễn Văn An)
 INSERT INTO advice_messages (sender_id, receiver_id, message, message_type, is_read, sent_at) VALUES
-(1, 6, 'Chào em, đây là lời khuyên thử nghiệm!', 'ADVICE', 0, NOW());
+-- Student 6 gửi tin nhắn đầu tiên cho Expert 3
+(6, 3, 'Chào thầy, em là An. Em đang cảm thấy rất lo lắng về kỳ thi sắp tới. Em không thể tập trung học được.', 'GENERAL', 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+-- Expert 3 trả lời
+(3, 6, 'Chào An, thầy hiểu cảm giác của em. Lo lắng trước kỳ thi là điều bình thường. Em có thể chia sẻ thêm về những điều khiến em lo lắng nhất không?', 'ADVICE', 1, DATE_SUB(NOW(), INTERVAL 2 DAY) + INTERVAL 30 MINUTE),
+-- Student 6 tiếp tục
+(6, 3, 'Em sợ sẽ không nhớ được bài và làm bài không tốt. Em đã học rất nhiều nhưng vẫn cảm thấy chưa đủ.', 'GENERAL', 1, DATE_SUB(NOW(), INTERVAL 2 DAY) + INTERVAL 1 HOUR),
+-- Expert 3 đưa lời khuyên
+(3, 6, 'An à, cảm giác "chưa đủ" là dấu hiệu của sự cầu toàn. Em đã học rất nhiều rồi, giờ cần nghỉ ngơi và tin tưởng vào bản thân. Thầy đề xuất em thử kỹ thuật thở sâu 4-7-8 để giảm lo âu.', 'ADVICE', 1, DATE_SUB(NOW(), INTERVAL 2 DAY) + INTERVAL 2 HOUR),
+-- Student 6 cảm ơn
+(6, 3, 'Cảm ơn thầy, em sẽ thử. Em cảm thấy nhẹ nhàng hơn rồi ạ.', 'GENERAL', 1, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+
+-- Cuộc hội thoại giữa Expert 3 và Student 7 (Hoàng Thị Linh)
+(7, 3, 'Chào thầy, em là Linh. Em đang gặp vấn đề với giấc ngủ, em không thể ngủ được vì suy nghĩ quá nhiều.', 'URGENT', 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(3, 7, 'Chào Linh, thầy hiểu vấn đề của em. Mất ngủ do lo âu là vấn đề phổ biến. Em có thể kể thêm về những suy nghĩ khiến em không ngủ được không?', 'ADVICE', 1, DATE_SUB(NOW(), INTERVAL 3 DAY) + INTERVAL 1 HOUR),
+(7, 3, 'Em cứ nghĩ về những việc chưa làm xong và lo sợ sẽ quên mất điều gì đó quan trọng.', 'GENERAL', 1, DATE_SUB(NOW(), INTERVAL 3 DAY) + INTERVAL 3 HOUR),
+(3, 7, 'Linh à, thầy đề xuất em viết ra tất cả những việc cần làm vào một cuốn sổ trước khi ngủ. Điều này giúp não bộ "gửi" những suy nghĩ ra ngoài và em sẽ dễ ngủ hơn. Ngoài ra, em nên tránh dùng điện thoại 1 giờ trước khi ngủ.', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+
+-- Cuộc hội thoại giữa Expert 4 (Trần Văn Hùng) và Student 8 (Nguyễn Đức Minh)
+(8, 4, 'Chào thầy, em là Minh. Em cảm thấy rất căng thẳng với áp lực học tập từ gia đình.', 'GENERAL', 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(4, 8, 'Chào Minh, thầy hiểu áp lực từ gia đình có thể rất nặng nề. Em có thể chia sẻ cụ thể về áp lực đó không?', 'ADVICE', 1, DATE_SUB(NOW(), INTERVAL 4 DAY) + INTERVAL 2 HOUR),
+(8, 4, 'Bố mẹ em luôn mong em đạt điểm cao và so sánh em với các bạn khác. Em cảm thấy mình không đủ giỏi.', 'GENERAL', 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(4, 8, 'Minh à, giá trị của em không chỉ nằm ở điểm số. Em là một người có giá trị riêng. Thầy đề xuất em nên trò chuyện cởi mở với bố mẹ về cảm giác của mình. Nếu khó khăn, em có thể nhờ thầy cô giáo hoặc người lớn tin cậy giúp đỡ.', 'ADVICE', 1, DATE_SUB(NOW(), INTERVAL 3 DAY) + INTERVAL 1 HOUR),
+(8, 4, 'Cảm ơn thầy, em sẽ thử nói chuyện với bố mẹ. Em cảm thấy có hy vọng hơn rồi.', 'GENERAL', 0, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+
+-- Cuộc hội thoại giữa Expert 5 (Lê Thị Thu Hà) và Student 9 (Trần Thị Hương)
+(9, 5, 'Chào cô, em là Hương. Em đang cảm thấy cô đơn và không có bạn bè thân thiết.', 'GENERAL', 1, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(5, 9, 'Chào Hương, cô hiểu cảm giác cô đơn có thể rất khó chịu. Em có thể kể thêm về tình huống của em không?', 'ADVICE', 1, DATE_SUB(NOW(), INTERVAL 5 DAY) + INTERVAL 1 HOUR),
+(9, 5, 'Em không biết cách kết bạn và cảm thấy mình không phù hợp với ai cả. Em sợ bị từ chối.', 'GENERAL', 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(5, 9, 'Hương à, việc kết bạn cần thời gian và sự kiên nhẫn. Em có thể bắt đầu bằng cách tham gia các hoạt động nhóm hoặc câu lạc bộ mà em quan tâm. Đừng sợ bị từ chối, vì không phải ai cũng sẽ trở thành bạn thân, nhưng em sẽ tìm được những người phù hợp với mình.', 'ADVICE', 1, DATE_SUB(NOW(), INTERVAL 4 DAY) + INTERVAL 2 HOUR),
+(9, 5, 'Cảm ơn cô, em sẽ thử tham gia câu lạc bộ sách mà em quan tâm. Em cảm thấy có động lực hơn.', 'GENERAL', 0, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+
+-- Cuộc hội thoại giữa Expert 4 và Student 10 (Lê Văn Tuấn)
+(10, 4, 'Chào thầy, em là Tuấn. Em muốn đặt lịch tư vấn về vấn đề stress trong học tập.', 'APPOINTMENT', 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(4, 10, 'Chào Tuấn, thầy sẵn sàng hỗ trợ em. Em có thể cho thầy biết thời gian nào phù hợp với em không?', 'APPOINTMENT', 1, DATE_SUB(NOW(), INTERVAL 2 DAY) + INTERVAL 3 HOUR),
+(10, 4, 'Em có thể vào chiều thứ 3 hoặc thứ 5 tuần này được không ạ?', 'APPOINTMENT', 0, DATE_SUB(NOW(), INTERVAL 1 DAY) + INTERVAL 12 HOUR),
+
+-- Cuộc hội thoại giữa Expert 5 và Student 6 (Nguyễn Văn An) - cuộc hội thoại thứ 2
+(6, 5, 'Chào cô, em là An. Em đã thử các phương pháp mà thầy Cường gợi ý và cảm thấy tốt hơn. Em muốn hỏi thêm về cách quản lý thời gian học tập.', 'GENERAL', 1, DATE_SUB(NOW(), INTERVAL 1 DAY) + INTERVAL 12 HOUR),
+(5, 6, 'Chào An, cô rất vui khi nghe em đã cải thiện. Về quản lý thời gian, cô đề xuất phương pháp Pomodoro: học 25 phút, nghỉ 5 phút. Sau 4 chu kỳ thì nghỉ dài hơn 15-30 phút. Em thử xem sao nhé!', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 1 DAY));
+
+-- Newsletter Subscriptions
+INSERT INTO newsletter_subscriptions (email, first_name, last_name, is_active, is_verified, subscribed_at, verified_at, user_id) VALUES
+-- Subscriptions từ users đã có
+('student1@mindmeter.com', 'Nguyễn Văn', 'An', true, true, NOW(), NOW(), 6),
+('student2@mindmeter.com', 'Hoàng Thị', 'Linh', true, true, NOW(), NOW(), 7),
+('student3@mindmeter.com', 'Nguyễn Đức', 'Minh', true, false, NOW(), NULL, 8),
+('student4@mindmeter.com', 'Trần Thị', 'Hương', true, true, NOW(), NOW(), 9),
+('student5@mindmeter.com', 'Lê Văn', 'Tuấn', true, true, NOW(), NOW(), 10),
+-- Subscriptions từ email độc lập
+('subscriber1@gmail.com', 'Nguyễn Thị', 'Lan', true, true, NOW(), NOW(), NULL),
+('subscriber2@gmail.com', 'Trần Văn', 'Hùng', true, false, NOW(), NULL, NULL),
+('subscriber3@gmail.com', 'Lê Thị', 'Mai', true, true, NOW(), NOW(), NULL),
+('subscriber4@gmail.com', 'Phạm Văn', 'Đức', false, true, NOW(), NOW(), NULL),
+('subscriber5@gmail.com', 'Hoàng Thị', 'Hoa', true, true, NOW(), NOW(), NULL);
 
 -- ========================================
 -- 8. EXPERT NOTES SAMPLE DATA
@@ -3104,23 +3174,24 @@ INSERT INTO depression_test_answers (test_result_id, question_id, answer_value, 
 (60, 125, 2, 'vi', 'depression_questions_vi'), (60, 126, 2, 'vi', 'depression_questions_vi'), (60, 127, 2, 'vi', 'depression_questions_vi'), (60, 128, 2, 'vi', 'depression_questions_vi'), (60, 129, 2, 'vi', 'depression_questions_vi'), (60, 130, 2, 'vi', 'depression_questions_vi'), (60, 131, 2, 'vi', 'depression_questions_vi'), (60, 132, 2, 'vi', 'depression_questions_vi'), (60, 133, 2, 'vi', 'depression_questions_vi'), (60, 134, 2, 'vi', 'depression_questions_vi'),
 (60, 135, 2, 'vi', 'depression_questions_vi'), (60, 136, 2, 'vi', 'depression_questions_vi'), (60, 137, 2, 'vi', 'depression_questions_vi'), (60, 138, 2, 'vi', 'depression_questions_vi'), (60, 139, 2, 'vi', 'depression_questions_vi'), (60, 140, 2, 'vi', 'depression_questions_vi'), (60, 141, 2, 'vi', 'depression_questions_vi'), (60, 142, 2, 'vi', 'depression_questions_vi'), (60, 143, 2, 'vi', 'depression_questions_vi'), (60, 144, 2, 'vi', 'depression_questions_vi');
 
--- Advice Messages
-INSERT INTO advice_messages (sender_id, receiver_id, message, message_type, is_read, sent_at) VALUES
-(1, 6, 'Chào em, đây là lời khuyên thử nghiệm!', 'ADVICE', 0, NOW()),
-(1, 7, 'Anh có thể giúp em được không?', 'ADVICE', 0, NOW()),
-(1, 8, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW()),
-(1, 9, 'Anh thấy em có vẻ lo âu, em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW()),
-(1, 10, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW()),
-(1, 11, 'Anh có thể giúp em được không?', 'ADVICE', 0, NOW()),
-(1, 12, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW()),
-(1, 13, 'Anh thấy em có vẻ lo âu, em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW()),
-(1, 14, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW()),
-(1, 15, 'Anh có thể giúp em được không?', 'ADVICE', 0, NOW()),
-(1, 16, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW()),
-(1, 17, 'Anh thấy em có vẻ lo âu, em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW()),
-(1, 18, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW()),
-(1, 19, 'Anh có thể giúp em được không?', 'ADVICE', 0, NOW()),
-(1, 20, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, NOW());
+-- Advice Messages (dữ liệu cũ - đã được thay thế bởi dữ liệu mới ở trên)
+-- Các tin nhắn này đã được cập nhật với thời gian quá khứ để tránh hiển thị "nữa"
+-- INSERT INTO advice_messages (sender_id, receiver_id, message, message_type, is_read, sent_at) VALUES
+-- (1, 6, 'Chào em, đây là lời khuyên thử nghiệm!', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 7 DAY)),
+-- (1, 7, 'Anh có thể giúp em được không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 6 DAY)),
+-- (1, 8, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+-- (1, 9, 'Anh thấy em có vẻ lo âu, em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+-- (1, 10, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+-- (1, 11, 'Anh có thể giúp em được không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+-- (1, 12, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+-- (1, 13, 'Anh thấy em có vẻ lo âu, em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 12 HOUR)),
+-- (1, 14, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 10 HOUR)),
+-- (1, 15, 'Anh có thể giúp em được không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 8 HOUR)),
+-- (1, 16, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 6 HOUR)),
+-- (1, 17, 'Anh thấy em có vẻ lo âu, em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 4 HOUR)),
+-- (1, 18, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+-- (1, 19, 'Anh có thể giúp em được không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+-- (1, 20, 'Em có thể nói cho anh biết em cần gì không?', 'ADVICE', 0, DATE_SUB(NOW(), INTERVAL 30 MINUTE));
 
 -- ========================================
 -- 11. APPOINTMENT BOOKING SYSTEM TABLES
@@ -4501,6 +4572,28 @@ CREATE INDEX idx_advice_receiver_unread ON advice_messages(receiver_id, is_read)
 
 -- Composite index cho conversation queries
 CREATE INDEX idx_advice_sender_receiver ON advice_messages(sender_id, receiver_id, sent_at);
+
+-- ========================================
+-- 6.5. NEWSLETTER SUBSCRIPTIONS OPTIMIZATION
+-- ========================================
+
+-- Index cho email lookup
+CREATE INDEX idx_newsletter_email ON newsletter_subscriptions(email);
+
+-- Index cho active subscriptions
+CREATE INDEX idx_newsletter_active ON newsletter_subscriptions(is_active);
+
+-- Index cho verified subscriptions
+CREATE INDEX idx_newsletter_verified ON newsletter_subscriptions(is_verified);
+
+-- Index cho user_id lookup
+CREATE INDEX idx_newsletter_user_id ON newsletter_subscriptions(user_id);
+
+-- Composite index cho active verified subscriptions
+CREATE INDEX idx_newsletter_active_verified ON newsletter_subscriptions(is_active, is_verified);
+
+-- Index cho subscription date
+CREATE INDEX idx_newsletter_subscribed_at ON newsletter_subscriptions(subscribed_at);
 
 -- ========================================
 -- 7. SYSTEM ANNOUNCEMENTS OPTIMIZATION
