@@ -422,7 +422,7 @@ const BlogManagementPage = ({ handleLogout }) => {
           {totalPages > 0 && (
             <div className="flex gap-2 justify-center mt-8">
               {/* Nút prev */}
-              <button
+                <button
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shadow transition
                   ${
                     page === 0
@@ -430,8 +430,8 @@ const BlogManagementPage = ({ handleLogout }) => {
                       : "bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 hover:border-blue-400 dark:bg-gray-800 dark:text-blue-300 dark:border-gray-600"
                   }
                 `}
-                onClick={() => setPage(Math.max(0, page - 1))}
-                disabled={page === 0}
+                  onClick={() => setPage(Math.max(0, page - 1))}
+                  disabled={page === 0}
                 aria-label="Trang trước"
               >
                 <svg
@@ -442,7 +442,7 @@ const BlogManagementPage = ({ handleLogout }) => {
                 >
                   <path d="M13 15l-5-5 5-5" />
                 </svg>
-              </button>
+                </button>
               {/* Số trang - tối đa 5 nút */}
               {getPagination(page, totalPages).map((pageIndex, idx) =>
                 pageIndex === "..." ? (
@@ -451,7 +451,7 @@ const BlogManagementPage = ({ handleLogout }) => {
                     className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-gray-500 dark:text-gray-400"
                   >
                     ...
-                  </span>
+                </span>
                 ) : (
                   <button
                     key={pageIndex}
@@ -469,7 +469,7 @@ const BlogManagementPage = ({ handleLogout }) => {
                 )
               )}
               {/* Nút next */}
-              <button
+                <button
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shadow transition
                   ${
                     page >= totalPages - 1 || totalPages === 0
@@ -477,7 +477,7 @@ const BlogManagementPage = ({ handleLogout }) => {
                       : "bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 hover:border-blue-400 dark:bg-gray-800 dark:text-blue-300 dark:border-gray-600"
                   }
                 `}
-                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                  onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
                 disabled={page >= totalPages - 1 || totalPages === 0}
                 aria-label="Trang sau"
               >
@@ -489,7 +489,7 @@ const BlogManagementPage = ({ handleLogout }) => {
                 >
                   <path d="M7 5l5 5-5 5" />
                 </svg>
-              </button>
+                </button>
             </div>
           )}
         </div>
