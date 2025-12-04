@@ -1,21 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Document,
-  Packer,
-  Paragraph,
-  Table,
-  TableCell,
-  TableRow,
-  TextRun,
-} from "docx";
+import { Document, Packer, Paragraph, Table, TableCell, TableRow } from "docx";
 import { saveAs } from "file-saver";
 import { useTranslation } from "react-i18next";
 import { authFetch } from "../authFetch";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { FaBrain } from "react-icons/fa";
-import { jwtDecode } from "jwt-decode";
 import { useTheme } from "../hooks/useTheme";
 
 function getPagination(current, total) {
@@ -67,7 +58,6 @@ export default function AnnouncementManagementPage({
   const pageSize = 5;
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -105,7 +95,7 @@ export default function AnnouncementManagementPage({
   ];
 
   // Lấy danh sách thông báo
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncements = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -121,11 +111,11 @@ export default function AnnouncementManagementPage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     fetchAnnouncements();
-  }, []);
+  }, [fetchAnnouncements]);
 
   useEffect(() => {
     if (alert.message) {
@@ -223,26 +213,6 @@ export default function AnnouncementManagementPage({
       setAlert({ message: t("deleteAnnouncementFailed"), type: "danger" });
     } finally {
       setDeleting(false);
-    }
-  };
-
-  // Bật/tắt trạng thái
-  const handleToggle = async (id) => {
-    setSaving(true);
-    setAlert({ message: "", type: "" });
-    try {
-      const token = localStorage.getItem("token");
-      const res = await authFetch(`/api/admin/announcements/${id}/toggle`, {
-        method: "PUT",
-        headers: { Authorization: "Bearer " + token },
-      });
-      if (!res.ok) throw new Error(t("updateStatusFailed"));
-      setAlert({ message: t("updateAnnouncementSuccess"), type: "success" });
-      fetchAnnouncements();
-    } catch (err) {
-      setAlert({ message: t("updateAnnouncementFailed"), type: "danger" });
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -517,20 +487,41 @@ export default function AnnouncementManagementPage({
                                 <td className="px-4 py-3 text-center align-middle dark:text-white">
                                   <div className="flex justify-center gap-2">
                                     <button
-                                      className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition-colors dark:bg-yellow-700 dark:hover:bg-yellow-800"
+                                      className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-full flex items-center gap-2 font-bold shadow-sm transition-all text-base"
                                       onClick={() => {
                                         setShowModal(true);
                                         setIsEdit(true);
                                         setModalAnnouncement(a);
                                       }}
                                     >
+                                      <svg
+                                        width="1.2em"
+                                        height="1.2em"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                      >
+                                        <path d="M17.414 2.586a2 2 0 00-2.828 0l-9.9 9.9A2 2 0 004 14v2a2 2 0 002 2h2a2 2 0 001.414-.586l9.9-9.9a2 2 0 000-2.828l-2.828-2.828zM5 16v-1.586l9.293-9.293 1.586 1.586L6.586 16H5zm2 0h1.586l9.293-9.293-1.586-1.586L7 14.414V16z"></path>
+                                      </svg>
                                       {t("edit")}
                                     </button>
                                     <button
-                                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors dark:bg-red-700 dark:hover:bg-red-800"
+                                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full flex items-center gap-2 font-bold shadow-sm transition-all text-base"
                                       onClick={() => handleDelete(a.id)}
                                       disabled={deleting}
                                     >
+                                      <svg
+                                        width="1.2em"
+                                        height="1.2em"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                      >
+                                        <path d="M6 8a1 1 0 011 1v6a1 1 0 11-2 0V9a1 1 0 011-1zm4 0a1 1 0 011 1v6a1 1 0 11-2 0V9a1 1 0 011-1zm4 0a1 1 0 011 1v6a1 1 0 11-2 0V9a1 1 0 011-1z"></path>
+                                        <path
+                                          fillRule="evenodd"
+                                          d="M4 6a1 1 0 011-1h10a1 1 0 011 1v1H4V6zm2-3a1 1 0 00-1 1v1h10V4a1 1 0 00-1-1H6z"
+                                          clipRule="evenodd"
+                                        ></path>
+                                      </svg>
                                       {deleting ? t("deleting") : t("delete")}
                                     </button>
                                   </div>

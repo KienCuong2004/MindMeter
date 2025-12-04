@@ -270,22 +270,22 @@ const AdminBlogReportsPage = ({ handleLogout }) => {
               <table className="w-full table-fixed">
                 <thead className="bg-blue-50 dark:bg-gray-900">
                   <tr>
-                    <th className="w-1/5 px-4 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                    <th className="w-1/5 px-1 py-3 text-left text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.reports.table.post")}
                     </th>
-                    <th className="w-1/5 px-3 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                    <th className="w-1/5 px-1 py-3 text-left text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.reports.table.reporter")}
                     </th>
-                    <th className="w-1/6 px-2 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                    <th className="w-1/6 px-1 py-3 text-left text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.reports.table.reason")}
                     </th>
-                    <th className="w-1/6 px-2 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                    <th className="w-1/6 px-1 py-3 text-left text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.reports.table.status")}
                     </th>
-                    <th className="w-1/6 px-2 py-4 text-left text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                    <th className="w-1/6 px-1 py-3 text-left text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.reports.table.createdAt")}
                     </th>
-                    <th className="w-1/6 px-3 py-4 text-center text-base font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
+                    <th className="w-1/6 px-1 py-3 text-center text-sm font-extrabold text-blue-800 dark:text-white uppercase tracking-wider border-b-2 border-blue-200 dark:border-gray-700">
                       {t("blog.reports.table.actions")}
                     </th>
                   </tr>
@@ -315,27 +315,27 @@ const AdminBlogReportsPage = ({ handleLogout }) => {
                         key={report.id}
                         className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       >
-                        <td className="px-4 py-4">
+                        <td className="px-1 py-3">
                           <div className="text-sm font-medium text-gray-800 dark:text-white truncate">
                             {report.postTitle || "N/A"}
                           </div>
                         </td>
-                        <td className="px-3 py-4 text-sm text-gray-800 dark:text-white">
+                        <td className="px-1 py-3 text-sm text-gray-800 dark:text-white">
                           {report.userName || "Unknown"}
                         </td>
-                        <td className="px-2 py-4 text-sm text-gray-800 dark:text-white">
+                        <td className="px-1 py-3 text-sm text-gray-800 dark:text-white">
                           {getReasonText(report.reason)}
                         </td>
-                        <td className="px-2 py-4">
+                        <td className="px-1 py-3">
                           <ReportStatusChip status={report.status} />
                         </td>
-                        <td className="px-2 py-4 text-sm text-gray-800 dark:text-white">
+                        <td className="px-1 py-3 text-sm text-gray-800 dark:text-white">
                           {new Date(report.createdAt).toLocaleDateString()}
                         </td>
-                        <td className="px-4 py-4">
-                          <div className="flex gap-2 justify-center items-center h-full flex-nowrap whitespace-nowrap px-2">
+                        <td className="px-1 py-3">
+                          <div className="flex gap-1 justify-start items-center h-full flex-nowrap whitespace-nowrap">
                             <button
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2 font-bold shadow-sm transition-all text-base whitespace-nowrap"
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-full flex items-center gap-1 font-bold shadow-sm transition-all text-sm whitespace-nowrap"
                               onClick={() => handleViewReport(report)}
                             >
                               <svg
@@ -355,7 +355,7 @@ const AdminBlogReportsPage = ({ handleLogout }) => {
                             </button>
                             {report.status === "PENDING" && (
                               <button
-                                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full flex items-center gap-2 font-bold shadow-sm transition-all text-base whitespace-nowrap"
+                                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-full flex items-center gap-1 font-bold shadow-sm transition-all text-sm whitespace-nowrap"
                                 onClick={() => handleReviewReport(report)}
                               >
                                 <svg
