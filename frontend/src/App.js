@@ -26,17 +26,37 @@ function App() {
     localStorage.setItem(THEME_CONSTANTS.STORAGE_KEY, theme);
   }, [theme]);
 
-  // Register service worker for PWA
+  // Register service worker for PWA (only in production)
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/service-worker.js")
-        .then(() => {
-          // Service Worker registered successfully
-        })
-        .catch(() => {
-          // Service Worker registration failed - silently fail
+    // Don't register service worker in development mode to avoid issues with OAuth callbacks
+    if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
+      // Unregister any existing service workers first
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => {
+          registration.unregister();
         });
+      });
+
+      // Register new service worker after a short delay
+      setTimeout(() => {
+        navigator.serviceWorker
+          .register("/service-worker.js")
+          .then(() => {
+            // Service Worker registered successfully
+          })
+          .catch(() => {
+            // Service Worker registration failed - silently fail
+          });
+      }, 1000);
+    } else if (process.env.NODE_ENV === "development") {
+      // Unregister service workers in development mode
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          registrations.forEach((registration) => {
+            registration.unregister();
+          });
+        });
+      }
     }
   }, []);
 

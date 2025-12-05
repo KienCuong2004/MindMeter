@@ -2,21 +2,30 @@
 // Service Worker for Push Notifications
 
 const CACHE_NAME = "mindmeter-v1";
-const urlsToCache = [
-  "/",
-  "/static/css/main.css",
-  "/static/js/main.js",
-  "/icon-192x192.png",
-  "/icon-512x512.png",
-];
+const urlsToCache = ["/", "/icon-192x192.png", "/icon-512x512.png"];
 
-// Install event - cache resources
+// Install event - cache resources (only cache non-static resources)
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
+      // Only cache resources that don't require authentication
+      return Promise.all(
+        urlsToCache.map((url) => {
+          return fetch(url, { credentials: "omit" })
+            .then((response) => {
+              if (response.ok) {
+                return cache.put(url, response);
+              }
+            })
+            .catch(() => {
+              // Ignore errors for individual cache items
+            });
+        })
+      );
     })
   );
+  // Skip waiting to activate immediately
+  self.skipWaiting();
 });
 
 // Activate event - clean up old caches
@@ -36,6 +45,28 @@ self.addEventListener("activate", (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+
+  // Don't intercept navigation requests (page loads)
+  if (event.request.mode === "navigate") {
+    // Let browser handle navigation requests directly
+    return;
+  }
+
+  // Don't cache or intercept API requests, OAuth callbacks, or authenticated resources
+  if (
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/auth/") ||
+    url.pathname.startsWith("/account-linking") ||
+    url.pathname.includes("/static/") ||
+    url.searchParams.has("token") // Don't cache URLs with token in query params
+  ) {
+    // For static files, API calls, and OAuth callbacks, fetch directly without cache
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // For other resources, try cache first, then network
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
@@ -54,18 +85,14 @@ self.addEventListener("push", (event) => {
     requireInteraction: false,
   };
 
-  event.waitUntil(
-    self.registration.showNotification("MindMeter", options)
-  );
+  event.waitUntil(self.registration.showNotification("MindMeter", options));
 });
 
 // Notification click event
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  event.waitUntil(
-    clients.openWindow("/")
-  );
+  event.waitUntil(clients.openWindow("/"));
 });
 
 // Background sync (optional - for offline support)
@@ -77,4 +104,3 @@ self.addEventListener("sync", (event) => {
     );
   }
 });
-
