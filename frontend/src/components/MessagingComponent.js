@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { FaPaperPlane, FaUser, FaCheck, FaCheckDouble } from "react-icons/fa";
 import MessagingService from "../services/messagingService";
-import { formatDistanceToNow } from "date-fns";
-import { vi, enUS } from "date-fns/locale";
 
 const MessagingComponent = ({
   otherUserId,
@@ -18,7 +16,6 @@ const MessagingComponent = ({
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
-  const currentLocale = i18n.language === "vi" ? vi : enUS;
 
   const scrollToBottom = (immediate = false) => {
     if (messagesContainerRef.current) {
@@ -169,13 +166,76 @@ const MessagingComponent = ({
     }
   };
 
+  // Format timestamp header (phía trên tin nhắn)
+  // - Nếu trong tuần: "Thứ, ngày/tháng/năm" (ví dụ: "T.5, 12/5/2025" hoặc "Thu, 12/5/2025")
+  // - Nếu khác tuần: chỉ "ngày/tháng/năm" (ví dụ: "12/5/2025")
+  const formatMessageHeaderTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+
+    // Kiểm tra xem có trong tuần này không (từ Chủ nhật đầu tuần)
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Chủ nhật đầu tuần
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const isInCurrentWeek = date >= startOfWeek;
+
+    // Format ngày tháng năm
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const dateStr = `${day}/${month}/${year}`;
+
+    if (i18n.language === "vi") {
+      if (isInCurrentWeek) {
+        // Trong tuần: hiển thị thứ + ngày tháng năm
+        const dayOfWeek = date.getDay(); // 0 = Chủ nhật, 1 = Thứ 2, ...
+        const dayNames = ["CN", "T.2", "T.3", "T.4", "T.5", "T.6", "T.7"];
+        return `${dayNames[dayOfWeek]}, ${dateStr}`;
+      } else {
+        // Khác tuần: chỉ hiển thị ngày tháng năm
+        return dateStr;
+      }
+    } else {
+      if (isInCurrentWeek) {
+        // Trong tuần: hiển thị thứ + ngày tháng năm
+        const dayOfWeek = date.getDay();
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        return `${dayNames[dayOfWeek]}, ${dateStr}`;
+      } else {
+        // Khác tuần: chỉ hiển thị ngày tháng năm
+        return dateStr;
+      }
+    }
+  };
+
+  // Format giờ:phút để hiển thị trong message bubble
   const formatMessageTime = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return formatDistanceToNow(date, {
-      addSuffix: true,
-      locale: currentLocale,
-    });
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  };
+
+  // Kiểm tra xem có cần hiển thị timestamp header không
+  const shouldShowTimestamp = (currentMessage, previousMessage) => {
+    if (!previousMessage) return true; // Hiển thị timestamp cho message đầu tiên
+
+    const currentDate = new Date(currentMessage.sentAt);
+    const previousDate = new Date(previousMessage.sentAt);
+
+    // Hiển thị timestamp nếu:
+    // 1. Khác ngày
+    // 2. Cách nhau hơn 5 phút
+    const timeDiff = Math.abs(currentDate - previousDate);
+    const fiveMinutes = 5 * 60 * 1000;
+
+    return (
+      currentDate.toDateString() !== previousDate.toDateString() ||
+      timeDiff > fiveMinutes
+    );
   };
 
   if (loading) {
@@ -192,11 +252,12 @@ const MessagingComponent = ({
       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-indigo-50 dark:bg-indigo-900/20">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center overflow-hidden relative">
-            {otherUserAvatarUrl ? (
+            {otherUserAvatarUrl && otherUserAvatarUrl.trim() !== "" ? (
               <>
                 <img
                   src={
-                    otherUserAvatarUrl.startsWith("http")
+                    otherUserAvatarUrl.startsWith("http") ||
+                    otherUserAvatarUrl.startsWith("//")
                       ? otherUserAvatarUrl
                       : `${
                           process.env.REACT_APP_API_URL ||
@@ -207,22 +268,24 @@ const MessagingComponent = ({
                             : `/${otherUserAvatarUrl}`
                         }`
                   }
-                  alt={otherUserName}
+                  alt={otherUserName || "User"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "flex";
+                    if (e.target.nextSibling) {
+                      e.target.nextSibling.style.display = "flex";
+                    }
                   }}
                 />
                 <div
-                  className="w-full h-full bg-indigo-500 flex items-center justify-center"
+                  className="w-full h-full bg-indigo-500 flex items-center justify-center absolute inset-0"
                   style={{ display: "none" }}
                 >
-                  <FaUser className="text-white" />
+                  <FaUser className="text-white text-sm" />
                 </div>
               </>
             ) : (
-              <FaUser className="text-white" />
+              <FaUser className="text-white text-sm" />
             )}
           </div>
           <div>
@@ -246,118 +309,139 @@ const MessagingComponent = ({
             <p>{t("messaging.noMessages")}</p>
           </div>
         ) : (
-          messages.map((message) => {
+          messages.map((message, index) => {
             const isOwnMessage = message.senderId === actualCurrentUserId;
             // Avatar should always be the sender's avatar (the person who sent this message)
             const avatarUrl = message.senderAvatarUrl;
+            const previousMessage = index > 0 ? messages[index - 1] : null;
+            const showTimestamp = shouldShowTimestamp(message, previousMessage);
+
             return (
-              <div
-                key={message.id}
-                className={`flex items-end gap-2 ${
-                  isOwnMessage ? "justify-end" : "justify-start"
-                }`}
-              >
-                {!isOwnMessage && (
-                  <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {avatarUrl ? (
-                      <>
-                        <img
-                          src={
-                            avatarUrl.startsWith("http")
-                              ? avatarUrl
-                              : `${
-                                  process.env.REACT_APP_API_URL ||
-                                  "http://localhost:8080"
-                                }${
-                                  avatarUrl.startsWith("/")
-                                    ? avatarUrl
-                                    : `/${avatarUrl}`
-                                }`
-                          }
-                          alt={message.senderName || otherUserName}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.nextSibling.style.display = "flex";
-                          }}
-                        />
-                        <div
-                          className="w-full h-full bg-indigo-500 flex items-center justify-center"
-                          style={{ display: "none" }}
-                        >
-                          <FaUser className="text-white text-xs" />
-                        </div>
-                      </>
-                    ) : (
-                      <FaUser className="text-white text-xs" />
-                    )}
+              <div key={message.id} className="space-y-1">
+                {/* Timestamp header - hiển thị phía trên message */}
+                {showTimestamp && (
+                  <div className="flex justify-center my-2">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
+                      {formatMessageHeaderTime(message.sentAt)}
+                    </span>
                   </div>
                 )}
+
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                    isOwnMessage
-                      ? "bg-indigo-500 text-white"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className={`flex items-end gap-2 ${
+                    isOwnMessage ? "justify-end" : "justify-start"
                   }`}
                 >
-                  <p className="text-sm">{message.message}</p>
-                  <div className="flex items-center justify-end gap-2 mt-1">
-                    <span
-                      className={`text-xs ${
-                        isOwnMessage
-                          ? "text-indigo-100"
-                          : "text-gray-500 dark:text-gray-400"
-                      }`}
-                    >
-                      {formatMessageTime(message.sentAt)}
-                    </span>
-                    {isOwnMessage && (
-                      <span className="text-xs">
-                        {message.isRead ? (
-                          <FaCheckDouble className="text-indigo-200" />
-                        ) : (
-                          <FaCheck className="text-indigo-200" />
-                        )}
+                  {!isOwnMessage && (
+                    <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+                      {avatarUrl && avatarUrl.trim() !== "" ? (
+                        <>
+                          <img
+                            src={
+                              avatarUrl.startsWith("http") ||
+                              avatarUrl.startsWith("//")
+                                ? avatarUrl
+                                : `${
+                                    process.env.REACT_APP_API_URL ||
+                                    "http://localhost:8080"
+                                  }${
+                                    avatarUrl.startsWith("/")
+                                      ? avatarUrl
+                                      : `/${avatarUrl}`
+                                  }`
+                            }
+                            alt={message.senderName || otherUserName || "User"}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                              if (e.target.nextSibling) {
+                                e.target.nextSibling.style.display = "flex";
+                              }
+                            }}
+                          />
+                          <div
+                            className="w-full h-full bg-indigo-500 flex items-center justify-center absolute inset-0"
+                            style={{ display: "none" }}
+                          >
+                            <FaUser className="text-white text-xs" />
+                          </div>
+                        </>
+                      ) : (
+                        <FaUser className="text-white text-xs" />
+                      )}
+                    </div>
+                  )}
+                  <div
+                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                      isOwnMessage
+                        ? "bg-indigo-500 text-white"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white"
+                    }`}
+                  >
+                    <p className="text-sm">{message.message}</p>
+                    <div className="flex items-center justify-end gap-2 mt-1">
+                      {/* Hiển thị giờ:phút trong message bubble */}
+                      <span
+                        className={`text-xs ${
+                          isOwnMessage
+                            ? "text-indigo-100"
+                            : "text-gray-500 dark:text-gray-400"
+                        }`}
+                      >
+                        {formatMessageTime(message.sentAt)}
                       </span>
-                    )}
+                      {/* Chỉ hiển thị read status cho tin nhắn của mình */}
+                      {isOwnMessage && (
+                        <span className="text-xs">
+                          {message.isRead ? (
+                            <FaCheckDouble className="text-indigo-200" />
+                          ) : (
+                            <FaCheck className="text-indigo-200" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {isOwnMessage && (
+                    <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+                      {avatarUrl && avatarUrl.trim() !== "" ? (
+                        <>
+                          <img
+                            src={
+                              avatarUrl.startsWith("http") ||
+                              avatarUrl.startsWith("//")
+                                ? avatarUrl
+                                : `${
+                                    process.env.REACT_APP_API_URL ||
+                                    "http://localhost:8080"
+                                  }${
+                                    avatarUrl.startsWith("/")
+                                      ? avatarUrl
+                                      : `/${avatarUrl}`
+                                  }`
+                            }
+                            alt={message.senderName || otherUserName || "User"}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                              if (e.target.nextSibling) {
+                                e.target.nextSibling.style.display = "flex";
+                              }
+                            }}
+                          />
+                          <div
+                            className="w-full h-full bg-indigo-500 flex items-center justify-center absolute inset-0"
+                            style={{ display: "none" }}
+                          >
+                            <FaUser className="text-white text-xs" />
+                          </div>
+                        </>
+                      ) : (
+                        <FaUser className="text-white text-xs" />
+                      )}
+                    </div>
+                  )}
                 </div>
-                {isOwnMessage && (
-                  <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {avatarUrl ? (
-                      <>
-                        <img
-                          src={
-                            avatarUrl.startsWith("http")
-                              ? avatarUrl
-                              : `${
-                                  process.env.REACT_APP_API_URL ||
-                                  "http://localhost:8080"
-                                }${
-                                  avatarUrl.startsWith("/")
-                                    ? avatarUrl
-                                    : `/${avatarUrl}`
-                                }`
-                          }
-                          alt={message.senderName || otherUserName}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                            e.target.nextSibling.style.display = "flex";
-                          }}
-                        />
-                        <div
-                          className="w-full h-full bg-indigo-500 flex items-center justify-center"
-                          style={{ display: "none" }}
-                        >
-                          <FaUser className="text-white text-xs" />
-                        </div>
-                      </>
-                    ) : (
-                      <FaUser className="text-white text-xs" />
-                    )}
-                  </div>
-                )}
               </div>
             );
           })
