@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useTranslation, Trans } from "react-i18next";
@@ -9,8 +9,11 @@ export default function AuthCallback() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get URL parameters for display
-  const params = new URLSearchParams(location.search);
+  // Get URL parameters for display - wrap in useMemo to avoid dependency issues
+  const params = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
   const email = params.get("email");
   const userName = params.get("name");
 
@@ -32,18 +35,34 @@ export default function AuthCallback() {
       try {
         const decoded = jwtDecode(token);
         // Lưu user vào localStorage
+        const avatarUrl = decoded.avatarUrl || null;
         user = {
           email: decoded.sub,
           role: decoded.role,
           firstName: decoded.firstName || "",
           lastName: decoded.lastName || "",
-          avatarUrl: decoded.avatarUrl || null,
+          avatarUrl: avatarUrl,
           plan: decoded.plan || "FREE",
           phone: decoded.phone,
           anonymous: decoded.anonymous || false,
+          // Thêm avatarTimestamp để force refresh avatar
+          avatarTimestamp: avatarUrl ? Date.now() : null,
         };
         localStorage.setItem("user", JSON.stringify(user));
         role = decoded.role;
+
+        // Dispatch event để notify các component khác về avatar update
+        if (avatarUrl) {
+          window.dispatchEvent(
+            new CustomEvent("avatarUpdated", {
+              detail: {
+                avatarUrl: avatarUrl,
+                timestamp: user.avatarTimestamp,
+                userId: user.email,
+              },
+            })
+          );
+        }
 
         // Nếu user mới cần đổi mật khẩu, lưu thông tin vào localStorage
         if (requiresPasswordChange) {
@@ -69,7 +88,7 @@ export default function AuthCallback() {
     } else {
       navigate("/login");
     }
-  }, [location, navigate, email, params, userName]);
+  }, [location.search, navigate, email, userName, params]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -112,7 +131,7 @@ export default function AuthCallback() {
                   i18nKey="accountLinking.welcomeMessage"
                   values={{ name: userName }}
                   components={[
-                    <span className="font-semibold text-indigo-600 dark:text-indigo-400" />
+                    <span className="font-semibold text-indigo-600 dark:text-indigo-400" />,
                   ]}
                 />
               </p>

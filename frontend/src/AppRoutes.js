@@ -111,6 +111,7 @@ export default function AppRoutes() {
             const res = await authFetch("/api/admin/profile");
             if (res.ok) {
               const userData = await res.json();
+              const avatarTimestamp = userData.avatarUrl ? Date.now() : null;
               setUser((prevUser) => {
                 const updatedUser = {
                   ...prevUser,
@@ -121,9 +122,37 @@ export default function AppRoutes() {
                   plan: userData.plan,
                   planStartDate: userData.planStartDate,
                   planExpiryDate: userData.planExpiryDate,
+                  avatarTimestamp: avatarTimestamp,
                 };
+
+                // Cập nhật localStorage
+                const storedUser = localStorage.getItem("user");
+                if (storedUser && storedUser !== "undefined") {
+                  try {
+                    const parsedUser = JSON.parse(storedUser);
+                    parsedUser.avatarUrl = userData.avatarUrl;
+                    parsedUser.avatarTimestamp = avatarTimestamp;
+                    localStorage.setItem("user", JSON.stringify(parsedUser));
+                  } catch (e) {
+                    // Handle localStorage error silently
+                  }
+                }
+
                 return updatedUser;
               });
+
+              // Dispatch event để notify các component khác
+              if (userData.avatarUrl) {
+                window.dispatchEvent(
+                  new CustomEvent("avatarUpdated", {
+                    detail: {
+                      avatarUrl: userData.avatarUrl,
+                      timestamp: avatarTimestamp,
+                      userId: decoded.sub,
+                    },
+                  })
+                );
+              }
             } else {
               // Failed to fetch user data
             }
@@ -131,6 +160,7 @@ export default function AppRoutes() {
             const res = await authFetch("/api/expert/profile");
             if (res.ok) {
               const userData = await res.json();
+              const avatarTimestamp = userData.avatarUrl ? Date.now() : null;
               setUser((prevUser) => {
                 const updatedUser = {
                   ...prevUser,
@@ -141,9 +171,37 @@ export default function AppRoutes() {
                   plan: userData.plan,
                   planStartDate: userData.planStartDate,
                   planExpiryDate: userData.planExpiryDate,
+                  avatarTimestamp: avatarTimestamp,
                 };
+
+                // Cập nhật localStorage
+                const storedUser = localStorage.getItem("user");
+                if (storedUser && storedUser !== "undefined") {
+                  try {
+                    const parsedUser = JSON.parse(storedUser);
+                    parsedUser.avatarUrl = userData.avatarUrl;
+                    parsedUser.avatarTimestamp = avatarTimestamp;
+                    localStorage.setItem("user", JSON.stringify(parsedUser));
+                  } catch (e) {
+                    // Handle localStorage error silently
+                  }
+                }
+
                 return updatedUser;
               });
+
+              // Dispatch event để notify các component khác
+              if (userData.avatarUrl) {
+                window.dispatchEvent(
+                  new CustomEvent("avatarUpdated", {
+                    detail: {
+                      avatarUrl: userData.avatarUrl,
+                      timestamp: avatarTimestamp,
+                      userId: decoded.sub,
+                    },
+                  })
+                );
+              }
             } else {
               // Failed to fetch user data
             }
@@ -193,6 +251,8 @@ export default function AppRoutes() {
               userData = {};
             }
           }
+          const avatarUrl =
+            decoded.avatarUrl || userData.avatarUrl || userData.avatar;
           const userObject = {
             email: decoded.sub,
             role: decoded.role,
@@ -200,9 +260,20 @@ export default function AppRoutes() {
             lastName: decoded.lastName || userData.lastName || "",
             plan: decoded.plan || userData.plan || "FREE",
             phone: decoded.phone || userData.phone,
-            avatarUrl: decoded.avatarUrl || userData.avatarUrl,
+            avatarUrl: avatarUrl,
             anonymous: decoded.anonymous || userData.anonymous || false,
+            // Thêm avatarTimestamp để force refresh avatar
+            avatarTimestamp:
+              userData.avatarTimestamp || (avatarUrl ? Date.now() : null),
           };
+
+          // Cập nhật localStorage với avatarTimestamp nếu chưa có
+          if (avatarUrl && !userData.avatarTimestamp) {
+            userData.avatarUrl = avatarUrl;
+            userData.avatarTimestamp = userObject.avatarTimestamp;
+            localStorage.setItem("user", JSON.stringify(userData));
+          }
+
           setUser(userObject);
           setLoadingUser(false);
           isProcessingUser.current = false;
@@ -258,6 +329,8 @@ export default function AppRoutes() {
           }
         }
 
+        const avatarUrl =
+          decoded.avatarUrl || userData.avatarUrl || userData.avatar;
         const userObject = {
           email: decoded.sub,
           role: decoded.role,
@@ -265,9 +338,19 @@ export default function AppRoutes() {
           lastName: decoded.lastName || userData.lastName || "",
           plan: decoded.plan || userData.plan || "FREE",
           phone: decoded.phone || userData.phone,
-          avatarUrl: decoded.avatarUrl || userData.avatarUrl,
+          avatarUrl: avatarUrl,
           anonymous: decoded.anonymous || userData.anonymous || false,
+          // Thêm avatarTimestamp để force refresh avatar
+          avatarTimestamp:
+            userData.avatarTimestamp || (avatarUrl ? Date.now() : null),
         };
+
+        // Cập nhật localStorage với avatarTimestamp nếu chưa có
+        if (avatarUrl && !userData.avatarTimestamp) {
+          userData.avatarUrl = avatarUrl;
+          userData.avatarTimestamp = userObject.avatarTimestamp;
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
 
         setUser(userObject);
         setLoadingUser(false);
@@ -297,11 +380,18 @@ export default function AppRoutes() {
             navigate("/admin/dashboard", { replace: true });
           }
         } else if (decoded.role === "EXPERT") {
-          // Expert chỉ được ở /expert/* hoặc public paths
+          // Expert được ở /expert/*, /messaging, /appointments, hoặc public paths
           // Không redirect nếu đang ở /saved-articles hoặc các trang blog (để hiển thị 404)
+          const isMessagingPath =
+            window.location.pathname === "/messaging" ||
+            window.location.pathname.startsWith("/messaging/");
+          const isAppointmentsPath =
+            window.location.pathname === "/expert/appointments";
           if (
             !shouldAllowRestrictedPagesForAdminExpert &&
             !window.location.pathname.startsWith("/expert") &&
+            !isMessagingPath &&
+            !isAppointmentsPath &&
             !publicPaths.includes(window.location.pathname) &&
             !isBlogPostPath
           ) {

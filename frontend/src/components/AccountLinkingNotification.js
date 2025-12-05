@@ -37,15 +37,18 @@ const AccountLinkingNotification = () => {
           const decoded = jwtDecode(token);
 
           // Lưu user object vào localStorage giống như AuthCallback
+          const avatarUrl = decoded.avatarUrl || null;
           const user = {
             email: decoded.sub || email,
             role: decoded.role,
             firstName: decoded.firstName || "",
             lastName: decoded.lastName || "",
-            avatarUrl: decoded.avatarUrl || null,
+            avatarUrl: avatarUrl,
             plan: decoded.plan || "FREE",
             phone: decoded.phone,
             anonymous: decoded.anonymous || false,
+            // Thêm avatarTimestamp để force refresh avatar
+            avatarTimestamp: avatarUrl ? Date.now() : null,
           };
 
           // Tạo name từ firstName và lastName
@@ -56,6 +59,19 @@ const AccountLinkingNotification = () => {
             "User";
 
           localStorage.setItem("user", JSON.stringify(user));
+
+          // Dispatch event để notify các component khác về avatar update
+          if (avatarUrl) {
+            window.dispatchEvent(
+              new CustomEvent("avatarUpdated", {
+                detail: {
+                  avatarUrl: avatarUrl,
+                  timestamp: user.avatarTimestamp,
+                  userId: user.email,
+                },
+              })
+            );
+          }
 
           // Lưu thời gian đăng nhập để chống spam mua gói
           const loginTimeKey = `lastLogin_${user.email}`;
