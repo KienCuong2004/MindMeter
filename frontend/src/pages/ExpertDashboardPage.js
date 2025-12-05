@@ -53,13 +53,29 @@ export default function ExpertDashboardPage({
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        userObj.firstName = decoded.firstName || "";
-        userObj.lastName = decoded.lastName || "";
+        // Lấy user từ localStorage nếu có (có thể có avatarUrl mới hơn)
+        const storedUser = localStorage.getItem("user");
+        let parsedUser = null;
+        if (storedUser && storedUser !== "undefined") {
+          try {
+            parsedUser = JSON.parse(storedUser);
+          } catch (e) {
+            // Ignore parse error
+          }
+        }
+        
+        userObj.firstName = parsedUser?.firstName || decoded.firstName || "";
+        userObj.lastName = parsedUser?.lastName || decoded.lastName || "";
         userObj.email = decoded.sub || decoded.email || "";
-        userObj.avatarUrl = decoded.avatarUrl || decoded.avatar || null;
+        // Ưu tiên avatarUrl từ localStorage (có thể mới hơn), sau đó từ token
+        userObj.avatarUrl = parsedUser?.avatarUrl || parsedUser?.avatar || decoded.avatarUrl || decoded.avatar || null;
         userObj.role = decoded.role || "";
-        userObj.plan = decoded.plan || "FREE";
-        userObj.phone = decoded.phone || "";
+        userObj.plan = parsedUser?.plan || decoded.plan || "FREE";
+        userObj.phone = parsedUser?.phone || decoded.phone || "";
+        // Thêm avatarTimestamp để force refresh
+        if (parsedUser?.avatarTimestamp) {
+          userObj.avatarTimestamp = parsedUser.avatarTimestamp;
+        }
       } catch {}
     }
     return userObj;

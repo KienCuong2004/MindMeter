@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { jwtDecode } from "jwt-decode";
 import { FaComments, FaUser, FaBrain } from "react-icons/fa";
@@ -43,41 +43,79 @@ const MessagingPage = () => {
     }
   }, []);
 
+  const isFetchingUnreadCountRef = useRef(false);
+  const isFetchingConversationsRef = useRef(false);
+
   const loadUnreadCount = useCallback(async () => {
+    // Tránh fetch trùng lặp
+    if (isFetchingUnreadCountRef.current) return;
+
     try {
+      isFetchingUnreadCountRef.current = true;
       const count = await MessagingService.getUnreadCount();
       setUnreadCount(count);
     } catch (error) {
-      console.error("Error loading unread count:", error);
+      // Chỉ log error nếu không phải rate limit
+      if (
+        !error.message?.includes("Rate limit") &&
+        !error.message?.includes("429")
+      ) {
+        console.error("Error loading unread count:", error);
+      }
+      // Không set unreadCount về 0 để giữ giá trị cũ
+    } finally {
+      isFetchingUnreadCountRef.current = false;
     }
   }, []);
 
   const loadConversations = useCallback(async () => {
+    // Tránh fetch trùng lặp
+    if (isFetchingConversationsRef.current) return;
+
     try {
       setLoading(true);
+      isFetchingConversationsRef.current = true;
       const data = await MessagingService.getConversations();
-      setConversations(data || []);
-      // Also refresh unread count when refreshing conversations
-      loadUnreadCount();
+      if (data && Array.isArray(data)) {
+        setConversations(data);
+      }
     } catch (error) {
-      console.error("Error loading conversations:", error);
+      // Chỉ log error nếu không phải rate limit
+      if (
+        !error.message?.includes("Rate limit") &&
+        !error.message?.includes("429")
+      ) {
+        console.error("Error loading conversations:", error);
+      }
+      // Giữ conversations cũ nếu có lỗi rate limit
     } finally {
       setLoading(false);
+      isFetchingConversationsRef.current = false;
     }
-  }, [loadUnreadCount]);
+  }, []);
 
   useEffect(() => {
-    loadConversations();
-    loadUnreadCount();
+    // Chỉ fetch một lần khi mount
+    const fetchData = async () => {
+      await loadConversations();
+      await loadUnreadCount();
+    };
 
-    // Refresh unread count every 30 seconds
-    const interval = setInterval(loadUnreadCount, 30000);
+    fetchData();
+
+    // Refresh conversations và unread count every 2 minutes (tăng interval để tránh rate limit)
+    const interval = setInterval(() => {
+      fetchData();
+    }, 120000); // 2 phút
+
     return () => clearInterval(interval);
-  }, [loadConversations, loadUnreadCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Chỉ chạy một lần khi mount
 
   const handleSelectConversation = (conversation) => {
     setSelectedConversation(conversation);
-    loadUnreadCount(); // Refresh unread count
+    // Không refresh unread count ngay lập tức để tránh rate limit
+    // Sẽ được refresh tự động qua interval
     // Prevent page scroll when selecting conversation
     window.scrollTo(0, 0);
   };
@@ -139,11 +177,13 @@ const MessagingPage = () => {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0 overflow-hidden relative">
-                          {conv.otherUserAvatarUrl ? (
+                          {conv.otherUserAvatarUrl &&
+                          conv.otherUserAvatarUrl.trim() !== "" ? (
                             <>
                               <img
                                 src={
-                                  conv.otherUserAvatarUrl.startsWith("http")
+                                  conv.otherUserAvatarUrl.startsWith("http") ||
+                                  conv.otherUserAvatarUrl.startsWith("//")
                                     ? conv.otherUserAvatarUrl
                                     : `${
                                         process.env.REACT_APP_API_URL ||
@@ -154,22 +194,24 @@ const MessagingPage = () => {
                                           : `/${conv.otherUserAvatarUrl}`
                                       }`
                                 }
-                                alt={conv.otherUserName}
+                                alt={conv.otherUserName || "User"}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   e.target.style.display = "none";
-                                  e.target.nextSibling.style.display = "flex";
+                                  if (e.target.nextSibling) {
+                                    e.target.nextSibling.style.display = "flex";
+                                  }
                                 }}
                               />
                               <div
-                                className="w-full h-full bg-indigo-500 flex items-center justify-center"
+                                className="w-full h-full bg-indigo-500 flex items-center justify-center absolute inset-0"
                                 style={{ display: "none" }}
                               >
-                                <FaUser className="text-white" />
+                                <FaUser className="text-white text-sm" />
                               </div>
                             </>
                           ) : (
-                            <FaUser className="text-white" />
+                            <FaUser className="text-white text-sm" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">

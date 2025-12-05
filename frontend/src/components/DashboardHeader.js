@@ -28,25 +28,30 @@ import MessagingService from "../services/messagingService";
 
 // Utility function to handle Google Profile Image URLs
 function getOptimizedAvatarUrl(avatarUrl, timestamp = null) {
-  if (!avatarUrl) return null;
+  if (!avatarUrl || avatarUrl.trim() === "") return null;
 
-  let optimizedUrl = avatarUrl;
+  let optimizedUrl = avatarUrl.trim();
 
   // Xử lý relative path (ví dụ: /uploads/avatars/...)
-  if (!avatarUrl.startsWith("http")) {
+  if (!optimizedUrl.startsWith("http")) {
     // Nếu là relative path, thêm base URL
     const API_BASE_URL =
       process.env.REACT_APP_API_URL || "http://localhost:8080";
-    optimizedUrl = avatarUrl.startsWith("/")
-      ? `${API_BASE_URL}${avatarUrl}`
-      : `${API_BASE_URL}/${avatarUrl}`;
+    optimizedUrl = optimizedUrl.startsWith("/")
+      ? `${API_BASE_URL}${optimizedUrl}`
+      : `${API_BASE_URL}/${optimizedUrl}`;
   }
 
   // If it's a Google Profile Image, optimize it
   if (optimizedUrl.includes("googleusercontent.com")) {
-    // Remove size parameters and add our own for better control
-    const baseUrl = optimizedUrl.split("=")[0];
-    optimizedUrl = `${baseUrl}=s96-c`;
+    // Nếu URL bị cắt ngắn (không có =s...), thêm size parameter
+    if (!optimizedUrl.includes("=")) {
+      optimizedUrl = `${optimizedUrl}=s96-c`;
+    } else {
+      // Remove size parameters và add our own for better control
+      const baseUrl = optimizedUrl.split("=")[0];
+      optimizedUrl = `${baseUrl}=s96-c`;
+    }
   }
 
   // Add cache-busting parameter if timestamp is provided
@@ -101,20 +106,35 @@ export default function DashboardHeader({
   // Force refresh avatar khi component mount hoặc user thay đổi
   useEffect(() => {
     if (user) {
+      // Force refresh avatar khi user thay đổi (đăng nhập, cập nhật profile)
+      const avatarUrl = user.avatarUrl || user.avatar;
+
       // Lấy avatar timestamp từ localStorage để force refresh
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser);
-          if (parsedUser.avatarTimestamp) {
-            setAvatarKey(parsedUser.avatarTimestamp); // Force avatar refresh
+          // Nếu có avatarUrl trong user prop hoặc localStorage, force refresh
+          if (avatarUrl || parsedUser.avatarUrl || parsedUser.avatar) {
+            // Tạo timestamp mới để force refresh
+            const timestamp = parsedUser.avatarTimestamp || Date.now();
+            setAvatarKey(timestamp);
+
+            // Cập nhật localStorage với timestamp nếu chưa có
+            if (!parsedUser.avatarTimestamp) {
+              parsedUser.avatarTimestamp = timestamp;
+              localStorage.setItem("user", JSON.stringify(parsedUser));
+            }
           }
         } catch (error) {
           // Error parsing stored user
         }
+      } else if (avatarUrl) {
+        // Nếu không có storedUser nhưng có avatarUrl trong prop, tạo timestamp mới
+        setAvatarKey(Date.now());
       }
     }
-  }, [user]);
+  }, [user, user?.avatarUrl, user?.avatar]);
 
   // Global avatar refresh mechanism
   useEffect(() => {
@@ -213,6 +233,8 @@ export default function DashboardHeader({
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [internalMessagingUnreadCount, setInternalMessagingUnreadCount] =
     useState(0);
+  const [isFetchingMessagingCount, setIsFetchingMessagingCount] =
+    useState(false);
 
   // Fetch notifications khi mở popup
   useEffect(() => {
@@ -288,33 +310,63 @@ export default function DashboardHeader({
     // Chỉ fetch nếu không được truyền vào từ prop
     if (messagingUnreadCount === undefined || messagingUnreadCount === null) {
       const fetchMessagingUnreadCount = () => {
+        // Tránh fetch trùng lặp
+        if (isFetchingMessagingCount) return;
+
         if (
           (user?.role === "STUDENT" || user?.role === "EXPERT") &&
           !isAnonymousUser(user)
         ) {
+          setIsFetchingMessagingCount(true);
           MessagingService.getUnreadCount()
             .then((count) => {
-              setInternalMessagingUnreadCount(count || 0);
+              // Đảm bảo count là số hợp lệ
+              const validCount =
+                typeof count === "number" ? count : parseInt(count) || 0;
+              setInternalMessagingUnreadCount(validCount);
             })
-            .catch(() => {
-              setInternalMessagingUnreadCount(0);
+            .catch((error) => {
+              // Chỉ log error nếu không phải rate limit
+              if (
+                !error.message?.includes("Rate limit") &&
+                !error.message?.includes("429")
+              ) {
+                console.error("Error fetching messaging unread count:", error);
+              }
+              // Không reset về 0 nếu có lỗi rate limit, giữ giá trị cũ
+              if (
+                !error.message?.includes("Rate limit") &&
+                !error.message?.includes("429")
+              ) {
+                setInternalMessagingUnreadCount(0);
+              }
+            })
+            .finally(() => {
+              setIsFetchingMessagingCount(false);
             });
         } else {
           setInternalMessagingUnreadCount(0);
         }
       };
 
-      // Fetch ngay lập tức
-      fetchMessagingUnreadCount();
+      // Fetch ngay lập tức (chỉ khi user thay đổi, không phải khi messagingUnreadCount thay đổi)
+      if (user) {
+        fetchMessagingUnreadCount();
+      }
 
-      // Refresh messaging unread count every 30 seconds
-      const interval = setInterval(fetchMessagingUnreadCount, 30000);
+      // Refresh messaging unread count every 60 seconds (reduced frequency to avoid rate limiting)
+      const interval = setInterval(() => {
+        if (!isFetchingMessagingCount) {
+          fetchMessagingUnreadCount();
+        }
+      }, 60000);
       return () => clearInterval(interval);
     } else {
       // Nếu được truyền vào từ prop, reset internal state
       setInternalMessagingUnreadCount(0);
     }
-  }, [user, messagingUnreadCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.role, user?.id, messagingUnreadCount]);
 
   // Sử dụng messagingUnreadCount từ prop hoặc internal state
   // Nếu prop được truyền vào (kể cả 0), sử dụng prop. Nếu không (undefined), dùng internal state
@@ -1193,9 +1245,11 @@ export default function DashboardHeader({
                         }}
                       >
                         <FaComments className="text-purple-500 dark:text-purple-400" />
-                        <span>{t("messaging.conversations")}</span>
+                        <span className="flex-1">
+                          {t("messaging.conversations")}
+                        </span>
                         {displayMessagingUnreadCount > 0 && (
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
+                          <span className="ml-auto bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center flex items-center justify-center">
                             {displayMessagingUnreadCount > 99
                               ? "99+"
                               : displayMessagingUnreadCount}

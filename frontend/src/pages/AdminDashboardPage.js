@@ -153,18 +153,38 @@ export default function AdminDashboardPage() {
       role: "",
     };
 
-    // Nếu không có user từ props, lấy từ JWT token
+    // Nếu không có user từ props, lấy từ localStorage trước, sau đó từ JWT token
+    const storedUser = localStorage.getItem("user");
+    let parsedUser = null;
+    if (storedUser && storedUser !== "undefined") {
+      try {
+        parsedUser = JSON.parse(storedUser);
+      } catch (e) {
+        // Ignore parse error
+      }
+    }
+
     const token = localStorage.getItem("token");
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        userObj.firstName = decoded.firstName || "";
-        userObj.lastName = decoded.lastName || "";
+        userObj.firstName = parsedUser?.firstName || decoded.firstName || "";
+        userObj.lastName = parsedUser?.lastName || decoded.lastName || "";
         userObj.email = decoded.sub || decoded.email || "";
-        userObj.avatarUrl = decoded.avatarUrl || decoded.avatar || null;
+        // Ưu tiên avatarUrl từ localStorage (có thể mới hơn), sau đó từ token
+        userObj.avatarUrl =
+          parsedUser?.avatarUrl ||
+          parsedUser?.avatar ||
+          decoded.avatarUrl ||
+          decoded.avatar ||
+          null;
         userObj.role = decoded.role || "";
-        userObj.plan = decoded.plan || "FREE";
-        userObj.phone = decoded.phone || "";
+        userObj.plan = parsedUser?.plan || decoded.plan || "FREE";
+        userObj.phone = parsedUser?.phone || decoded.phone || "";
+        // Thêm avatarTimestamp để force refresh
+        userObj.avatarTimestamp =
+          parsedUser?.avatarTimestamp ||
+          (userObj.avatarUrl ? Date.now() : null);
       } catch {}
     }
     return userObj;
@@ -180,22 +200,66 @@ export default function AdminDashboardPage() {
         const res = await authFetch("/api/admin/profile");
         if (res.ok) {
           const data = await res.json();
+          const avatarUrl = data.avatarUrl || data.avatar || null;
+          const avatarTimestamp = avatarUrl ? Date.now() : null;
+
+          // Cập nhật localStorage trước
+          const storedUser = localStorage.getItem("user");
+          if (storedUser && storedUser !== "undefined") {
+            try {
+              const parsedUser = JSON.parse(storedUser);
+              if (avatarUrl) {
+                parsedUser.avatarUrl = avatarUrl;
+                parsedUser.avatar = avatarUrl;
+              }
+              parsedUser.avatarTimestamp =
+                avatarTimestamp || parsedUser.avatarTimestamp;
+              localStorage.setItem("user", JSON.stringify(parsedUser));
+            } catch (e) {
+              // Handle localStorage error silently
+            }
+          }
+
           // Cập nhật user với avatar mới nhất từ backend
-          setUser((prev) => ({
-            ...prev,
-            avatarUrl: data.avatarUrl || data.avatar || prev.avatarUrl || null,
-            avatar: data.avatarUrl || data.avatar || prev.avatar || null,
-            firstName: data.firstName || prev.firstName || "",
-            lastName: data.lastName || prev.lastName || "",
-            phone: data.phone || prev.phone || "",
-            plan: data.plan || prev.plan || "FREE",
-          }));
+          setUser((prev) => {
+            const updatedUser = {
+              ...prev,
+              avatarUrl: avatarUrl || prev.avatarUrl || null,
+              avatar: avatarUrl || prev.avatar || null,
+              firstName: data.firstName || prev.firstName || "",
+              lastName: data.lastName || prev.lastName || "",
+              phone: data.phone || prev.phone || "",
+              plan: data.plan || prev.plan || "FREE",
+              avatarTimestamp: avatarTimestamp || prev.avatarTimestamp,
+            };
+
+            return updatedUser;
+          });
+
+          // Force re-render avatar
+          setAvatarUpdateKey((prev) => prev + 1);
+
+          // Dispatch event để notify các component khác
+          if (avatarUrl) {
+            // Sử dụng email từ data (không cần user?.email vì data đã có email)
+            const userEmail = data.email || "";
+            window.dispatchEvent(
+              new CustomEvent("avatarUpdated", {
+                detail: {
+                  avatarUrl: avatarUrl,
+                  timestamp: avatarTimestamp,
+                  userId: userEmail,
+                },
+              })
+            );
+          }
         }
       } catch (err) {
         // Silently fail, fallback to token data
       }
     };
     fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
