@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   FaUserCircle,
   FaSignOutAlt,
@@ -102,39 +102,71 @@ export default function DashboardHeader({
 }) {
   // Force re-render khi user thay đổi
   const [avatarKey, setAvatarKey] = useState(0);
+  const prevAvatarRef = useRef(null);
+  const prevAvatarTimestampRef = useRef(null);
 
   // Force refresh avatar khi component mount hoặc user thay đổi
   useEffect(() => {
     if (user) {
       // Force refresh avatar khi user thay đổi (đăng nhập, cập nhật profile)
       const avatarUrl = user.avatarUrl || user.avatar;
+      const currentAvatarTimestamp = user.avatarTimestamp;
 
-      // Lấy avatar timestamp từ localStorage để force refresh
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          // Nếu có avatarUrl trong user prop hoặc localStorage, force refresh
-          if (avatarUrl || parsedUser.avatarUrl || parsedUser.avatar) {
-            // Tạo timestamp mới để force refresh
-            const timestamp = parsedUser.avatarTimestamp || Date.now();
-            setAvatarKey(timestamp);
+      // Chỉ update nếu avatar URL hoặc timestamp thực sự thay đổi
+      if (
+        prevAvatarRef.current !== avatarUrl ||
+        prevAvatarTimestampRef.current !== currentAvatarTimestamp
+      ) {
+        prevAvatarRef.current = avatarUrl;
+        prevAvatarTimestampRef.current = currentAvatarTimestamp;
 
-            // Cập nhật localStorage với timestamp nếu chưa có
-            if (!parsedUser.avatarTimestamp) {
-              parsedUser.avatarTimestamp = timestamp;
-              localStorage.setItem("user", JSON.stringify(parsedUser));
+        // Lấy avatar timestamp từ localStorage để force refresh
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser);
+            // Nếu có avatarUrl trong user prop hoặc localStorage, force refresh
+            if (avatarUrl || parsedUser.avatarUrl || parsedUser.avatar) {
+              // Tạo timestamp mới để force refresh
+              const timestamp =
+                parsedUser.avatarTimestamp ||
+                currentAvatarTimestamp ||
+                Date.now();
+              setAvatarKey((prev) => {
+                // Chỉ update nếu timestamp thực sự khác
+                if (prev !== timestamp) {
+                  return timestamp;
+                }
+                return prev;
+              });
+
+              // Cập nhật localStorage với timestamp nếu chưa có
+              if (!parsedUser.avatarTimestamp && timestamp) {
+                parsedUser.avatarTimestamp = timestamp;
+                localStorage.setItem("user", JSON.stringify(parsedUser));
+              }
             }
+          } catch (error) {
+            // Error parsing stored user
           }
-        } catch (error) {
-          // Error parsing stored user
+        } else if (avatarUrl) {
+          // Nếu không có storedUser nhưng có avatarUrl trong prop, tạo timestamp mới
+          const newTimestamp = currentAvatarTimestamp || Date.now();
+          setAvatarKey((prev) => {
+            if (prev !== newTimestamp) {
+              return newTimestamp;
+            }
+            return prev;
+          });
         }
-      } else if (avatarUrl) {
-        // Nếu không có storedUser nhưng có avatarUrl trong prop, tạo timestamp mới
-        setAvatarKey(Date.now());
       }
+    } else {
+      // Reset refs khi user is null
+      prevAvatarRef.current = null;
+      prevAvatarTimestampRef.current = null;
     }
-  }, [user, user?.avatarUrl, user?.avatar]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.avatarUrl, user?.avatar, user?.avatarTimestamp]);
 
   // Global avatar refresh mechanism
   useEffect(() => {

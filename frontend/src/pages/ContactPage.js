@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import DashboardHeader from "../components/DashboardHeader";
@@ -19,48 +19,86 @@ export default function ContactPage() {
   const [isSending, setIsSending] = useState(false);
   const [cooldown, setCooldown] = useState(0); // giây còn lại
 
-  // Đồng bộ logic lấy user như các trang public khác
-  let user = null;
-  let u = getCurrentUser();
-  const token = getCurrentToken();
-  if (u) {
-    if (u.anonymous === true || u.role === "ANONYMOUS" || u.email === null) {
-      u = {
-        ...u,
-        name: u.name || t("anonymousUser.name"),
-        anonymous: true,
-        role: u.role || "STUDENT",
-      };
+  // Đồng bộ logic lấy user như các trang public khác - sử dụng useMemo để tránh re-render vô hạn
+  const user = useMemo(() => {
+    let userObj = null;
+    let u = getCurrentUser();
+    const token = getCurrentToken();
+
+    // Helper function để tạo name từ firstName và lastName
+    const createName = (user) => {
+      if (user.name) return user.name;
+      if (user.firstName || user.lastName) {
+        return (
+          (user.firstName || "") + (user.lastName ? " " + user.lastName : "")
+        ).trim();
+      }
+      return "";
+    };
+
+    if (u) {
+      // Tạo name nếu chưa có
+      if (!u.name && (u.firstName || u.lastName)) {
+        u.name = createName(u);
+      }
+
+      if (u.anonymous === true || u.role === "ANONYMOUS" || u.email === null) {
+        u = {
+          ...u,
+          name: u.name || t("anonymousUser.name"),
+          anonymous: true,
+          role: u.role || "STUDENT",
+        };
+      }
+      userObj = u;
+    } else if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        let decodedUser = {};
+        decodedUser.name = (
+          (decoded.firstName || "") +
+          (decoded.lastName ? " " + decoded.lastName : "")
+        ).trim();
+        decodedUser.email = decoded.sub || decoded.email || "";
+        if (!decodedUser.name)
+          decodedUser.name = decodedUser.email || "Student";
+        if (decoded.avatar) decodedUser.avatar = decoded.avatar;
+        if (decoded.role) decodedUser.role = decoded.role;
+        if (decoded.anonymous) decodedUser.anonymous = true;
+        if (decodedUser.anonymous && !decodedUser.role)
+          decodedUser.role = "STUDENT";
+        if (decodedUser.anonymous && !decodedUser.name)
+          decodedUser.name = t("anonymousUser.name");
+        userObj = decodedUser;
+      } catch {}
     }
-    user = u;
-  } else if (token) {
-    try {
-      const decoded = jwtDecode(token);
-      let userObj = {};
-      userObj.name = (
-        (decoded.firstName || "") +
-        (decoded.lastName ? " " + decoded.lastName : "")
-      ).trim();
-      userObj.email = decoded.sub || decoded.email || "";
-      if (!userObj.name) userObj.name = userObj.email || "Student";
-      if (decoded.avatar) userObj.avatar = decoded.avatar;
-      if (decoded.role) userObj.role = decoded.role;
-      if (decoded.anonymous) userObj.anonymous = true;
-      if (userObj.anonymous && !userObj.role) userObj.role = "STUDENT";
-      if (userObj.anonymous && !userObj.name)
-        userObj.name = t("anonymousUser.name");
-      user = userObj;
-    } catch {}
-  }
+    return userObj;
+  }, [t]);
 
   // Tự động điền họ tên và email nếu đã đăng nhập
   useEffect(() => {
     if (user && user.email) {
-      setForm((prev) => ({
-        ...prev,
-        name: user.name || "",
-        email: user.email || "",
-      }));
+      // Tạo name từ firstName và lastName nếu name chưa có
+      let userName = user.name;
+      if (!userName && (user.firstName || user.lastName)) {
+        userName = (
+          (user.firstName || "") + (user.lastName ? " " + user.lastName : "")
+        ).trim();
+      }
+
+      setForm((prev) => {
+        // Chỉ update nếu giá trị thực sự thay đổi để tránh re-render vô hạn
+        const newName = userName || "";
+        const newEmail = user.email || "";
+        if (prev.name === newName && prev.email === newEmail) {
+          return prev;
+        }
+        return {
+          ...prev,
+          name: newName,
+          email: newEmail,
+        };
+      });
     }
   }, [user]);
 
@@ -117,7 +155,8 @@ export default function ContactPage() {
     try {
       setIsSending(true);
       const token = localStorage.getItem("token");
-      const res = await fetch("/api/contact", {
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+      const res = await fetch(`${API_URL}/api/contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
