@@ -48,8 +48,9 @@ const ChangePasswordModal = ({
         ? { newPassword }
         : { currentPassword, newPassword };
 
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}${endpoint}`,
+        `${API_URL}${endpoint}`,
         {
           method: "POST",
           headers: {
@@ -75,8 +76,9 @@ const ChangePasswordModal = ({
               const email = payload.sub;
 
               // Auto login with new password
+              const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
               const loginResponse = await fetch(
-                `${process.env.REACT_APP_API_URL}/api/auth/login`,
+                `${API_URL}/api/auth/login`,
                 {
                   method: "POST",
                   headers: {

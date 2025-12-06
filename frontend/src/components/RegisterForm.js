@@ -86,8 +86,9 @@ function RegisterForm({ onRegister, onSwitchForm }) {
     setLoading(true);
 
     try {
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
       const res = await authFetch(
-        `${process.env.REACT_APP_API_URL}/api/auth/register`,
+        `${API_URL}/api/auth/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -202,7 +203,8 @@ function RegisterForm({ onRegister, onSwitchForm }) {
   }, []);
 
   const handleGoogleRegister = () => {
-    window.location.href = `${process.env.REACT_APP_API_URL}/oauth2/authorization/google`;
+    const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+    window.location.href = `${API_URL}/oauth2/authorization/google`;
   };
 
   const { theme } = useTheme();

@@ -4,6 +4,8 @@
 import i18n from "../i18n";
 import logger from "../utils/logger";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 const AI_STATISTICS_CONFIG = {
   model: "gpt-4o-mini", // Cost-effective for analytics
   maxTokens: 1000,
@@ -74,7 +76,7 @@ Keep responses professional but accessible. Focus on student mental health impac
 `;
 
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/ai/analyze-statistics`,
+      `${API_BASE_URL}/api/ai/analyze-statistics`,
       {
         method: "POST",
         headers: {
@@ -182,7 +184,7 @@ IMPORTANT:
 `;
 
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/ai/predict-trends`,
+      `${API_BASE_URL}/api/ai/predict-trends`,
       {
         method: "POST",
         headers: {
@@ -248,7 +250,7 @@ Format as JSON array.
 `;
 
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/ai/generate-recommendations`,
+      `${API_BASE_URL}/api/ai/generate-recommendations`,
       {
         method: "POST",
         headers: {
@@ -305,7 +307,7 @@ Tone: Professional, data-driven, action-oriented.
 `;
 
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/ai/executive-summary`,
+      `${API_BASE_URL}/api/ai/executive-summary`,
       {
         method: "POST",
         headers: {

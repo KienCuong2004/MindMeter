@@ -54,8 +54,9 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
     }
     setLoading(true);
     try {
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
       const res = await authFetch(
-        `${process.env.REACT_APP_API_URL}/api/auth/login`,
+        `${API_URL}/api/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -107,7 +108,8 @@ function LoginForm({ onLogin, onSwitchForm, onForgotPassword }) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_API_URL}/oauth2/authorization/google`;
+    const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+    window.location.href = `${API_URL}/oauth2/authorization/google`;
   };
 
   const requiredErrors = Object.values(fieldError).filter((e) =>
