@@ -114,11 +114,27 @@ const MessagingPage = () => {
 
   const handleSelectConversation = (conversation) => {
     setSelectedConversation(conversation);
-    // Không refresh unread count ngay lập tức để tránh rate limit
-    // Sẽ được refresh tự động qua interval
+    // Optimistically update unread count if this conversation has unread messages
+    if (conversation.unreadCount > 0) {
+      setUnreadCount((prev) => Math.max(0, prev - conversation.unreadCount));
+      // Also update the conversation in the list to remove unread badge
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.otherUserId === conversation.otherUserId
+            ? { ...conv, unreadCount: 0 }
+            : conv
+        )
+      );
+    }
     // Prevent page scroll when selecting conversation
     window.scrollTo(0, 0);
   };
+
+  const handleConversationRead = useCallback(() => {
+    // Refresh both conversations and unread count when conversation is marked as read
+    loadConversations();
+    loadUnreadCount();
+  }, [loadConversations, loadUnreadCount]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -248,7 +264,7 @@ const MessagingPage = () => {
                   otherUserId={selectedConversation.otherUserId}
                   otherUserName={selectedConversation.otherUserName}
                   otherUserAvatarUrl={selectedConversation.otherUserAvatarUrl}
-                  onConversationRead={loadConversations}
+                  onConversationRead={handleConversationRead}
                 />
               ) : (
                 <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400">
