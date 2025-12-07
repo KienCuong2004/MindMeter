@@ -18,7 +18,7 @@ public class ContentModerationService {
         // Buồi và variants
         "buồi", "buoi", "dau buoi", "daubuoi", "caidaubuoi", "nhucaidaubuoi", 
         "dau boi", "bòi", "dauboi", "caidauboi", "đầu bòy", "đầu bùi", 
-        "dau boy", "dauboy", "caidauboy", "b`",
+        "dau boy", "dauboy", "caidauboy",
         
         // Cặc và variants
         "cặc", "cak", "kak", "kac", "cac", "concak", "nungcak", "bucak", 
@@ -265,6 +265,10 @@ public class ContentModerationService {
         "chết mịa", "chết mja", "chết mịe", "chết mie", "chet mia", "chet mie", 
         "chet mja", "chet mje", "thấy mẹ", "thấy mịe", "thấy mịa", "thay me", 
         "thay mie", "thay mia", "tổ cha", "bà cha mày", "cmn", "cmnl",
+        "con mẹ", "con me", "con mẹ mày", "con me may", "con mẹ này", "con me nay",
+        "con mẹ nó", "con me no", "con mẹ nó mày", "con me no may", "con mẹ mày này",
+        "con me may nay", "con mẹ anh", "con me anh", "con mẹ nhà mày", "con me nha may",
+        "con mẹ nhà anh", "con me nha anh", "con mẹ nhà nó", "con me nha no",
         
         // Tiên sư và variants
         "tiên sư nhà mày", "tiên sư bố", "tổ sư", "tổ sư nhà mày", "tổ sư bố",
@@ -504,26 +508,125 @@ public class ContentModerationService {
     ));
 
     // Pattern để phát hiện từ ngữ vi phạm (case-insensitive, có dấu/không dấu)
+    private static final Pattern PROFANITY_PATTERN = createPattern(PROFANITY_WORDS);
     private static final Pattern RACIST_PATTERN = createPattern(RACIST_WORDS);
+    
+    // Pattern cho nội dung không dấu (để phát hiện từ không dấu)
+    private static final Pattern PROFANITY_PATTERN_NO_DIACRITICS = createPatternNoDiacritics(PROFANITY_WORDS);
 
     /**
-     * Tạo pattern từ set các từ
+     * Tạo pattern từ set các từ với word boundaries
+     * Hỗ trợ cả từ đơn và cụm từ có khoảng trắng
      */
     private static Pattern createPattern(Set<String> words) {
+        StringBuilder singleWords = new StringBuilder();
+        StringBuilder multiWords = new StringBuilder();
+        
+        boolean firstSingle = true;
+        boolean firstMulti = true;
+        
+        for (String word : words) {
+            // Tách từ đơn và cụm từ (có khoảng trắng)
+            if (word.contains(" ")) {
+                // Cụm từ: không dùng \b ở giữa, chỉ ở đầu và cuối
+                if (!firstMulti) {
+                    multiWords.append("|");
+                }
+                multiWords.append("\\b").append(Pattern.quote(word)).append("\\b");
+                firstMulti = false;
+            } else {
+                // Từ đơn: dùng \b ở cả đầu và cuối
+                if (!firstSingle) {
+                    singleWords.append("|");
+                }
+                singleWords.append(Pattern.quote(word));
+                firstSingle = false;
+            }
+        }
+        
         StringBuilder patternBuilder = new StringBuilder();
         patternBuilder.append("(?i)"); // Case-insensitive
-        patternBuilder.append("\\b(");
         
-        boolean first = true;
-        for (String word : words) {
-            if (!first) {
-                patternBuilder.append("|");
-            }
-            // Escape special regex characters
-            patternBuilder.append(Pattern.quote(word));
-            first = false;
+        // Kết hợp pattern cho từ đơn và cụm từ
+        if (singleWords.length() > 0 && multiWords.length() > 0) {
+            patternBuilder.append("(\\b(").append(singleWords).append(")\\b|").append(multiWords).append(")");
+        } else if (singleWords.length() > 0) {
+            patternBuilder.append("\\b(").append(singleWords).append(")\\b");
+        } else if (multiWords.length() > 0) {
+            patternBuilder.append(multiWords);
+        } else {
+            // Fallback nếu không có từ nào
+            patternBuilder.append("(?!.*)");
         }
-        patternBuilder.append(")\\b");
+        
+        return Pattern.compile(patternBuilder.toString());
+    }
+    
+    /**
+     * Tạo pattern từ set các từ không dấu (sau khi remove diacritics)
+     * Sử dụng để phát hiện từ không dấu trong nội dung
+     * Hỗ trợ cả từ đơn và cụm từ có khoảng trắng
+     */
+    private static Pattern createPatternNoDiacritics(Set<String> words) {
+        Set<String> wordsNoDiacritics = new HashSet<>();
+        for (String word : words) {
+            String wordNoDiacritics = word
+                .replace("à", "a").replace("á", "a").replace("ạ", "a").replace("ả", "a").replace("ã", "a")
+                .replace("â", "a").replace("ầ", "a").replace("ấ", "a").replace("ậ", "a").replace("ẩ", "a").replace("ẫ", "a")
+                .replace("ă", "a").replace("ằ", "a").replace("ắ", "a").replace("ặ", "a").replace("ẳ", "a").replace("ẵ", "a")
+                .replace("è", "e").replace("é", "e").replace("ẹ", "e").replace("ẻ", "e").replace("ẽ", "e")
+                .replace("ê", "e").replace("ề", "e").replace("ế", "e").replace("ệ", "e").replace("ể", "e").replace("ễ", "e")
+                .replace("ì", "i").replace("í", "i").replace("ị", "i").replace("ỉ", "i").replace("ĩ", "i")
+                .replace("ò", "o").replace("ó", "o").replace("ọ", "o").replace("ỏ", "o").replace("õ", "o")
+                .replace("ô", "o").replace("ồ", "o").replace("ố", "o").replace("ộ", "o").replace("ổ", "o").replace("ỗ", "o")
+                .replace("ơ", "o").replace("ờ", "o").replace("ớ", "o").replace("ợ", "o").replace("ở", "o").replace("ỡ", "o")
+                .replace("ù", "u").replace("ú", "u").replace("ụ", "u").replace("ủ", "u").replace("ũ", "u")
+                .replace("ư", "u").replace("ừ", "u").replace("ứ", "u").replace("ự", "u").replace("ử", "u").replace("ữ", "u")
+                .replace("ỳ", "y").replace("ý", "y").replace("ỵ", "y").replace("ỷ", "y").replace("ỹ", "y")
+                .replace("đ", "d")
+                .toLowerCase();
+            wordsNoDiacritics.add(wordNoDiacritics);
+        }
+        
+        StringBuilder singleWords = new StringBuilder();
+        StringBuilder multiWords = new StringBuilder();
+        
+        boolean firstSingle = true;
+        boolean firstMulti = true;
+        
+        for (String word : wordsNoDiacritics) {
+            // Tách từ đơn và cụm từ (có khoảng trắng)
+            if (word.contains(" ")) {
+                // Cụm từ: không dùng \b ở giữa, chỉ ở đầu và cuối
+                if (!firstMulti) {
+                    multiWords.append("|");
+                }
+                multiWords.append("\\b").append(Pattern.quote(word)).append("\\b");
+                firstMulti = false;
+            } else {
+                // Từ đơn: dùng \b ở cả đầu và cuối
+                if (!firstSingle) {
+                    singleWords.append("|");
+                }
+                singleWords.append(Pattern.quote(word));
+                firstSingle = false;
+            }
+        }
+        
+        StringBuilder patternBuilder = new StringBuilder();
+        patternBuilder.append("(?i)"); // Case-insensitive
+        
+        // Kết hợp pattern cho từ đơn và cụm từ
+        if (singleWords.length() > 0 && multiWords.length() > 0) {
+            patternBuilder.append("(\\b(").append(singleWords).append(")\\b|").append(multiWords).append(")");
+        } else if (singleWords.length() > 0) {
+            patternBuilder.append("\\b(").append(singleWords).append(")\\b");
+        } else if (multiWords.length() > 0) {
+            patternBuilder.append(multiWords);
+        } else {
+            // Fallback nếu không có từ nào
+            patternBuilder.append("(?!.*)");
+        }
         
         return Pattern.compile(patternBuilder.toString());
     }
@@ -628,42 +731,64 @@ public class ContentModerationService {
         List<String> detectedWords = new ArrayList<>();
         List<ViolationType> violations = new ArrayList<>();
 
-        // Kiểm tra thô tục, tục tĩu - kiểm tra cả có dấu và không dấu
-        boolean hasProfanity = false;
-        for (String word : PROFANITY_WORDS) {
-            String wordLower = word.toLowerCase();
-            String wordWithoutDiacritics = removeVietnameseDiacritics(wordLower);
-            
-            // Kiểm tra trong nội dung có dấu
-            if (normalizedContent.contains(wordLower)) {
-                log.debug("Content moderation: Detected profanity word '{}' in content", word);
-                hasProfanity = true;
-                if (!detectedWords.contains(word)) {
-                    detectedWords.add(word);
-                }
-            }
-            // Kiểm tra trong nội dung không dấu (nếu chưa phát hiện)
-            else if (contentWithoutDiacritics.contains(wordWithoutDiacritics)) {
-                log.debug("Content moderation: Detected profanity word '{}' (without diacritics) in content", word);
-                hasProfanity = true;
-                if (!detectedWords.contains(word)) {
-                    detectedWords.add(word);
-                }
+        // Kiểm tra thô tục, tục tĩu - sử dụng pattern với word boundaries để tránh false positive
+        java.util.regex.Matcher profanityMatcher = PROFANITY_PATTERN.matcher(normalizedContent);
+        boolean hasProfanity = profanityMatcher.find();
+        
+        // Nếu không tìm thấy với pattern có dấu, kiểm tra với pattern không dấu
+        if (!hasProfanity) {
+            java.util.regex.Matcher profanityMatcherNoDiacritics = PROFANITY_PATTERN_NO_DIACRITICS.matcher(contentWithoutDiacritics);
+            hasProfanity = profanityMatcherNoDiacritics.find();
+            if (hasProfanity) {
+                profanityMatcher = profanityMatcherNoDiacritics;
             }
         }
         
         if (hasProfanity) {
             violations.add(ViolationType.PROFANITY);
+            // Tìm tất cả các từ vi phạm được phát hiện
+            profanityMatcher.reset();
+            while (profanityMatcher.find()) {
+                // Lấy toàn bộ text được match (group 0)
+                String matchedText = profanityMatcher.group(0).toLowerCase().trim();
+                // Tìm từ gốc tương ứng trong PROFANITY_WORDS
+                for (String word : PROFANITY_WORDS) {
+                    String wordLower = word.toLowerCase();
+                    String wordWithoutDiacritics = removeVietnameseDiacritics(wordLower);
+                    // So sánh với từ gốc (có dấu hoặc không dấu)
+                    if (matchedText.equals(wordLower) || matchedText.equals(wordWithoutDiacritics)) {
+                        if (!detectedWords.contains(word)) {
+                            detectedWords.add(word);
+                            log.debug("Content moderation: Detected profanity word '{}' in content (matched: '{}')", word, matchedText);
+                        }
+                        break;
+                    }
+                }
+            }
         }
 
         // Kiểm tra phân biệt chủng tộc (cần kiểm tra context kỹ hơn)
-        if (RACIST_PATTERN.matcher(normalizedContent).find()) {
+        java.util.regex.Matcher racistMatcher = RACIST_PATTERN.matcher(normalizedContent);
+        if (racistMatcher.find()) {
+            // Tạo matcher mới để kiểm tra context (vì matcher hiện tại đã được sử dụng)
+            java.util.regex.Matcher contextMatcher = RACIST_PATTERN.matcher(normalizedContent);
             // Kiểm tra context để tránh false positive
-            if (isRacistContext(normalizedContent)) {
+            if (isRacistContext(normalizedContent, contextMatcher)) {
                 violations.add(ViolationType.RACISM);
-                for (String word : RACIST_WORDS) {
-                    if (normalizedContent.contains(word.toLowerCase())) {
-                        detectedWords.add(word);
+                // Tìm tất cả các từ vi phạm được phát hiện
+                contextMatcher.reset();
+                while (contextMatcher.find()) {
+                    // Lấy toàn bộ text được match (group 0)
+                    String matchedText = contextMatcher.group(0).toLowerCase().trim();
+                    // Tìm từ gốc tương ứng trong RACIST_WORDS
+                    for (String word : RACIST_WORDS) {
+                        if (matchedText.equals(word.toLowerCase())) {
+                            if (!detectedWords.contains(word)) {
+                                detectedWords.add(word);
+                                log.debug("Content moderation: Detected racist word '{}' in content (matched: '{}')", word, matchedText);
+                            }
+                            break;
+                        }
                     }
                 }
             }
@@ -691,22 +816,70 @@ public class ContentModerationService {
      * Kiểm tra context để xác định có phải phân biệt chủng tộc không
      * (Tránh false positive khi nói về quốc gia một cách tích cực)
      */
-    private boolean isRacistContext(String content) {
-        // Các từ chỉ context tiêu cực
-        String[] negativeContext = {
+    private boolean isRacistContext(String content, java.util.regex.Matcher matcher) {
+        // Các từ chỉ context tiêu cực (tiếng Việt)
+        String[] negativeContextVi = {
             "ghét", "xấu", "tệ", "dở", "kém", "thấp kém", "hạ đẳng",
-            "không bằng", "thua", "kém cỏi", "đồ", "thằng", "con"
+            "không bằng", "thua", "kém cỏi", "đồ", "thằng", "con",
+            "xấu xa", "tệ hại", "dở tệ", "kém cỏi", "thấp hèn"
         };
-
-        for (String context : negativeContext) {
-            if (content.contains(context)) {
-                return true;
+        
+        // Các từ chỉ context tiêu cực (tiếng Anh)
+        String[] negativeContextEn = {
+            "hate", "bad", "worst", "stupid", "inferior", "low",
+            "disgusting", "terrible", "awful", "pathetic", "worthless"
+        };
+        
+        // Tìm từ racist được phát hiện
+        matcher.reset();
+        while (matcher.find()) {
+            // Lấy toàn bộ text được match (group 0)
+            String matchedWord = matcher.group(0).toLowerCase().trim();
+            int matchStart = matcher.start();
+            int matchEnd = matcher.end();
+            
+            // Kiểm tra context xung quanh từ được phát hiện (50 ký tự trước và sau)
+            int contextStart = Math.max(0, matchStart - 50);
+            int contextEnd = Math.min(content.length(), matchEnd + 50);
+            String context = content.substring(contextStart, contextEnd).toLowerCase();
+            
+            // Kiểm tra context tiêu cực tiếng Việt
+            for (String negativeWord : negativeContextVi) {
+                if (context.contains(negativeWord)) {
+                    log.debug("Content moderation: Negative context detected (Vietnamese): '{}' around word '{}'", 
+                        negativeWord, matchedWord);
+                    return true;
+                }
+            }
+            
+            // Kiểm tra context tiêu cực tiếng Anh
+            for (String negativeWord : negativeContextEn) {
+                if (context.contains(negativeWord)) {
+                    log.debug("Content moderation: Negative context detected (English): '{}' around word '{}'", 
+                        negativeWord, matchedWord);
+                    return true;
+                }
+            }
+            
+            // Kiểm tra các từ racist cụ thể (luôn flag bất kể context)
+            String[] alwaysFlagWords = {
+                "nigger", "ngger", "nigga", "ngga", "coon", "spic", "wetback",
+                "chink", "gook", "jap", "nip", "kike", "heeb", "yid",
+                "mọi rợ", "moi ro", "tàu khựa", "tau khua"
+            };
+            
+            for (String alwaysFlagWord : alwaysFlagWords) {
+                if (matchedWord.toLowerCase().contains(alwaysFlagWord.toLowerCase())) {
+                    log.debug("Content moderation: Always-flag racist word detected: '{}'", matchedWord);
+                    return true;
+                }
             }
         }
         
-        // Nếu không có context tiêu cực, có thể là false positive
-        // Nhưng vẫn đánh dấu để admin review
-        return true; // Conservative approach: flag để admin review
+        // Nếu không có context tiêu cực và không phải từ luôn flag, không đánh dấu
+        // (tránh false positive khi nói về quốc gia/dân tộc một cách tích cực)
+        log.debug("Content moderation: No negative context found, not flagging as racist");
+        return false;
     }
 
     /**
