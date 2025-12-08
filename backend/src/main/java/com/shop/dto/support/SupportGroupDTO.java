@@ -16,6 +16,7 @@ public class SupportGroupDTO {
     private String description;
     private Long creatorId;
     private String creatorName;
+    private String creatorAvatar;
     private SupportGroup.SupportGroupCategory category;
     private Integer maxMembers;
     private Integer memberCount;

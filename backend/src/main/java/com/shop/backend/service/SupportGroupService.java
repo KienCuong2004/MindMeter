@@ -252,8 +252,30 @@ public class SupportGroupService {
         dto.setId(group.getId());
         dto.setName(group.getName());
         dto.setDescription(group.getDescription());
-        dto.setCreatorId(group.getCreator().getId());
-        dto.setCreatorName(group.getCreator().getFirstName() + " " + group.getCreator().getLastName());
+        
+        try {
+            User creator = group.getCreator();
+            if (creator != null) {
+                dto.setCreatorId(creator.getId());
+                String firstName = creator.getFirstName() != null ? creator.getFirstName() : "";
+                String lastName = creator.getLastName() != null ? creator.getLastName() : "";
+                String fullName = (firstName + " " + lastName).trim();
+                if (fullName.isEmpty()) {
+                    fullName = creator.getEmail() != null ? creator.getEmail() : "Unknown User";
+                }
+                dto.setCreatorName(fullName);
+                dto.setCreatorAvatar(creator.getAvatarUrl());
+            } else {
+                dto.setCreatorId(null);
+                dto.setCreatorName("Unknown User");
+                dto.setCreatorAvatar(null);
+            }
+        } catch (Exception e) {
+            log.error("Error converting group to DTO: {}", e.getMessage());
+            dto.setCreatorId(null);
+            dto.setCreatorName("Unknown User");
+            dto.setCreatorAvatar(null);
+        }
         dto.setCategory(group.getCategory());
         dto.setMaxMembers(group.getMaxMembers());
         dto.setMemberCount(group.getMemberCount());

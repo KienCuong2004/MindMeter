@@ -216,14 +216,35 @@ public class ForumService {
         dto.setId(post.getId());
         dto.setTitle(post.getTitle());
         dto.setContent(post.getContent());
-        dto.setAuthorId(post.getAuthor().getId());
         
-        if (post.getIsAnonymous()) {
-            dto.setAuthorName("Anonymous");
+        try {
+            User author = post.getAuthor();
+            if (author != null) {
+                dto.setAuthorId(author.getId());
+                
+                if (post.getIsAnonymous()) {
+                    dto.setAuthorName("Anonymous");
+                    dto.setAuthorAvatar(null);
+                } else {
+                    String firstName = author.getFirstName() != null ? author.getFirstName() : "";
+                    String lastName = author.getLastName() != null ? author.getLastName() : "";
+                    String fullName = (firstName + " " + lastName).trim();
+                    if (fullName.isEmpty()) {
+                        fullName = author.getEmail() != null ? author.getEmail() : "Unknown User";
+                    }
+                    dto.setAuthorName(fullName);
+                    dto.setAuthorAvatar(author.getAvatarUrl());
+                }
+            } else {
+                dto.setAuthorId(null);
+                dto.setAuthorName("Unknown User");
+                dto.setAuthorAvatar(null);
+            }
+        } catch (Exception e) {
+            log.error("Error converting post to DTO: {}", e.getMessage());
+            dto.setAuthorId(null);
+            dto.setAuthorName("Unknown User");
             dto.setAuthorAvatar(null);
-        } else {
-            dto.setAuthorName(post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName());
-            dto.setAuthorAvatar(post.getAuthor().getAvatarUrl());
         }
         
         dto.setIsAnonymous(post.getIsAnonymous());
@@ -253,12 +274,30 @@ public class ForumService {
         dto.setPostId(comment.getPost().getId());
         dto.setUserId(comment.getUser().getId());
         
-        if (comment.getIsAnonymous()) {
-            dto.setUserName("Anonymous");
+        try {
+            if (comment.getIsAnonymous()) {
+                dto.setUserName("Anonymous");
+                dto.setUserAvatar(null);
+            } else {
+                User user = comment.getUser();
+                if (user != null) {
+                    String firstName = user.getFirstName() != null ? user.getFirstName() : "";
+                    String lastName = user.getLastName() != null ? user.getLastName() : "";
+                    String fullName = (firstName + " " + lastName).trim();
+                    if (fullName.isEmpty()) {
+                        fullName = user.getEmail() != null ? user.getEmail() : "Unknown User";
+                    }
+                    dto.setUserName(fullName);
+                    dto.setUserAvatar(user.getAvatarUrl());
+                } else {
+                    dto.setUserName("Unknown User");
+                    dto.setUserAvatar(null);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error converting comment to DTO: {}", e.getMessage());
+            dto.setUserName("Unknown User");
             dto.setUserAvatar(null);
-        } else {
-            dto.setUserName(comment.getUser().getFirstName() + " " + comment.getUser().getLastName());
-            dto.setUserAvatar(comment.getUser().getAvatarUrl());
         }
         
         if (comment.getParent() != null) {

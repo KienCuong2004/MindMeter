@@ -122,14 +122,35 @@ public class SuccessStoryService {
         dto.setId(story.getId());
         dto.setTitle(story.getTitle());
         dto.setContent(story.getContent());
-        dto.setAuthorId(story.getAuthor().getId());
         
-        if (story.getIsAnonymous()) {
-            dto.setAuthorName("Anonymous");
+        try {
+            User author = story.getAuthor();
+            if (author != null) {
+                dto.setAuthorId(author.getId());
+                
+                if (story.getIsAnonymous()) {
+                    dto.setAuthorName("Anonymous");
+                    dto.setAuthorAvatar(null);
+                } else {
+                    String firstName = author.getFirstName() != null ? author.getFirstName() : "";
+                    String lastName = author.getLastName() != null ? author.getLastName() : "";
+                    String fullName = (firstName + " " + lastName).trim();
+                    if (fullName.isEmpty()) {
+                        fullName = author.getEmail() != null ? author.getEmail() : "Unknown User";
+                    }
+                    dto.setAuthorName(fullName);
+                    dto.setAuthorAvatar(author.getAvatarUrl());
+                }
+            } else {
+                dto.setAuthorId(null);
+                dto.setAuthorName("Unknown User");
+                dto.setAuthorAvatar(null);
+            }
+        } catch (Exception e) {
+            log.error("Error converting story to DTO: {}", e.getMessage());
+            dto.setAuthorId(null);
+            dto.setAuthorName("Unknown User");
             dto.setAuthorAvatar(null);
-        } else {
-            dto.setAuthorName(story.getAuthor().getFirstName() + " " + story.getAuthor().getLastName());
-            dto.setAuthorAvatar(story.getAuthor().getAvatarUrl());
         }
         
         dto.setIsAnonymous(story.getIsAnonymous());

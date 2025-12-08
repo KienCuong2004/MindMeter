@@ -32,7 +32,12 @@ public class PeerMatchingService {
     private UserRepository userRepository;
     
     public Page<PeerMatchDTO> getUserMatches(Long userId, PeerMatch.MatchStatus status, Pageable pageable) {
-        Page<PeerMatch> matches = peerMatchRepository.findMatchesByUserId(userId, status, pageable);
+        Page<PeerMatch> matches;
+        if (status != null) {
+            matches = peerMatchRepository.findMatchesByUserId(userId, status, pageable);
+        } else {
+            matches = peerMatchRepository.findAllMatchesByUserId(userId, pageable);
+        }
         return matches.map(this::convertToDTO);
     }
     
@@ -228,12 +233,54 @@ public class PeerMatchingService {
     private PeerMatchDTO convertToDTO(PeerMatch match) {
         PeerMatchDTO dto = new PeerMatchDTO();
         dto.setId(match.getId());
-        dto.setUser1Id(match.getUser1().getId());
-        dto.setUser1Name(match.getUser1().getFirstName() + " " + match.getUser1().getLastName());
-        dto.setUser1Avatar(match.getUser1().getAvatarUrl());
-        dto.setUser2Id(match.getUser2().getId());
-        dto.setUser2Name(match.getUser2().getFirstName() + " " + match.getUser2().getLastName());
-        dto.setUser2Avatar(match.getUser2().getAvatarUrl());
+        
+        try {
+            User user1 = match.getUser1();
+            if (user1 != null) {
+                dto.setUser1Id(user1.getId());
+                String firstName1 = user1.getFirstName() != null ? user1.getFirstName() : "";
+                String lastName1 = user1.getLastName() != null ? user1.getLastName() : "";
+                String fullName1 = (firstName1 + " " + lastName1).trim();
+                if (fullName1.isEmpty()) {
+                    fullName1 = user1.getEmail() != null ? user1.getEmail() : "Unknown User";
+                }
+                dto.setUser1Name(fullName1);
+                dto.setUser1Avatar(user1.getAvatarUrl());
+            } else {
+                dto.setUser1Id(null);
+                dto.setUser1Name("Unknown User");
+                dto.setUser1Avatar(null);
+            }
+        } catch (Exception e) {
+            log.error("Error converting user1 in match to DTO: {}", e.getMessage());
+            dto.setUser1Id(null);
+            dto.setUser1Name("Unknown User");
+            dto.setUser1Avatar(null);
+        }
+        
+        try {
+            User user2 = match.getUser2();
+            if (user2 != null) {
+                dto.setUser2Id(user2.getId());
+                String firstName2 = user2.getFirstName() != null ? user2.getFirstName() : "";
+                String lastName2 = user2.getLastName() != null ? user2.getLastName() : "";
+                String fullName2 = (firstName2 + " " + lastName2).trim();
+                if (fullName2.isEmpty()) {
+                    fullName2 = user2.getEmail() != null ? user2.getEmail() : "Unknown User";
+                }
+                dto.setUser2Name(fullName2);
+                dto.setUser2Avatar(user2.getAvatarUrl());
+            } else {
+                dto.setUser2Id(null);
+                dto.setUser2Name("Unknown User");
+                dto.setUser2Avatar(null);
+            }
+        } catch (Exception e) {
+            log.error("Error converting user2 in match to DTO: {}", e.getMessage());
+            dto.setUser2Id(null);
+            dto.setUser2Name("Unknown User");
+            dto.setUser2Avatar(null);
+        }
         dto.setMatchType(match.getMatchType());
         dto.setMatchScore(match.getMatchScore());
         dto.setStatus(match.getStatus());
