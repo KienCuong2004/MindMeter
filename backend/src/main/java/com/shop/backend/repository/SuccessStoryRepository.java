@@ -3,6 +3,7 @@ package com.shop.backend.repository;
 import com.shop.backend.model.SuccessStory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,12 +15,15 @@ import java.util.Optional;
 public interface SuccessStoryRepository extends JpaRepository<SuccessStory, Long> {
     
     // Find approved stories
+    @EntityGraph(attributePaths = {"author"})
     Page<SuccessStory> findByIsApprovedTrueOrderByPublishedAtDesc(Pageable pageable);
     
     // Find featured stories
+    @EntityGraph(attributePaths = {"author"})
     Page<SuccessStory> findByIsFeaturedTrueAndIsApprovedTrueOrderByPublishedAtDesc(Pageable pageable);
     
     // Find stories by category
+    @EntityGraph(attributePaths = {"author"})
     Page<SuccessStory> findByCategoryAndIsApprovedTrueOrderByPublishedAtDesc(
         SuccessStory.StoryCategory category, Pageable pageable);
     
@@ -31,6 +35,7 @@ public interface SuccessStoryRepository extends JpaRepository<SuccessStory, Long
     Page<SuccessStory> findByIsApprovedFalseOrderByCreatedAtDesc(Pageable pageable);
     
     // Search stories by title or content
+    @EntityGraph(attributePaths = {"author"})
     @Query("SELECT s FROM SuccessStory s WHERE " +
            "(LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(s.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
@@ -44,6 +49,7 @@ public interface SuccessStoryRepository extends JpaRepository<SuccessStory, Long
     long countByIsApprovedFalse();
     
     // Find story by id and approved status
+    @EntityGraph(attributePaths = {"author"})
     Optional<SuccessStory> findByIdAndIsApprovedTrue(Long id);
 }
 

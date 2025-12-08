@@ -3,6 +3,7 @@ package com.shop.backend.repository;
 import com.shop.backend.model.ForumPost;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,9 +15,11 @@ import java.util.Optional;
 public interface ForumPostRepository extends JpaRepository<ForumPost, Long> {
     
     // Find active posts with pagination
+    @EntityGraph(attributePaths = {"author"})
     Page<ForumPost> findByStatusOrderByCreatedAtDesc(ForumPost.ForumPostStatus status, Pageable pageable);
     
     // Find posts by category
+    @EntityGraph(attributePaths = {"author"})
     Page<ForumPost> findByCategoryAndStatusOrderByCreatedAtDesc(
         ForumPost.ForumCategory category, ForumPost.ForumPostStatus status, Pageable pageable);
     
@@ -29,6 +32,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPost, Long> {
         Long authorId, ForumPost.ForumPostStatus status, Pageable pageable);
     
     // Search posts by title or content
+    @EntityGraph(attributePaths = {"author"})
     @Query("SELECT p FROM ForumPost p WHERE " +
            "(LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
@@ -43,6 +47,7 @@ public interface ForumPostRepository extends JpaRepository<ForumPost, Long> {
     long countByCategoryAndStatus(ForumPost.ForumCategory category, ForumPost.ForumPostStatus status);
     
     // Find post by id and status
+    @EntityGraph(attributePaths = {"author"})
     Optional<ForumPost> findByIdAndStatus(Long id, ForumPost.ForumPostStatus status);
 }
 
