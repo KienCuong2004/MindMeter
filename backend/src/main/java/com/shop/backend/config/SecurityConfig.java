@@ -69,6 +69,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/payment/**").permitAll() // Tất cả payment endpoints
                 .requestMatchers("/api/currency/**").permitAll() // Currency endpoints
                 .requestMatchers("/api/blog/**").permitAll() // Blog endpoints - public access
+                .requestMatchers("/api/forum/**").permitAll() // Forum endpoints - public access
+                .requestMatchers("/api/support-groups/**").permitAll() // Support groups endpoints - public access
+                .requestMatchers("/api/success-stories/**").permitAll() // Success stories endpoints - public access
+                .requestMatchers("/api/peer-matching/**").permitAll() // Peer matching endpoints - public access
                 .requestMatchers("/ws/**").permitAll() // WebSocket endpoints
                 .requestMatchers("/api/chatbot").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
