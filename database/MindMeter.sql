@@ -4021,6 +4021,196 @@ CREATE TABLE blog_reports (
 );
 
 -- ========================================
+-- 8. SOCIAL & COMMUNITY TABLES
+-- ========================================
+
+-- Forum posts table (discussion boards)
+CREATE TABLE forum_posts (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    author_id BIGINT NOT NULL,
+    category ENUM('GENERAL', 'SUPPORT', 'SUCCESS_STORY', 'QUESTION', 'DISCUSSION') DEFAULT 'GENERAL',
+    is_anonymous BOOLEAN DEFAULT FALSE,
+    is_pinned BOOLEAN DEFAULT FALSE,
+    view_count INT DEFAULT 0,
+    like_count INT DEFAULT 0,
+    comment_count INT DEFAULT 0,
+    status ENUM('active', 'closed', 'archived', 'deleted') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_author (author_id),
+    INDEX idx_category (category),
+    INDEX idx_status (status),
+    INDEX idx_created (created_at DESC),
+    INDEX idx_pinned (is_pinned, created_at DESC)
+);
+
+-- Forum comments table
+CREATE TABLE forum_comments (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    post_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    parent_id BIGINT NULL,
+    content TEXT NOT NULL,
+    is_anonymous BOOLEAN DEFAULT FALSE,
+    like_count INT DEFAULT 0,
+    is_flagged BOOLEAN DEFAULT FALSE,
+    violation_type VARCHAR(50) NULL,
+    violation_reason TEXT NULL,
+    status ENUM('active', 'deleted', 'hidden') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_id) REFERENCES forum_comments(id) ON DELETE CASCADE,
+    INDEX idx_post (post_id),
+    INDEX idx_user (user_id),
+    INDEX idx_parent (parent_id),
+    INDEX idx_status (status),
+    INDEX idx_created (created_at DESC)
+);
+
+-- Forum post likes table
+CREATE TABLE forum_post_likes (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    post_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES forum_posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_forum_like (post_id, user_id),
+    INDEX idx_post (post_id),
+    INDEX idx_user (user_id)
+);
+
+-- Forum comment likes table
+CREATE TABLE forum_comment_likes (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    comment_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (comment_id) REFERENCES forum_comments(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_forum_comment_like (comment_id, user_id),
+    INDEX idx_comment (comment_id),
+    INDEX idx_user (user_id)
+);
+
+-- Support groups table (nhóm hỗ trợ)
+CREATE TABLE support_groups (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    creator_id BIGINT NOT NULL,
+    category ENUM('DEPRESSION', 'ANXIETY', 'STRESS', 'GENERAL', 'PEER_SUPPORT', 'RECOVERY') DEFAULT 'GENERAL',
+    max_members INT DEFAULT 50,
+    is_public BOOLEAN DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT TRUE,
+    member_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_creator (creator_id),
+    INDEX idx_category (category),
+    INDEX idx_active (is_active),
+    INDEX idx_public (is_public)
+);
+
+-- Support group members table
+CREATE TABLE support_group_members (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    group_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    role ENUM('MEMBER', 'MODERATOR', 'ADMIN') DEFAULT 'MEMBER',
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (group_id) REFERENCES support_groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_group_member (group_id, user_id),
+    INDEX idx_group (group_id),
+    INDEX idx_user (user_id),
+    INDEX idx_active (is_active)
+);
+
+-- Peer support matching table
+CREATE TABLE peer_matches (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user1_id BIGINT NOT NULL,
+    user2_id BIGINT NOT NULL,
+    match_type ENUM('AUTO', 'MANUAL', 'REQUESTED') DEFAULT 'AUTO',
+    match_score DECIMAL(5,2) DEFAULT 0.00,
+    status ENUM('PENDING', 'ACCEPTED', 'REJECTED', 'ACTIVE', 'ENDED') DEFAULT 'PENDING',
+    matched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    accepted_at TIMESTAMP NULL,
+    ended_at TIMESTAMP NULL,
+    notes TEXT,
+    FOREIGN KEY (user1_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user2_id) REFERENCES users(id) ON DELETE CASCADE,
+    CHECK (user1_id != user2_id),
+    INDEX idx_user1 (user1_id),
+    INDEX idx_user2 (user2_id),
+    INDEX idx_status (status),
+    INDEX idx_matched (matched_at DESC)
+);
+
+-- Peer match preferences table
+CREATE TABLE peer_match_preferences (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL UNIQUE,
+    age_range_min INT DEFAULT 18,
+    age_range_max INT DEFAULT 30,
+    preferred_gender ENUM('MALE', 'FEMALE', 'OTHER', 'ANY') DEFAULT 'ANY',
+    preferred_language ENUM('vi', 'en', 'both') DEFAULT 'both',
+    interests TEXT,
+    matching_enabled BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user (user_id),
+    INDEX idx_enabled (matching_enabled)
+);
+
+-- Success stories table
+CREATE TABLE success_stories (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    author_id BIGINT NOT NULL,
+    is_anonymous BOOLEAN DEFAULT FALSE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    is_approved BOOLEAN DEFAULT FALSE,
+    view_count INT DEFAULT 0,
+    like_count INT DEFAULT 0,
+    share_count INT DEFAULT 0,
+    category ENUM('RECOVERY', 'TREATMENT', 'SUPPORT', 'LIFESTYLE', 'INSPIRATION') DEFAULT 'RECOVERY',
+    tags TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    published_at TIMESTAMP NULL,
+    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_author (author_id),
+    INDEX idx_approved (is_approved),
+    INDEX idx_featured (is_featured),
+    INDEX idx_category (category),
+    INDEX idx_published (published_at DESC)
+);
+
+-- Success story likes table
+CREATE TABLE success_story_likes (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    story_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (story_id) REFERENCES success_stories(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_story_like (story_id, user_id),
+    INDEX idx_story (story_id),
+    INDEX idx_user (user_id)
+);
+
+-- ========================================
 -- BLOG SAMPLE DATA
 -- ========================================
 
@@ -4420,6 +4610,154 @@ SET SQL_SAFE_UPDATES = 1;
 -- BLOG SYSTEM COMPLETE
 -- ========================================
 
+-- ========================================
+-- 9. SOCIAL & COMMUNITY SAMPLE DATA
+-- ========================================
+
+-- Insert sample forum posts
+INSERT INTO forum_posts (title, content, author_id, category, is_anonymous, is_pinned, view_count, like_count, comment_count, status, created_at) VALUES
+('Làm thế nào để vượt qua cảm giác cô đơn?', 'Tôi đang cảm thấy rất cô đơn và không biết làm thế nào để vượt qua. Có ai đã từng trải qua cảm giác này và có thể chia sẻ kinh nghiệm không?', 6, 'SUPPORT', FALSE, TRUE, 45, 12, 8, 'active', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+('Câu chuyện vượt qua trầm cảm của tôi', 'Tôi muốn chia sẻ hành trình vượt qua trầm cảm của mình. Hy vọng có thể giúp ích cho những ai đang gặp khó khăn tương tự.', 7, 'SUCCESS_STORY', FALSE, FALSE, 89, 25, 15, 'active', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+('Thiền định có thực sự giúp giảm lo âu không?', 'Tôi đã nghe nhiều người nói về thiền định nhưng chưa thử. Có ai đã thử và thấy hiệu quả không?', 8, 'QUESTION', FALSE, FALSE, 32, 7, 5, 'active', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+('Chia sẻ ẩn danh: Tôi đang rất mệt mỏi', 'Tôi không muốn ai biết danh tính nhưng cần chia sẻ. Tôi đang cảm thấy rất mệt mỏi và không có động lực làm gì cả.', 9, 'SUPPORT', TRUE, FALSE, 67, 18, 12, 'active', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+('Thảo luận về phương pháp điều trị trầm cảm', 'Chúng ta hãy cùng thảo luận về các phương pháp điều trị trầm cảm hiệu quả. Bạn đã thử phương pháp nào?', 10, 'DISCUSSION', FALSE, FALSE, 54, 14, 9, 'active', DATE_SUB(NOW(), INTERVAL 4 DAY)),
+('Làm sao để giúp bạn bè đang trầm cảm?', 'Bạn tôi đang có dấu hiệu trầm cảm nhưng không muốn nói chuyện. Tôi nên làm gì để giúp bạn ấy?', 6, 'QUESTION', FALSE, FALSE, 41, 10, 6, 'active', DATE_SUB(NOW(), INTERVAL 6 HOUR)),
+('Câu chuyện thành công: Từ trầm cảm nặng đến cuộc sống tích cực', 'Tôi đã từng ở đáy của trầm cảm nhưng giờ đây tôi đã tìm lại được niềm vui trong cuộc sống. Đây là câu chuyện của tôi.', 7, 'SUCCESS_STORY', FALSE, TRUE, 123, 42, 28, 'active', DATE_SUB(NOW(), INTERVAL 7 DAY)),
+('Chia sẻ ẩn danh: Tôi sợ phải đi khám tâm lý', 'Tôi biết mình cần giúp đỡ nhưng rất sợ phải đi khám. Có ai đã từng cảm thấy như vậy không?', 8, 'SUPPORT', TRUE, FALSE, 38, 9, 7, 'active', DATE_SUB(NOW(), INTERVAL 12 HOUR));
+
+-- Insert sample forum comments
+INSERT INTO forum_comments (post_id, user_id, parent_id, content, is_anonymous, like_count, status, created_at) VALUES
+(1, 7, NULL, 'Tôi cũng đã từng cảm thấy cô đơn. Điều giúp tôi là tham gia các hoạt động tình nguyện và kết nối với những người có cùng sở thích.', FALSE, 5, 'active', DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(1, 8, NULL, 'Bạn có thể thử tham gia các nhóm hỗ trợ hoặc tìm kiếm sự giúp đỡ từ chuyên gia. Đừng ngại chia sẻ cảm xúc của mình.', FALSE, 3, 'active', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(1, 9, 1, 'Cảm ơn bạn đã chia sẻ. Tôi sẽ thử tham gia hoạt động tình nguyện xem sao.', FALSE, 1, 'active', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(2, 6, NULL, 'Cảm ơn bạn đã chia sẻ câu chuyện. Điều này thực sự truyền cảm hứng cho tôi.', FALSE, 8, 'active', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(2, 8, NULL, 'Câu chuyện của bạn rất ý nghĩa. Tôi cũng đang trên hành trình tương tự.', FALSE, 4, 'active', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(3, 7, NULL, 'Thiền định đã giúp tôi rất nhiều trong việc quản lý lo âu. Bạn nên thử bắt đầu với 5-10 phút mỗi ngày.', FALSE, 6, 'active', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(3, 9, NULL, 'Tôi đã thử và thấy hiệu quả. Bạn có thể dùng app Headspace hoặc Calm để bắt đầu.', FALSE, 3, 'active', DATE_SUB(NOW(), INTERVAL 18 HOUR)),
+(4, 6, NULL, 'Bạn không đơn độc. Nhiều người đang trải qua cảm giác tương tự. Hãy nhớ rằng bạn xứng đáng được giúp đỡ.', FALSE, 7, 'active', DATE_SUB(NOW(), INTERVAL 20 HOUR)),
+(5, 7, NULL, 'Tôi đã thử liệu pháp nhận thức hành vi (CBT) và thấy rất hiệu quả. Bạn có thể tìm hiểu thêm về phương pháp này.', FALSE, 5, 'active', DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(6, 8, NULL, 'Hãy kiên nhẫn và cho bạn ấy thời gian. Quan trọng là bạn luôn ở đó khi bạn ấy sẵn sàng nói chuyện.', FALSE, 4, 'active', DATE_SUB(NOW(), INTERVAL 5 HOUR));
+
+-- Insert sample forum post likes
+INSERT INTO forum_post_likes (post_id, user_id) VALUES
+(1, 7), (1, 8), (1, 9), (1, 10),
+(2, 6), (2, 8), (2, 9), (2, 10),
+(3, 6), (3, 7), (3, 9),
+(4, 6), (4, 7), (4, 8), (4, 9), (4, 10),
+(5, 6), (5, 7), (5, 8), (5, 9),
+(6, 7), (6, 8), (6, 9),
+(7, 6), (7, 7), (7, 8), (7, 9), (7, 10),
+(8, 6), (8, 7), (8, 9);
+
+-- Insert sample forum comment likes
+INSERT INTO forum_comment_likes (comment_id, user_id) VALUES
+(1, 6), (1, 8), (1, 9), (1, 10),
+(2, 6), (2, 7), (2, 9),
+(4, 7), (4, 8), (4, 9), (4, 10),
+(6, 6), (6, 8), (6, 9), (6, 10);
+
+-- Update forum post counts
+SET SQL_SAFE_UPDATES = 0;
+UPDATE forum_posts SET 
+    like_count = (SELECT COUNT(*) FROM forum_post_likes WHERE post_id = forum_posts.id),
+    comment_count = (SELECT COUNT(*) FROM forum_comments WHERE post_id = forum_posts.id AND status = 'active');
+SET SQL_SAFE_UPDATES = 1;
+
+-- Insert sample support groups
+INSERT INTO support_groups (name, description, creator_id, category, max_members, is_public, is_active, member_count, created_at) VALUES
+('Nhóm hỗ trợ trầm cảm', 'Nhóm dành cho những người đang đối mặt với trầm cảm. Chúng ta cùng nhau chia sẻ và hỗ trợ lẫn nhau.', 11, 'DEPRESSION', 50, TRUE, TRUE, 8, DATE_SUB(NOW(), INTERVAL 10 DAY)),
+('Nhóm vượt qua lo âu', 'Nơi chia sẻ kinh nghiệm và phương pháp vượt qua lo âu, căng thẳng.', 12, 'ANXIETY', 40, TRUE, TRUE, 6, DATE_SUB(NOW(), INTERVAL 8 DAY)),
+('Nhóm hỗ trợ đồng đẳng', 'Nhóm kết nối những người có cùng hoàn cảnh để hỗ trợ lẫn nhau.', 11, 'PEER_SUPPORT', 30, TRUE, TRUE, 5, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+('Nhóm phục hồi và tái hòa nhập', 'Dành cho những người đang trong quá trình phục hồi và muốn tái hòa nhập cuộc sống.', 12, 'RECOVERY', 35, TRUE, TRUE, 4, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+('Nhóm quản lý căng thẳng', 'Chia sẻ các kỹ thuật và phương pháp quản lý căng thẳng hiệu quả.', 11, 'STRESS', 45, TRUE, TRUE, 7, DATE_SUB(NOW(), INTERVAL 7 DAY));
+
+-- Insert sample support group members
+INSERT INTO support_group_members (group_id, user_id, role, is_active, joined_at) VALUES
+-- Group 1: Nhóm hỗ trợ trầm cảm
+(1, 11, 'ADMIN', TRUE, DATE_SUB(NOW(), INTERVAL 10 DAY)),
+(1, 6, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 9 DAY)),
+(1, 7, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 8 DAY)),
+(1, 8, 'MODERATOR', TRUE, DATE_SUB(NOW(), INTERVAL 7 DAY)),
+(1, 9, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 6 DAY)),
+(1, 10, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(1, 13, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(1, 14, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+-- Group 2: Nhóm vượt qua lo âu
+(2, 12, 'ADMIN', TRUE, DATE_SUB(NOW(), INTERVAL 8 DAY)),
+(2, 6, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 7 DAY)),
+(2, 7, 'MODERATOR', TRUE, DATE_SUB(NOW(), INTERVAL 6 DAY)),
+(2, 8, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(2, 9, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(2, 15, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+-- Group 3: Nhóm hỗ trợ đồng đẳng
+(3, 11, 'ADMIN', TRUE, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(3, 6, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(3, 7, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(3, 8, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(3, 9, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+-- Group 4: Nhóm phục hồi
+(4, 12, 'ADMIN', TRUE, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(4, 6, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(4, 7, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(4, 8, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 12 HOUR)),
+-- Group 5: Nhóm quản lý căng thẳng
+(5, 11, 'ADMIN', TRUE, DATE_SUB(NOW(), INTERVAL 7 DAY)),
+(5, 6, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 6 DAY)),
+(5, 7, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(5, 8, 'MODERATOR', TRUE, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(5, 9, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(5, 10, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(5, 13, 'MEMBER', TRUE, DATE_SUB(NOW(), INTERVAL 1 DAY));
+
+-- Update support group member counts
+SET SQL_SAFE_UPDATES = 0;
+UPDATE support_groups SET 
+    member_count = (SELECT COUNT(*) FROM support_group_members WHERE group_id = support_groups.id AND is_active = TRUE);
+SET SQL_SAFE_UPDATES = 1;
+
+-- Insert sample peer match preferences
+INSERT INTO peer_match_preferences (user_id, age_range_min, age_range_max, preferred_gender, preferred_language, interests, matching_enabled, created_at) VALUES
+(6, 18, 25, 'ANY', 'both', 'Thiền định, Yoga, Đọc sách', TRUE, DATE_SUB(NOW(), INTERVAL 10 DAY)),
+(7, 20, 28, 'ANY', 'vi', 'Âm nhạc, Viết lách, Tình nguyện', TRUE, DATE_SUB(NOW(), INTERVAL 8 DAY)),
+(8, 18, 30, 'FEMALE', 'both', 'Thể thao, Du lịch, Nhiếp ảnh', TRUE, DATE_SUB(NOW(), INTERVAL 6 DAY)),
+(9, 22, 30, 'ANY', 'vi', 'Công nghệ, Lập trình, Game', TRUE, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(10, 20, 27, 'MALE', 'both', 'Học tập, Nghiên cứu, Khoa học', TRUE, DATE_SUB(NOW(), INTERVAL 4 DAY));
+
+-- Insert sample peer matches
+INSERT INTO peer_matches (user1_id, user2_id, match_type, match_score, status, matched_at, accepted_at) VALUES
+(6, 7, 'AUTO', 85.50, 'ACTIVE', DATE_SUB(NOW(), INTERVAL 7 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY)),
+(8, 9, 'AUTO', 78.25, 'ACTIVE', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(6, 10, 'MANUAL', 72.00, 'PENDING', DATE_SUB(NOW(), INTERVAL 3 DAY), NULL),
+(7, 8, 'AUTO', 80.75, 'ACCEPTED', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(9, 10, 'REQUESTED', 75.50, 'REJECTED', DATE_SUB(NOW(), INTERVAL 1 DAY), NULL);
+
+-- Insert sample success stories
+INSERT INTO success_stories (title, content, author_id, is_anonymous, is_featured, is_approved, view_count, like_count, share_count, category, tags, created_at, published_at) VALUES
+('Từ bóng tối đến ánh sáng: Hành trình vượt qua trầm cảm', 'Tôi đã từng ở trong bóng tối của trầm cảm trong suốt 2 năm. Nhưng với sự hỗ trợ từ gia đình, bạn bè và các chuyên gia, tôi đã tìm lại được ánh sáng. Hôm nay tôi muốn chia sẻ câu chuyện của mình để truyền cảm hứng cho những ai đang đấu tranh...', 7, FALSE, TRUE, TRUE, 156, 48, 12, 'RECOVERY', 'trầm cảm, phục hồi, hy vọng', DATE_SUB(NOW(), INTERVAL 15 DAY), DATE_SUB(NOW(), INTERVAL 14 DAY)),
+('Làm thế nào tôi học cách quản lý lo âu', 'Lo âu đã từng kiểm soát cuộc sống của tôi. Mỗi ngày đều là một cuộc chiến. Nhưng tôi đã không từ bỏ. Tôi đã thử nhiều phương pháp và cuối cùng tìm ra cách phù hợp với mình. Đây là câu chuyện của tôi...', 8, FALSE, TRUE, TRUE, 134, 35, 8, 'TREATMENT', 'lo âu, quản lý, CBT', DATE_SUB(NOW(), INTERVAL 12 DAY), DATE_SUB(NOW(), INTERVAL 11 DAY)),
+('Chia sẻ ẩn danh: Tôi đã tìm lại được chính mình', 'Tôi không muốn tiết lộ danh tính nhưng muốn chia sẻ rằng tôi đã tìm lại được chính mình sau một thời gian dài đấu tranh. Hy vọng câu chuyện này có thể giúp ích cho ai đó...', 9, TRUE, FALSE, TRUE, 98, 28, 5, 'INSPIRATION', 'phục hồi, hy vọng, ẩn danh', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 9 DAY)),
+('Hành trình từ căng thẳng đến bình yên', 'Công việc và cuộc sống đã khiến tôi căng thẳng đến mức không thể chịu đựng được. Nhưng tôi đã học cách tìm lại sự bình yên. Đây là những gì tôi đã làm...', 6, FALSE, FALSE, TRUE, 87, 22, 6, 'LIFESTYLE', 'căng thẳng, thiền định, yoga', DATE_SUB(NOW(), INTERVAL 8 DAY), DATE_SUB(NOW(), INTERVAL 7 DAY)),
+('Sự hỗ trợ từ cộng đồng đã thay đổi cuộc đời tôi', 'Tôi không thể tin rằng sự hỗ trợ từ cộng đồng có thể tạo ra sự khác biệt lớn đến vậy. Những người bạn tôi gặp ở đây đã giúp tôi vượt qua những khoảnh khắc khó khăn nhất...', 10, FALSE, FALSE, TRUE, 112, 31, 9, 'SUPPORT', 'cộng đồng, hỗ trợ, kết nối', DATE_SUB(NOW(), INTERVAL 6 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+('Từ tuyệt vọng đến hy vọng: Câu chuyện của tôi', 'Tôi đã từng nghĩ rằng mình sẽ không bao giờ vượt qua được. Nhưng tôi đã sai. Với sự kiên trì và hỗ trợ, tôi đã tìm lại được hy vọng. Đây là câu chuyện của tôi...', 7, TRUE, FALSE, TRUE, 76, 19, 4, 'RECOVERY', 'hy vọng, phục hồi, kiên trì', DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY));
+
+-- Insert sample success story likes
+INSERT INTO success_story_likes (story_id, user_id) VALUES
+(1, 6), (1, 8), (1, 9), (1, 10), (1, 11), (1, 12),
+(2, 6), (2, 7), (2, 9), (2, 10), (2, 11),
+(3, 6), (3, 7), (3, 8), (3, 10), (3, 11), (3, 12),
+(4, 7), (4, 8), (4, 9), (4, 10), (4, 11),
+(5, 6), (5, 7), (5, 8), (5, 9), (5, 11), (5, 12),
+(6, 6), (6, 8), (6, 9), (6, 10);
+
+-- Update success story counts
+SET SQL_SAFE_UPDATES = 0;
+UPDATE success_stories SET 
+    like_count = (SELECT COUNT(*) FROM success_story_likes WHERE story_id = success_stories.id);
+SET SQL_SAFE_UPDATES = 1;
+
+-- ========================================
+-- SOCIAL & COMMUNITY SYSTEM COMPLETE
+-- ========================================
 
 -- ========================================
 -- DATABASE OPTIMIZATION - MySQL Indexing
