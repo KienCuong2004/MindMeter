@@ -27,8 +27,14 @@ public class PeerMatchingController {
             @PathVariable Long userId,
             @RequestParam(required = false) PeerMatch.MatchStatus status,
             Pageable pageable) {
-        PeerMatch.MatchStatus matchStatus = status != null ? status : PeerMatch.MatchStatus.PENDING;
-        Page<PeerMatchDTO> matches = peerMatchingService.getUserMatches(userId, matchStatus, pageable);
+        // If status is null, get all matches (don't filter by status)
+        Page<PeerMatchDTO> matches;
+        if (status != null) {
+            matches = peerMatchingService.getUserMatches(userId, status, pageable);
+        } else {
+            // Get all matches regardless of status
+            matches = peerMatchingService.getUserMatches(userId, null, pageable);
+        }
         return ResponseEntity.ok(matches);
     }
     
