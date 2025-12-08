@@ -255,6 +255,7 @@ export default function DashboardHeader({
 
   const [showMenu, setShowMenu] = useState(false);
   const [showIntroMenu, setShowIntroMenu] = useState(false);
+  const [showCommunityMenu, setShowCommunityMenu] = useState(false);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -592,6 +593,79 @@ export default function DashboardHeader({
                   </div>
                 )}
               </div>
+              {/* Community menu - Mobile */}
+              <div className="relative">
+                <button
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                  onClick={() => setShowCommunityMenu(!showCommunityMenu)}
+                >
+                  <div className="flex items-center gap-3">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                    {t("navCommunity")}
+                  </div>
+                  <FaChevronDown
+                    className={`text-xs transition-transform ${
+                      showCommunityMenu ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {showCommunityMenu && (
+                  <div className="ml-8 mt-1 space-y-1">
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                      onClick={() => {
+                        navigate("/forum");
+                        setShowCommunityMenu(false);
+                        setShowMobileMenu(false);
+                      }}
+                    >
+                      {t("navForum")}
+                    </button>
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                      onClick={() => {
+                        navigate("/support-groups");
+                        setShowCommunityMenu(false);
+                        setShowMobileMenu(false);
+                      }}
+                    >
+                      {t("navSupportGroups")}
+                    </button>
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                      onClick={() => {
+                        navigate("/success-stories");
+                        setShowCommunityMenu(false);
+                        setShowMobileMenu(false);
+                      }}
+                    >
+                      {t("navSuccessStories")}
+                    </button>
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                      onClick={() => {
+                        navigate("/peer-matching");
+                        setShowCommunityMenu(false);
+                        setShowMobileMenu(false);
+                      }}
+                    >
+                      {t("navPeerMatching")}
+                    </button>
+                  </div>
+                )}
+              </div>
               {/* Danh sách bài test - chỉ hiển thị cho STUDENT và ANONYMOUS */}
               {(!user || user.role === "STUDENT" || isAnonymousUser(user)) && (
                 <button
@@ -921,6 +995,74 @@ export default function DashboardHeader({
                 {t("navBlog")}
               </span>
             )}
+            {/* Community menu */}
+            <div
+              className="relative"
+              onMouseEnter={() => setShowCommunityMenu(true)}
+              onMouseLeave={() => setShowCommunityMenu(false)}
+            >
+              <span
+                className={
+                  "cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1 text-gray-700 dark:text-gray-200 transition-colors whitespace-nowrap " +
+                  (showCommunityMenu ? "text-blue-600 dark:text-blue-400" : "")
+                }
+              >
+                {t("navCommunity")}{" "}
+                <FaChevronDown className="inline text-xs mt-0.5" />
+              </span>
+              {/* Dropdown Community */}
+              {showCommunityMenu && (
+                <>
+                  <div
+                    className="absolute left-0 top-full w-full h-3 z-40"
+                    onMouseEnter={() => setShowCommunityMenu(true)}
+                    onMouseLeave={() => setShowCommunityMenu(false)}
+                  />
+                  <div
+                    className="absolute left-0 top-[calc(100%+12px)] bg-white dark:bg-gray-800 shadow-lg rounded-lg py-2 min-w-[220px] z-50 border border-gray-200 dark:border-gray-700"
+                    onMouseEnter={() => setShowCommunityMenu(true)}
+                    onMouseLeave={() => setShowCommunityMenu(false)}
+                  >
+                    <div
+                      className="px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200 transition-colors"
+                      onClick={() => {
+                        navigate("/forum");
+                        setShowCommunityMenu(false);
+                      }}
+                    >
+                      {t("navForum")}
+                    </div>
+                    <div
+                      className="px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200 transition-colors"
+                      onClick={() => {
+                        navigate("/support-groups");
+                        setShowCommunityMenu(false);
+                      }}
+                    >
+                      {t("navSupportGroups")}
+                    </div>
+                    <div
+                      className="px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200 transition-colors"
+                      onClick={() => {
+                        navigate("/success-stories");
+                        setShowCommunityMenu(false);
+                      }}
+                    >
+                      {t("navSuccessStories")}
+                    </div>
+                    <div
+                      className="px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer text-gray-700 dark:text-gray-200 transition-colors"
+                      onClick={() => {
+                        navigate("/peer-matching");
+                        setShowCommunityMenu(false);
+                      }}
+                    >
+                      {t("navPeerMatching")}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
             <span
               className="cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 text-gray-700 dark:text-gray-200 transition-colors whitespace-nowrap"
               onClick={() => navigate("/contact")}

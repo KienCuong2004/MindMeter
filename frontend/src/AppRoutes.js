@@ -39,6 +39,16 @@ import SecurityPolicy from "./pages/SecurityPolicy";
 import ContactPage from "./pages/ContactPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import AccountLinkingNotification from "./components/AccountLinkingNotification";
+import ForumPage from "./pages/ForumPage";
+import ForumPostDetailPage from "./pages/ForumPostDetailPage";
+import CreateForumPostPage from "./pages/CreateForumPostPage";
+import SupportGroupsPage from "./pages/SupportGroupsPage";
+import SupportGroupDetailPage from "./pages/SupportGroupDetailPage";
+import CreateSupportGroupPage from "./pages/CreateSupportGroupPage";
+import PeerMatchingPage from "./pages/PeerMatchingPage";
+import SuccessStoriesPage from "./pages/SuccessStoriesPage";
+import SuccessStoryDetailPage from "./pages/SuccessStoryDetailPage";
+import CreateSuccessStoryPage from "./pages/CreateSuccessStoryPage";
 
 // Lazy load admin pages for better performance
 const UserManagementPage = lazy(() => import("./pages/UserManagementPage"));
@@ -289,6 +299,13 @@ export default function AppRoutes() {
     const anonymousToken = localStorage.getItem("anonymousToken");
 
     const publicPaths = [
+      "/forum",
+      "/forum/create",
+      "/support-groups",
+      "/support-groups/create",
+      "/success-stories",
+      "/success-stories/create",
+      "/peer-matching",
       "/privacy-policy",
       "/introduce",
       "/user-guide",
@@ -375,6 +392,14 @@ export default function AppRoutes() {
             !shouldAllowRestrictedPagesForAdminExpert &&
             !window.location.pathname.startsWith("/admin") &&
             !publicPaths.includes(window.location.pathname) &&
+            !window.location.pathname.startsWith("/forum") &&
+            !window.location.pathname.startsWith("/support-groups") &&
+            !window.location.pathname.startsWith("/success-stories") &&
+            !window.location.pathname.startsWith("/peer-matching") &&
+            !window.location.pathname.startsWith("/forum") &&
+            !window.location.pathname.startsWith("/support-groups") &&
+            !window.location.pathname.startsWith("/success-stories") &&
+            !window.location.pathname.startsWith("/peer-matching") &&
             !isBlogPostPath
           ) {
             navigate("/admin/dashboard", { replace: true });
@@ -414,6 +439,10 @@ export default function AppRoutes() {
               !isMessagingPath &&
               !isBlogEditPath &&
               !publicPaths.includes(window.location.pathname) &&
+              !window.location.pathname.startsWith("/forum") &&
+              !window.location.pathname.startsWith("/support-groups") &&
+              !window.location.pathname.startsWith("/success-stories") &&
+              !window.location.pathname.startsWith("/peer-matching") &&
               !isBlogPostPath)
           ) {
             navigate("/home", { replace: true });
@@ -477,6 +506,10 @@ export default function AppRoutes() {
         window.location.pathname !== "/" &&
         !publicPaths.includes(window.location.pathname) &&
         !isBlogPostPath &&
+        !window.location.pathname.startsWith("/forum") &&
+        !window.location.pathname.startsWith("/support-groups") &&
+        !window.location.pathname.startsWith("/success-stories") &&
+        !window.location.pathname.startsWith("/peer-matching") &&
         !window.location.pathname.startsWith("/login") &&
         !window.location.pathname.startsWith("/register") &&
         !window.location.pathname.startsWith("/forgot-password") &&
@@ -666,6 +699,28 @@ export default function AppRoutes() {
           />
           <Route path="/student/profile" element={<StudentProfilePage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/forum" element={<ForumPage />} />
+          <Route path="/forum/post/:id" element={<ForumPostDetailPage />} />
+          <Route path="/forum/create" element={<CreateForumPostPage />} />
+          <Route path="/support-groups" element={<SupportGroupsPage />} />
+          <Route
+            path="/support-groups/:id"
+            element={<SupportGroupDetailPage />}
+          />
+          <Route
+            path="/support-groups/create"
+            element={<CreateSupportGroupPage />}
+          />
+          <Route path="/peer-matching" element={<PeerMatchingPage />} />
+          <Route path="/success-stories" element={<SuccessStoriesPage />} />
+          <Route
+            path="/success-stories/:id"
+            element={<SuccessStoryDetailPage />}
+          />
+          <Route
+            path="/success-stories/create"
+            element={<CreateSuccessStoryPage />}
+          />
         </>
       ) : user.role === "ADMIN" ? (
         <>
@@ -942,6 +997,28 @@ export default function AppRoutes() {
           />
           <Route path="/messaging" element={<MessagingPage />} />
           <Route path="/messaging/:otherUserId" element={<MessagingPage />} />
+          <Route path="/forum" element={<ForumPage />} />
+          <Route path="/forum/post/:id" element={<ForumPostDetailPage />} />
+          <Route path="/forum/create" element={<CreateForumPostPage />} />
+          <Route path="/support-groups" element={<SupportGroupsPage />} />
+          <Route
+            path="/support-groups/:id"
+            element={<SupportGroupDetailPage />}
+          />
+          <Route
+            path="/support-groups/create"
+            element={<CreateSupportGroupPage />}
+          />
+          <Route path="/peer-matching" element={<PeerMatchingPage />} />
+          <Route path="/success-stories" element={<SuccessStoriesPage />} />
+          <Route
+            path="/success-stories/:id"
+            element={<SuccessStoryDetailPage />}
+          />
+          <Route
+            path="/success-stories/create"
+            element={<CreateSuccessStoryPage />}
+          />
         </>
       ) : (
         <>
@@ -1003,6 +1080,28 @@ export default function AppRoutes() {
           <Route
             path="/student/appointments"
             element={<StudentAppointmentsPage handleLogout={handleLogout} />}
+          />
+          <Route path="/forum" element={<ForumPage />} />
+          <Route path="/forum/post/:id" element={<ForumPostDetailPage />} />
+          <Route path="/forum/create" element={<CreateForumPostPage />} />
+          <Route path="/support-groups" element={<SupportGroupsPage />} />
+          <Route
+            path="/support-groups/:id"
+            element={<SupportGroupDetailPage />}
+          />
+          <Route
+            path="/support-groups/create"
+            element={<CreateSupportGroupPage />}
+          />
+          <Route path="/peer-matching" element={<PeerMatchingPage />} />
+          <Route path="/success-stories" element={<SuccessStoriesPage />} />
+          <Route
+            path="/success-stories/:id"
+            element={<SuccessStoryDetailPage />}
+          />
+          <Route
+            path="/success-stories/create"
+            element={<CreateSuccessStoryPage />}
           />
         </>
       )}
