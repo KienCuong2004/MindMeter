@@ -16,6 +16,7 @@ import ForumCommentSection from "../components/ForumCommentSection";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { useTheme } from "../hooks/useTheme";
+import { getCurrentUser, getCurrentToken } from "../services/anonymousService";
 import logger from "../utils/logger";
 
 const ForumPostDetailPage = () => {
@@ -30,24 +31,46 @@ const ForumPostDetailPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const currentUser = getCurrentUser();
+    const currentToken = getCurrentToken();
+
+    let userObj = null;
+
+    if (currentUser) {
+      userObj = {
+        ...currentUser,
+        id: currentUser.id || currentUser.userId,
+      };
+    } else if (currentToken) {
       try {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode(currentToken);
         const storedUser = localStorage.getItem("user");
         let userData = {};
         if (storedUser && storedUser !== "undefined") {
           userData = JSON.parse(storedUser);
         }
-        setUser({
-          email: decoded.sub,
+        userObj = {
+          email: decoded.sub || decoded.email || "",
           id: decoded.id || decoded.userId || userData.id,
           role: decoded.role,
-        });
+          firstName: decoded.firstName || userData.firstName || "",
+          lastName: decoded.lastName || userData.lastName || "",
+          avatarUrl:
+            decoded.avatarUrl || userData.avatarUrl || userData.avatar || null,
+          avatarTimestamp: userData.avatarTimestamp || null,
+          plan: decoded.plan || userData.plan || "FREE",
+          phone: decoded.phone || userData.phone || "",
+          anonymous: decoded.anonymous || userData.anonymous || false,
+        };
       } catch (e) {
         // Handle error
       }
     }
+
+    if (userObj) {
+      setUser(userObj);
+    }
+
     loadPost();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
