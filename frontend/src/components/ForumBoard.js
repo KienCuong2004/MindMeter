@@ -125,7 +125,7 @@ const ForumBoard = ({ category = null }) => {
       {posts.map((post) => (
         <div
           key={post.id}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg hover:scale-[1.01] transition-all duration-200 cursor-pointer"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 cursor-pointer"
           onClick={() => navigate(`/forum/post/${post.id}`)}
         >
           <div className="flex items-start justify-between mb-3">
