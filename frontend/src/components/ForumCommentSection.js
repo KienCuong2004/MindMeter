@@ -78,7 +78,30 @@ const ForumCommentSection = ({ postId, currentUser }) => {
     }).format(date);
   };
 
+  const findCommentById = (comments, id) => {
+    for (const comment of comments) {
+      if (comment.id === id) {
+        return comment;
+      }
+      if (comment.replies && comment.replies.length > 0) {
+        const found = findCommentById(comment.replies, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
   const renderComment = (comment, depth = 0) => {
+    const isReplyingToThis = replyingTo === comment.id;
+    const replyingToComment = replyingTo
+      ? findCommentById(comments, replyingTo)
+      : null;
+    const replyingToUserName = replyingToComment
+      ? replyingToComment.isAnonymous
+        ? t("forum.anonymous")
+        : replyingToComment.userName
+      : "";
+
     return (
       <div key={comment.id} className={`mb-4 ${depth > 0 ? "ml-8" : ""}`}>
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
@@ -137,6 +160,56 @@ const ForumCommentSection = ({ postId, currentUser }) => {
             </div>
           </div>
         </div>
+
+        {/* Reply form hiển thị dưới comment được reply */}
+        {isReplyingToThis && currentUser && (
+          <form
+            onSubmit={handleSubmit}
+            className="mt-3 ml-4 bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600"
+          >
+            <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+              {t("forum.replyingTo")} {replyingToUserName}
+              <button
+                type="button"
+                onClick={() => {
+                  setReplyingTo(null);
+                  setNewComment("");
+                }}
+                className="ml-2 text-blue-600 hover:text-blue-700"
+              >
+                {t("forum.cancel")}
+              </button>
+            </div>
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder={t("forum.writeComment")}
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows="3"
+              required
+              autoFocus
+            />
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <input
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                  className="rounded"
+                />
+                {t("forum.postAsAnonymous")}
+              </label>
+              <button
+                type="submit"
+                disabled={isSubmitting || !newComment.trim()}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? t("forum.posting") : t("forum.postComment")}
+              </button>
+            </div>
+          </form>
+        )}
+
         {comment.replies && comment.replies.length > 0 && (
           <div className="mt-2">
             {comment.replies.map((reply) => renderComment(reply, depth + 1))}
@@ -152,25 +225,14 @@ const ForumCommentSection = ({ postId, currentUser }) => {
         {t("forum.comments")} ({comments.length})
       </h3>
 
-      {currentUser && (
+      {/* Form comment mới chỉ hiển thị khi không đang reply comment nào */}
+      {currentUser && !replyingTo && (
         <form onSubmit={handleSubmit} className="mb-6">
-          {replyingTo && (
-            <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
-              {t("forum.replyingTo")} #{replyingTo}
-              <button
-                type="button"
-                onClick={() => setReplyingTo(null)}
-                className="ml-2 text-blue-600 hover:text-blue-700"
-              >
-                {t("forum.cancel")}
-              </button>
-            </div>
-          )}
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder={t("forum.writeComment")}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 mb-2"
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             rows="3"
             required
           />
