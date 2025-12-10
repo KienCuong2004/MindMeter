@@ -45,8 +45,11 @@ export async function retryWithBackoff(fn, options = {}) {
         delay = Math.min(delay * Math.pow(2, attempt), maxDelay);
       }
 
+      // Capture delay value to avoid unsafe reference in loop
+      const currentDelay = delay;
+
       // Wait before retrying
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, currentDelay));
     }
   }
 
