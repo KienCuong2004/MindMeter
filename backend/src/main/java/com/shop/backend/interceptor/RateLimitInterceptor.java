@@ -24,6 +24,13 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         String clientIP = getClientIP(request);
         String requestPath = request.getRequestURI();
         
+        // Bypass rate limiting for localhost in development
+        if ("127.0.0.1".equals(clientIP) || "localhost".equals(clientIP) || "0:0:0:0:0:0:0:1".equals(clientIP)) {
+            // Add rate limit headers but don't enforce limits
+            addRateLimitHeaders(response, requestPath, clientIP);
+            return true;
+        }
+        
         // Apply different rate limits based on endpoint
         boolean isRateLimited = false;
         
@@ -51,6 +58,13 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         // Record successful request
         securityMetricsService.recordRequest(requestPath, clientIP);
         
+        // Add rate limit headers
+        addRateLimitHeaders(response, requestPath, clientIP);
+        
+        return true;
+    }
+    
+    private void addRateLimitHeaders(HttpServletResponse response, String requestPath, String clientIP) {
         // Add rate limit headers based on endpoint
         String limitHeader = "100"; // default
         if (requestPath.startsWith("/api/auth/")) {
@@ -64,8 +78,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         response.setHeader("X-RateLimit-Limit", limitHeader);
         response.setHeader("X-RateLimit-Remaining", String.valueOf(rateLimitService.getRemainingRequests(clientIP)));
         response.setHeader("X-RateLimit-Reset", String.valueOf(rateLimitService.getResetTime(clientIP)));
-        
-        return true;
     }
     
     private String getClientIP(HttpServletRequest request) {

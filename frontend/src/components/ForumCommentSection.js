@@ -17,18 +17,25 @@ const ForumCommentSection = ({ postId, currentUser }) => {
   const loadComments = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await forumService.getComments(postId, {
         page: 0,
         size: 50,
       });
       setComments(response.content || []);
     } catch (err) {
-      setError(err.message);
-      logger.error("Error loading comments:", err);
+      // Only set error if it's not a rate limit error (rate limit is handled by retry)
+      if (err.response?.status !== 429) {
+        setError(err.message || t("forum.commentLoadError"));
+        logger.error("Error loading comments:", err);
+      } else {
+        // For rate limit, just log warning and keep existing comments
+        logger.warn("Rate limit exceeded while loading comments");
+      }
     } finally {
       setLoading(false);
     }
-  }, [postId]);
+  }, [postId, t]);
 
   useEffect(() => {
     loadComments();

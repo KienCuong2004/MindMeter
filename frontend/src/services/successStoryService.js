@@ -1,5 +1,6 @@
 import axios from "axios";
 import logger from "../utils/logger";
+import { retryWithBackoff } from "../utils/retryWithBackoff";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
@@ -30,11 +31,20 @@ class SuccessStoryService {
           localStorage.removeItem("token");
           window.location.href = "/login";
         } else if (error.response?.status === 429) {
-          logger.warn("Rate limit exceeded, retrying after delay...");
+          logger.warn("Rate limit exceeded");
         }
         return Promise.reject(error);
       }
     );
+  }
+
+  // Helper method to wrap API calls with retry logic
+  async _requestWithRetry(requestFn) {
+    return retryWithBackoff(requestFn, {
+      maxRetries: 3,
+      initialDelay: 1000,
+      maxDelay: 10000,
+    });
   }
 
   async getStories(params = {}) {

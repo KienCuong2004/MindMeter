@@ -1,7 +1,8 @@
 import { authFetch } from "../authFetch";
 import websocketService from "./websocketService";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
 
 class MessagingService {
   /**
@@ -38,7 +39,9 @@ class MessagingService {
    */
   static async getConversation(otherUserId) {
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/messaging/conversation/${otherUserId}`);
+      const response = await authFetch(
+        `${API_BASE_URL}/api/messaging/conversation/${otherUserId}`
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -57,7 +60,9 @@ class MessagingService {
    */
   static async getConversations() {
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/messaging/conversations`);
+      const response = await authFetch(
+        `${API_BASE_URL}/api/messaging/conversations`
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -76,9 +81,12 @@ class MessagingService {
    */
   static async markAsRead(messageId) {
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/messaging/message/${messageId}/read`, {
-        method: "PUT",
-      });
+      const response = await authFetch(
+        `${API_BASE_URL}/api/messaging/message/${messageId}/read`,
+        {
+          method: "PUT",
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -97,9 +105,12 @@ class MessagingService {
    */
   static async markConversationAsRead(otherUserId) {
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/messaging/conversation/${otherUserId}/read`, {
-        method: "PUT",
-      });
+      const response = await authFetch(
+        `${API_BASE_URL}/api/messaging/conversation/${otherUserId}/read`,
+        {
+          method: "PUT",
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -118,7 +129,14 @@ class MessagingService {
    */
   static async getUnreadCount() {
     try {
-      const response = await authFetch(`${API_BASE_URL}/api/messaging/unread/count`);
+      const response = await authFetch(
+        `${API_BASE_URL}/api/messaging/unread/count`
+      );
+
+      // Handle rate limit gracefully - return 0 instead of throwing
+      if (response.status === 429) {
+        return 0;
+      }
 
       if (!response.ok) {
         const error = await response.json();
@@ -128,7 +146,10 @@ class MessagingService {
       const data = await response.json();
       return data.count || 0;
     } catch (error) {
-      console.error("Get unread count error:", error);
+      // Only log if not a rate limit error
+      if (error.message && !error.message.includes("Rate limit")) {
+        console.error("Get unread count error:", error);
+      }
       return 0;
     }
   }
@@ -156,4 +177,3 @@ class MessagingService {
 }
 
 export default MessagingService;
-

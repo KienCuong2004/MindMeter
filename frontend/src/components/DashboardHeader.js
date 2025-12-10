@@ -279,20 +279,32 @@ export default function DashboardHeader({
     ) {
       setLoadingNoti(true);
       Promise.all([
-        authFetch("/api/advice/received").then((res) =>
-          Array.isArray(res)
-            ? res
-            : res && typeof res.json === "function"
-            ? res.json()
-            : []
-        ),
-        authFetch("/api/auth/student/announcements").then((res) =>
-          Array.isArray(res)
-            ? res
-            : res && typeof res.json === "function"
-            ? res.json()
-            : []
-        ),
+        authFetch("/api/advice/received")
+          .then((res) => {
+            // Handle rate limit gracefully
+            if (res.status === 429) {
+              return [];
+            }
+            return Array.isArray(res)
+              ? res
+              : res && typeof res.json === "function"
+              ? res.json()
+              : [];
+          })
+          .catch(() => []), // Return empty array on error
+        authFetch("/api/auth/student/announcements")
+          .then((res) => {
+            // Handle rate limit gracefully
+            if (res.status === 429) {
+              return [];
+            }
+            return Array.isArray(res)
+              ? res
+              : res && typeof res.json === "function"
+              ? res.json()
+              : [];
+          })
+          .catch(() => []), // Return empty array on error
       ])
         .then(([adviceData, systemData]) => {
           const adviceArr = Array.isArray(adviceData) ? adviceData : [];
@@ -313,13 +325,18 @@ export default function DashboardHeader({
   useEffect(() => {
     if (user && user.role === "STUDENT" && !isAnonymousUser(user)) {
       authFetch("/api/advice/received")
-        .then((res) =>
-          Array.isArray(res)
+        .then((res) => {
+          // Handle rate limit gracefully
+          if (res.status === 429) {
+            return [];
+          }
+          return Array.isArray(res)
             ? res
             : res && typeof res.json === "function"
             ? res.json()
-            : []
-        )
+            : [];
+        })
+        .catch(() => []) // Return empty array on error
         .then((data) => {
           const adviceArr = Array.isArray(data) ? data : [];
           // Chuẩn hóa adviceArr để lấy đúng isRead

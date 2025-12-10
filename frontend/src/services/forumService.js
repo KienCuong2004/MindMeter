@@ -1,5 +1,6 @@
 import axios from "axios";
 import logger from "../utils/logger";
+import { retryWithBackoff } from "../utils/retryWithBackoff";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
@@ -34,12 +35,20 @@ class ForumService {
           localStorage.removeItem("token");
           window.location.href = "/login";
         } else if (error.response?.status === 429) {
-          logger.warn("Rate limit exceeded, retrying after delay...");
-          // Don't throw for rate limit, let the component handle it
+          logger.warn("Rate limit exceeded");
         }
         return Promise.reject(error);
       }
     );
+  }
+
+  // Helper method to wrap API calls with retry logic
+  async _requestWithRetry(requestFn) {
+    return retryWithBackoff(requestFn, {
+      maxRetries: 3,
+      initialDelay: 1000,
+      maxDelay: 10000,
+    });
   }
 
   // Get all forum posts
@@ -109,12 +118,17 @@ class ForumService {
   // Get comments for a post
   async getComments(postId, params = {}) {
     try {
-      const response = await this.api.get(`/posts/${postId}/comments`, {
-        params,
+      return await this._requestWithRetry(async () => {
+        const response = await this.api.get(`/posts/${postId}/comments`, {
+          params,
+        });
+        return response.data;
       });
-      return response.data;
     } catch (error) {
-      logger.error("Error fetching comments:", error);
+      // Only log if not a rate limit error (rate limit errors are expected and handled)
+      if (error.response?.status !== 429) {
+        logger.error("Error fetching comments:", error);
+      }
       throw error;
     }
   }
