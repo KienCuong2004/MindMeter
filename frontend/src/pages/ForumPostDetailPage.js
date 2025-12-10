@@ -168,7 +168,7 @@ const ForumPostDetailPage = () => {
         }}
       />
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 pt-24 pb-8 max-w-4xl">
         <button
           onClick={() => navigate("/forum")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 mb-6"
