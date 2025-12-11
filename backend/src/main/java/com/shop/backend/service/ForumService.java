@@ -56,13 +56,18 @@ public class ForumService {
     public ForumPostDTO getPostById(Long id, String userEmail) {
         Optional<ForumPost> post = forumPostRepository.findByIdAndStatus(id, ForumPost.ForumPostStatus.active);
         if (post.isPresent()) {
-            // Increment view count
+            return convertToPostDTO(post.get(), userEmail);
+        }
+        return null;
+    }
+    
+    public void incrementViewCount(Long id) {
+        Optional<ForumPost> post = forumPostRepository.findByIdAndStatus(id, ForumPost.ForumPostStatus.active);
+        if (post.isPresent()) {
             ForumPost p = post.get();
             p.setViewCount(p.getViewCount() + 1);
             forumPostRepository.save(p);
-            return convertToPostDTO(p, userEmail);
         }
-        return null;
     }
     
     public ForumPostDTO createPost(ForumPostRequest request, String authorEmail) {

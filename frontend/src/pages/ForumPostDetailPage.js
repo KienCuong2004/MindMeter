@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { jwtDecode } from "jwt-decode";
@@ -29,6 +29,7 @@ const ForumPostDetailPage = () => {
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const viewRecordedRef = useRef(false);
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -71,6 +72,8 @@ const ForumPostDetailPage = () => {
       setUser(userObj);
     }
 
+    // Reset view recorded flag when post ID changes
+    viewRecordedRef.current = false;
     loadPost();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -80,6 +83,20 @@ const ForumPostDetailPage = () => {
       setLoading(true);
       const postData = await forumService.getPostById(id);
       setPost(postData);
+
+      // Record view count separately (only once per page load)
+      if (!viewRecordedRef.current) {
+        viewRecordedRef.current = true;
+        try {
+          await forumService.recordView(id);
+          // Reload post to get updated view count
+          const updatedPost = await forumService.getPostById(id);
+          setPost(updatedPost);
+        } catch (viewError) {
+          // Silently ignore view recording errors
+          logger.error("Error recording view:", viewError);
+        }
+      }
     } catch (err) {
       setError(err.message || t("forum.errorLoadingPost"));
       logger.error("Error loading post:", err);

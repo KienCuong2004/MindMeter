@@ -115,6 +115,16 @@ class ForumService {
     }
   }
 
+  // Record view for a post
+  async recordView(postId) {
+    try {
+      await this.api.post(`/posts/${postId}/view`);
+    } catch (error) {
+      logger.error("Error recording view:", error);
+      throw error;
+    }
+  }
+
   // Get comments for a post
   async getComments(postId, params = {}) {
     try {

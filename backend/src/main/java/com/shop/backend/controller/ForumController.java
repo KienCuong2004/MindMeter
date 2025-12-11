@@ -116,6 +116,12 @@ public class ForumController {
         return ResponseEntity.ok().build();
     }
     
+    @PostMapping("/posts/{postId}/view")
+    public ResponseEntity<Void> incrementViewCount(@PathVariable Long postId) {
+        forumService.incrementViewCount(postId);
+        return ResponseEntity.ok().build();
+    }
+    
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<ForumCommentDTO>> getComments(
             @PathVariable Long postId,
