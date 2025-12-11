@@ -30,5 +30,8 @@ public interface SupportGroupMemberRepository extends JpaRepository<SupportGroup
     
     // Find all active members of a group
     List<SupportGroupMember> findByGroupIdAndIsActiveTrue(Long groupId);
+    
+    // Find member by group and user (regardless of active status)
+    Optional<SupportGroupMember> findByGroupIdAndUserId(Long groupId, Long userId);
 }
 

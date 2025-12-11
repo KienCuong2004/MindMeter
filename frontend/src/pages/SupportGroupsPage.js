@@ -8,6 +8,7 @@ import supportGroupService from "../services/supportGroupService";
 import { useTheme } from "../hooks/useTheme";
 import { jwtDecode } from "jwt-decode";
 import { getCurrentUser, getCurrentToken } from "../services/anonymousService";
+import logger from "../utils/logger";
 
 const SupportGroupsPage = () => {
   const { t } = useTranslation();
@@ -76,18 +77,24 @@ const SupportGroupsPage = () => {
     }
     try {
       await supportGroupService.joinGroup(groupId);
-      loadGroups();
+      // Reload groups to update member count
+      await loadGroups();
+      // Navigate to group detail page
+      navigate(`/support-groups/${groupId}`);
     } catch (err) {
-      // Handle error
+      logger.error("Error joining group:", err);
+      // Silently handle error - user can see error on detail page if needed
     }
   };
 
   const handleLeaveGroup = async (groupId) => {
     try {
       await supportGroupService.leaveGroup(groupId);
-      loadGroups();
+      // Reload groups
+      await loadGroups();
     } catch (err) {
-      // Handle error
+      logger.error("Error leaving group:", err);
+      // Silently handle error
     }
   };
 

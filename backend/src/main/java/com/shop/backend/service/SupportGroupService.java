@@ -1,17 +1,21 @@
 package com.shop.backend.service;
 
 import com.shop.dto.support.SupportGroupDTO;
+import com.shop.dto.support.SupportGroupMemberDTO;
 import com.shop.dto.support.SupportGroupRequest;
 import com.shop.backend.model.*;
 import com.shop.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -130,25 +134,58 @@ public class SupportGroupService {
             throw new RuntimeException("Group is not active");
         }
         
-        // Check if already a member
-        Optional<SupportGroupMember> existingMember = supportGroupMemberRepository.findByGroupIdAndUserIdAndIsActiveTrue(groupId, user.getId());
-        if (existingMember.isPresent()) {
+        // Check if already an active member
+        Optional<SupportGroupMember> existingActiveMember = supportGroupMemberRepository.findByGroupIdAndUserIdAndIsActiveTrue(groupId, user.getId());
+        if (existingActiveMember.isPresent()) {
             throw new RuntimeException("User is already a member of this group");
         }
         
-        // Check if group is full
-        if (group.getMemberCount() >= group.getMaxMembers()) {
-            throw new RuntimeException("Group is full");
+        // Check if user was previously a member (inactive)
+        Optional<SupportGroupMember> existingInactiveMember = supportGroupMemberRepository.findByGroupIdAndUserId(groupId, user.getId());
+        SupportGroupMember member;
+        
+        if (existingInactiveMember.isPresent()) {
+            // Reactivate existing member
+            member = existingInactiveMember.get();
+            if (member.getIsActive()) {
+                // This shouldn't happen, but handle it gracefully
+                throw new RuntimeException("User is already a member of this group");
+            }
+            member.setIsActive(true);
+        } else {
+            // Check if group is full (only for new members)
+            if (group.getMemberCount() >= group.getMaxMembers()) {
+                throw new RuntimeException("Group is full");
+            }
+            
+            // Create new member
+            member = new SupportGroupMember();
+            member.setGroup(group);
+            member.setUser(user);
+            member.setRole(SupportGroupMember.MemberRole.MEMBER);
+            member.setIsActive(true);
         }
         
-        SupportGroupMember member = new SupportGroupMember();
-        member.setGroup(group);
-        member.setUser(user);
-        member.setRole(SupportGroupMember.MemberRole.MEMBER);
-        member.setIsActive(true);
-        supportGroupMemberRepository.save(member);
-        
-        updateGroupMemberCount(groupId);
+        try {
+            supportGroupMemberRepository.save(member);
+            updateGroupMemberCount(groupId);
+        } catch (DataIntegrityViolationException e) {
+            // Handle race condition: if duplicate entry occurs, try to find and reactivate
+            if (e.getMessage() != null && e.getMessage().contains("unique_group_member")) {
+                log.warn("Duplicate entry detected for group {} and user {}, attempting to reactivate", groupId, user.getId());
+                Optional<SupportGroupMember> existingMember = supportGroupMemberRepository.findByGroupIdAndUserId(groupId, user.getId());
+                if (existingMember.isPresent()) {
+                    member = existingMember.get();
+                    member.setIsActive(true);
+                    supportGroupMemberRepository.save(member);
+                    updateGroupMemberCount(groupId);
+                } else {
+                    throw new RuntimeException("User is already a member of this group");
+                }
+            } else {
+                throw e;
+            }
+        }
     }
     
     public void leaveGroup(Long groupId, String userEmail) {
@@ -299,6 +336,45 @@ public class SupportGroupService {
         }
         
         return dto;
+    }
+    
+    public List<SupportGroupMemberDTO> getGroupMembers(Long groupId) {
+        // Verify group exists and is active
+        Optional<SupportGroup> groupOpt = supportGroupRepository.findByIdAndIsActiveTrue(groupId);
+        if (groupOpt.isEmpty()) {
+            throw new RuntimeException("Group not found");
+        }
+        
+        List<SupportGroupMember> members = supportGroupMemberRepository.findByGroupIdAndIsActiveTrue(groupId);
+        
+        return members.stream().map(member -> {
+            SupportGroupMemberDTO dto = new SupportGroupMemberDTO();
+            dto.setId(member.getId());
+            
+            User user = member.getUser();
+            if (user != null) {
+                dto.setUserId(user.getId());
+                
+                // Get user name
+                String firstName = user.getFirstName() != null ? user.getFirstName() : "";
+                String lastName = user.getLastName() != null ? user.getLastName() : "";
+                String fullName = (firstName + " " + lastName).trim();
+                if (fullName.isEmpty()) {
+                    fullName = user.getEmail() != null ? user.getEmail() : "Unknown User";
+                }
+                dto.setUserName(fullName);
+                dto.setUserAvatar(user.getAvatarUrl());
+            } else {
+                dto.setUserId(null);
+                dto.setUserName("Unknown User");
+                dto.setUserAvatar(null);
+            }
+            
+            dto.setRole(member.getRole().name());
+            dto.setJoinedAt(member.getJoinedAt());
+            
+            return dto;
+        }).collect(Collectors.toList());
     }
     
     private void updateGroupMemberCount(Long groupId) {

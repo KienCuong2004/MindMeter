@@ -7,6 +7,7 @@ import supportGroupService from "../services/supportGroupService";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { useTheme } from "../hooks/useTheme";
+import { getCurrentUser, getCurrentToken } from "../services/anonymousService";
 import logger from "../utils/logger";
 
 const CreateSupportGroupPage = () => {
@@ -25,19 +26,34 @@ const CreateSupportGroupPage = () => {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const currentUser = getCurrentUser();
+    const currentToken = getCurrentToken();
+
+    if (currentUser) {
+      setUser({
+        ...currentUser,
+        id: currentUser.id || currentUser.userId,
+      });
+    } else if (currentToken) {
       try {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode(currentToken);
         const storedUser = localStorage.getItem("user");
         let userData = {};
         if (storedUser && storedUser !== "undefined") {
           userData = JSON.parse(storedUser);
         }
         setUser({
-          email: decoded.sub,
+          email: decoded.sub || decoded.email || "",
           id: decoded.id || decoded.userId || userData.id,
           role: decoded.role,
+          firstName: decoded.firstName || userData.firstName || "",
+          lastName: decoded.lastName || userData.lastName || "",
+          avatarUrl:
+            decoded.avatarUrl || userData.avatarUrl || userData.avatar || null,
+          avatarTimestamp: userData.avatarTimestamp || null,
+          plan: decoded.plan || userData.plan || "FREE",
+          phone: decoded.phone || userData.phone || "",
+          anonymous: decoded.anonymous || userData.anonymous || false,
         });
       } catch (e) {
         navigate("/login");

@@ -123,6 +123,16 @@ class SupportGroupService {
       throw error;
     }
   }
+
+  async getGroupMembers(groupId) {
+    try {
+      const response = await this.api.get(`/${groupId}/members`);
+      return response.data;
+    } catch (error) {
+      logger.error("Error fetching group members:", error);
+      throw error;
+    }
+  }
 }
 
 // eslint-disable-next-line import/no-anonymous-default-export

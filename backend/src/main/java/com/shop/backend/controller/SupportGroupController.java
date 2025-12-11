@@ -1,6 +1,7 @@
 package com.shop.backend.controller;
 
 import com.shop.dto.support.SupportGroupDTO;
+import com.shop.dto.support.SupportGroupMemberDTO;
 import com.shop.dto.support.SupportGroupRequest;
 import com.shop.backend.model.SupportGroup;
 import com.shop.backend.model.SupportGroupMember;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/support-groups")
@@ -116,11 +119,11 @@ public class SupportGroupController {
     }
     
     @PostMapping("/{id}/join")
-    public ResponseEntity<Void> joinGroup(
+    public ResponseEntity<?> joinGroup(
             @PathVariable Long id,
             Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body("Unauthorized");
         }
         
         String userEmail = authentication.getName();
@@ -128,16 +131,16 @@ public class SupportGroupController {
             supportGroupService.joinGroup(id, userEmail);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     
     @PostMapping("/{id}/leave")
-    public ResponseEntity<Void> leaveGroup(
+    public ResponseEntity<?> leaveGroup(
             @PathVariable Long id,
             Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(401).body("Unauthorized");
         }
         
         String userEmail = authentication.getName();
@@ -145,7 +148,7 @@ public class SupportGroupController {
             supportGroupService.leaveGroup(id, userEmail);
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     
@@ -181,6 +184,18 @@ public class SupportGroupController {
         try {
             supportGroupService.updateMemberRole(groupId, memberId, role, userEmail);
             return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @GetMapping("/{groupId}/members")
+    public ResponseEntity<List<SupportGroupMemberDTO>> getGroupMembers(
+            @PathVariable Long groupId,
+            Authentication authentication) {
+        try {
+            List<SupportGroupMemberDTO> members = supportGroupService.getGroupMembers(groupId);
+            return ResponseEntity.ok(members);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }

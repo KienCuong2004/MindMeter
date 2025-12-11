@@ -14,6 +14,7 @@ import supportGroupService from "../services/supportGroupService";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import { useTheme } from "../hooks/useTheme";
+import { getCurrentUser, getCurrentToken } from "../services/anonymousService";
 import logger from "../utils/logger";
 
 const SupportGroupDetailPage = () => {
@@ -22,25 +23,41 @@ const SupportGroupDetailPage = () => {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const [group, setGroup] = useState(null);
+  const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const currentUser = getCurrentUser();
+    const currentToken = getCurrentToken();
+
+    if (currentUser) {
+      setUser({
+        ...currentUser,
+        id: currentUser.id || currentUser.userId,
+      });
+    } else if (currentToken) {
       try {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode(currentToken);
         const storedUser = localStorage.getItem("user");
         let userData = {};
         if (storedUser && storedUser !== "undefined") {
           userData = JSON.parse(storedUser);
         }
         setUser({
-          email: decoded.sub,
+          email: decoded.sub || decoded.email || "",
           id: decoded.id || decoded.userId || userData.id,
           role: decoded.role,
+          firstName: decoded.firstName || userData.firstName || "",
+          lastName: decoded.lastName || userData.lastName || "",
+          avatarUrl:
+            decoded.avatarUrl || userData.avatarUrl || userData.avatar || null,
+          avatarTimestamp: userData.avatarTimestamp || null,
+          plan: decoded.plan || userData.plan || "FREE",
+          phone: decoded.phone || userData.phone || "",
+          anonymous: decoded.anonymous || userData.anonymous || false,
         });
       } catch (e) {
         // Handle error
@@ -55,6 +72,15 @@ const SupportGroupDetailPage = () => {
       setLoading(true);
       const groupData = await supportGroupService.getGroupById(id);
       setGroup(groupData);
+
+      // Load members
+      try {
+        const membersData = await supportGroupService.getGroupMembers(id);
+        setMembers(membersData || []);
+      } catch (err) {
+        logger.error("Error loading members:", err);
+        setMembers([]);
+      }
     } catch (err) {
       setError(err.message || t("supportGroups.errorLoadingGroup"));
       logger.error("Error loading group:", err);
@@ -70,7 +96,7 @@ const SupportGroupDetailPage = () => {
     }
     try {
       await supportGroupService.joinGroup(id);
-      loadGroup();
+      await loadGroup();
     } catch (err) {
       logger.error("Error joining group:", err);
     }
@@ -79,7 +105,7 @@ const SupportGroupDetailPage = () => {
   const handleLeave = async () => {
     try {
       await supportGroupService.leaveGroup(id);
-      loadGroup();
+      await loadGroup();
     } catch (err) {
       logger.error("Error leaving group:", err);
     }
@@ -236,6 +262,47 @@ const SupportGroupDetailPage = () => {
             )}
           </div>
         </div>
+
+        {/* Members List */}
+        {members.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+              {t("supportGroups.members")} ({members.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <img
+                    src={member.userAvatar || "/default-avatar.png"}
+                    alt={member.userName}
+                    className="w-10 h-10 rounded-full object-cover"
+                    onError={(e) => {
+                      e.target.src = "/default-avatar.png";
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {member.userName}
+                    </p>
+                    {member.role === "ADMIN" && (
+                      <p className="text-xs text-blue-600 dark:text-blue-400">
+                        {t("supportGroups.admin") || "Quản trị viên"}
+                      </p>
+                    )}
+                    {member.role === "MODERATOR" && (
+                      <p className="text-xs text-green-600 dark:text-green-400">
+                        {t("supportGroups.moderator") || "Điều hành viên"}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {showDeleteModal && (
