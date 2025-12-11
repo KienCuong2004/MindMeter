@@ -463,7 +463,7 @@ const BlogPostPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <BlogPostMeta post={post} />
 
       {/* Main Header */}
@@ -480,7 +480,7 @@ const BlogPostPage = () => {
       />
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 flex-1">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
           {/* Post Header */}
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">

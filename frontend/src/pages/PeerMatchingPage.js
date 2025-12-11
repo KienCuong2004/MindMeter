@@ -131,7 +131,7 @@ const PeerMatchingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col">
       <DashboardHeader
         logoIcon={<FaUserFriends />}
         logoText={t("peerMatching.title")}
@@ -145,7 +145,7 @@ const PeerMatchingPage = () => {
         }}
       />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-1">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6">
           {t("peerMatching.title")}
         </h1>

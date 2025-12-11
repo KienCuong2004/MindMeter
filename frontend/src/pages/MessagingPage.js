@@ -137,7 +137,7 @@ const MessagingPage = () => {
   }, [loadConversations, loadUnreadCount]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <DashboardHeader
         logoIcon={
           <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300" />
@@ -150,7 +150,7 @@ const MessagingPage = () => {
         messagingUnreadCount={unreadCount}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-8 pt-24">
+      <div className="max-w-7xl mx-auto px-4 py-8 pt-24 flex-1">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="flex h-[600px]">
             {/* Conversations List */}

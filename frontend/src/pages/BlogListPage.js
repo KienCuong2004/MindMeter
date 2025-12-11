@@ -24,7 +24,7 @@ const BlogListPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, setTheme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   // User state
   const [user, setUser] = useState(null);
@@ -470,7 +470,7 @@ const BlogListPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       {/* Dashboard Header */}
       <DashboardHeader
         logoIcon={
@@ -487,7 +487,7 @@ const BlogListPage = () => {
       />
 
       {/* Main Content */}
-      <div className="pt-20">
+      <div className="pt-20 flex-1">
         {/* Blog Header */}
         <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-4xl mx-auto px-4 py-6">

@@ -80,7 +80,7 @@ const CreateSuccessStoryPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col">
       <DashboardHeader
         logoIcon={<FaHeart />}
         logoText={t("successStories.shareStory")}
@@ -94,7 +94,7 @@ const CreateSuccessStoryPage = () => {
         }}
       />
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl flex-1">
         <button
           onClick={() => navigate("/success-stories")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 mb-6"
