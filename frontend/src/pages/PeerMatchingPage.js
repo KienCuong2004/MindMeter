@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { FaUserFriends, FaCheck, FaTimes } from "react-icons/fa";
+import { FaCheck, FaTimes, FaBrain } from "react-icons/fa";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
 import peerMatchingService from "../services/peerMatchingService";
@@ -133,7 +133,9 @@ const PeerMatchingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col">
       <DashboardHeader
-        logoIcon={<FaUserFriends />}
+        logoIcon={
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
+        }
         logoText={t("peerMatching.title")}
         user={user}
         theme={theme}

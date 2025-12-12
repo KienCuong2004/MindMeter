@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { jwtDecode } from "jwt-decode";
-import { FaHeart, FaEye, FaShare, FaLock, FaArrowLeft } from "react-icons/fa";
+import {
+  FaHeart,
+  FaEye,
+  FaShare,
+  FaLock,
+  FaArrowLeft,
+  FaBrain,
+} from "react-icons/fa";
 import successStoryService from "../services/successStoryService";
 import DashboardHeader from "../components/DashboardHeader";
 import FooterSection from "../components/FooterSection";
@@ -129,7 +136,9 @@ const SuccessStoryDetailPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col">
       <DashboardHeader
-        logoIcon={<FaHeart />}
+        logoIcon={
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
+        }
         logoText={t("successStories.title")}
         user={user}
         theme={theme}

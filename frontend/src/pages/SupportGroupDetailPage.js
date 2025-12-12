@@ -9,6 +9,7 @@ import {
   FaEdit,
   FaTrash,
   FaArrowLeft,
+  FaBrain,
 } from "react-icons/fa";
 import supportGroupService from "../services/supportGroupService";
 import DashboardHeader from "../components/DashboardHeader";
@@ -166,7 +167,9 @@ const SupportGroupDetailPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col">
       <DashboardHeader
-        logoIcon={<FaUsers />}
+        logoIcon={
+          <FaBrain className="w-8 h-8 text-indigo-500 dark:text-indigo-300 animate-pulse-slow" />
+        }
         logoText={t("supportGroups.title")}
         user={user}
         theme={theme}
