@@ -105,14 +105,23 @@ const ForumPostDetailPage = () => {
     }
   };
 
-  const handleLike = async () => {
+  const handleLike = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!user) {
       navigate("/login");
       return;
     }
     try {
       await forumService.toggleLikePost(id);
-      loadPost();
+      // Update state directly instead of reloading the entire post
+      setPost((prevPost) => ({
+        ...prevPost,
+        isLiked: !prevPost.isLiked,
+        likeCount: prevPost.isLiked
+          ? (prevPost.likeCount || 1) - 1
+          : (prevPost.likeCount || 0) + 1,
+      }));
     } catch (err) {
       logger.error("Error toggling like:", err);
     }
@@ -157,6 +166,7 @@ const ForumPostDetailPage = () => {
               {error || t("forum.postNotFound")}
             </p>
             <button
+              type="button"
               onClick={() => navigate("/forum")}
               className="mt-4 text-blue-600 hover:text-blue-700"
             >
@@ -187,6 +197,7 @@ const ForumPostDetailPage = () => {
 
       <div className="container mx-auto px-4 pt-24 pb-8 max-w-4xl flex-1">
         <button
+          type="button"
           onClick={() => navigate("/forum")}
           className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 mb-6"
         >
@@ -220,12 +231,14 @@ const ForumPostDetailPage = () => {
             {isAuthor && (
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => navigate(`/forum/edit/${id}`)}
                   className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600"
                 >
                   <FaEdit />
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowDeleteModal(true)}
                   className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600"
                 >
@@ -253,6 +266,7 @@ const ForumPostDetailPage = () => {
 
           <div className="flex items-center gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
+              type="button"
               onClick={handleLike}
               className={`flex items-center gap-2 ${
                 post.isLiked
@@ -287,12 +301,14 @@ const ForumPostDetailPage = () => {
               </p>
               <div className="flex gap-4">
                 <button
+                  type="button"
                   onClick={() => setShowDeleteModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   {t("forum.cancel")}
                 </button>
                 <button
+                  type="button"
                   onClick={handleDelete}
                   className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                 >
