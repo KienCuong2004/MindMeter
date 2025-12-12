@@ -727,6 +727,8 @@
   "adviceContentRequired": "Advice content is required!",
   "register": "Register",
   "login": "Login",
+  "loginShort": "Log",
+  "registerShort": "Reg",
   "loginNow": "Login Now!",
   "emailLabel": "Email",
   "emailPlaceholder": "Enter your email",

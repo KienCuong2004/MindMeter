@@ -1148,7 +1148,7 @@ export default function DashboardHeader({
                 }}
               >
                 <span className="hidden sm:inline">{t("login")}</span>
-                <span className="sm:hidden">ĐN</span>
+                <span className="sm:hidden">{t("loginShort")}</span>
               </button>
               <button
                 className="px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 xl:px-5 xl:py-2 rounded-full font-semibold border border-blue-600 text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-900 shadow-md hover:bg-blue-50 dark:hover:bg-gray-800 transition-all duration-200 text-xs sm:text-sm"
@@ -1159,7 +1159,7 @@ export default function DashboardHeader({
                 }}
               >
                 <span className="hidden sm:inline">{t("register")}</span>
-                <span className="sm:hidden">ĐK</span>
+                <span className="sm:hidden">{t("registerShort")}</span>
               </button>
             </div>
           ) : (

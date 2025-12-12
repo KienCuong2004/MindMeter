@@ -725,6 +725,8 @@
   "adviceContentRequired": "Nội dung không được để trống!",
   "register": "Đăng ký",
   "login": "Đăng nhập",
+  "loginShort": "ĐN",
+  "registerShort": "ĐK",
   "loginNow": "Đăng nhập ngay!",
   "emailLabel": "Email",
   "emailPlaceholder": "Nhập email của bạn",
