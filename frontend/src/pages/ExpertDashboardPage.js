@@ -63,12 +63,17 @@ export default function ExpertDashboardPage({
             // Ignore parse error
           }
         }
-        
+
         userObj.firstName = parsedUser?.firstName || decoded.firstName || "";
         userObj.lastName = parsedUser?.lastName || decoded.lastName || "";
         userObj.email = decoded.sub || decoded.email || "";
         // Ưu tiên avatarUrl từ localStorage (có thể mới hơn), sau đó từ token
-        userObj.avatarUrl = parsedUser?.avatarUrl || parsedUser?.avatar || decoded.avatarUrl || decoded.avatar || null;
+        userObj.avatarUrl =
+          parsedUser?.avatarUrl ||
+          parsedUser?.avatar ||
+          decoded.avatarUrl ||
+          decoded.avatar ||
+          null;
         userObj.role = decoded.role || "";
         userObj.plan = parsedUser?.plan || decoded.plan || "FREE";
         userObj.phone = parsedUser?.phone || decoded.phone || "";
@@ -177,21 +182,21 @@ export default function ExpertDashboardPage({
           }
         }}
       />
-      <div className="flex-grow pt-32 max-w-6xl mx-auto relative z-10">
+      <div className="flex-grow pt-20 sm:pt-24 md:pt-32 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto relative z-10">
         {/* Hero Section */}
-        <div className="text-center mb-12 relative">
+        <div className="text-center mb-8 sm:mb-12 relative">
           <div className="inline-block relative">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 bg-clip-text text-transparent mb-4 flex flex-col md:flex-row items-center justify-center gap-4 animate-fade-in">
-              <span className="text-5xl md:text-6xl animate-bounce-slow">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 bg-clip-text text-transparent mb-4 flex flex-col md:flex-row items-center justify-center gap-2 sm:gap-4 animate-fade-in">
+              <span className="text-4xl sm:text-5xl md:text-6xl animate-bounce-slow">
                 🎓
               </span>
-              <span className="whitespace-nowrap overflow-visible leading-tight">
+              <span className="leading-tight break-words text-center">
                 {t("expertDashboardTitle")}
               </span>
             </h1>
             <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-indigo-400 via-blue-400 to-purple-400 rounded-full animate-slide-in"></div>
           </div>
-          <div className="text-xl text-gray-600 dark:text-gray-300 italic mt-6 animate-fade-in-slow max-w-2xl mx-auto leading-relaxed">
+          <div className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 italic mt-4 sm:mt-6 animate-fade-in-slow max-w-2xl mx-auto leading-relaxed px-2">
             {t("expertDashboardSlogan")}
           </div>
 
@@ -209,7 +214,7 @@ export default function ExpertDashboardPage({
           </div>
         </div>
         {/* Stats Cards Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12">
           <StatCard
             icon={
               <FaVial className="text-indigo-400 dark:text-white text-4xl" />
@@ -284,19 +289,19 @@ export default function ExpertDashboardPage({
           />
         </div>
         {/* Charts Section */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:text-white dark:border dark:border-gray-700 rounded-3xl shadow-2xl dark:shadow-2xl p-8 mb-12 border border-white/20">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:text-white dark:border dark:border-gray-700 rounded-2xl sm:rounded-3xl shadow-2xl dark:shadow-2xl p-4 sm:p-6 md:p-8 mb-8 sm:mb-12 border border-white/20">
           <DepressionStatsChart testStats={testStats} t={t} />
         </div>
 
         {/* Recent Surveys Section */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:text-white dark:border dark:border-gray-700 rounded-3xl shadow-2xl dark:shadow-2xl p-8 border border-white/20">
-          <div className="flex items-center justify-between mb-6">
-            <div className="text-xl font-bold text-indigo-600 dark:text-indigo-300 flex items-center gap-2">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm dark:text-white dark:border dark:border-gray-700 rounded-2xl sm:rounded-3xl shadow-2xl dark:shadow-2xl p-4 sm:p-6 md:p-8 border border-white/20 overflow-x-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+            <div className="text-lg sm:text-xl font-bold text-indigo-600 dark:text-indigo-300 flex items-center gap-2">
               <FaChartPie className="text-indigo-500" />
               {t("recentSurveys")}
             </div>
             <button
-              className="text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm font-medium px-4 py-2 rounded-full bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all duration-200"
+              className="text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 text-xs sm:text-sm font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all duration-200"
               onClick={() => navigate("/expert/students")}
             >
               {t("seeAll")}
@@ -305,63 +310,67 @@ export default function ExpertDashboardPage({
           {stats.recentSurveys.length === 0 ? (
             <div className="text-gray-400">{t("noData")}</div>
           ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-bold text-blue-800 dark:text-blue-200 uppercase">
-                    {t("studentNameHeader")}
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-bold text-blue-800 dark:text-blue-200 uppercase">
-                    {t("emailHeader")}
-                  </th>
-                  <th className="px-4 py-2 text-center text-xs font-bold text-blue-800 dark:text-blue-200 uppercase">
-                    {t("scoreHeader")}
-                  </th>
-                  <th className="px-4 py-2 text-center text-xs font-bold text-blue-800 dark:text-blue-200 uppercase">
-                    {t("levelHeader")}
-                  </th>
-                  <th className="px-4 py-2 text-center text-xs font-bold text-blue-800 dark:text-blue-200 uppercase">
-                    {t("dateHeader")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.recentSurveys.map((s, idx) => (
-                  <tr
-                    key={idx}
-                    className="hover:bg-blue-50 dark:hover:bg-gray-800"
-                  >
-                    <td className="px-4 py-2 dark:text-white">
-                      {s.studentName}
-                    </td>
-                    <td className="px-4 py-2 dark:text-white">{s.email}</td>
-                    <td className="px-4 py-2 text-center dark:text-white">
-                      {s.totalScore}
-                    </td>
-                    <td className="px-4 py-2 text-center dark:text-white">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          s.severityLevel === "SEVERE"
-                            ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
-                            : s.severityLevel === "MODERATE"
-                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
-                            : s.severityLevel === "MILD"
-                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
-                            : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
-                        }`}
-                      >
-                        {t(s.severityLevel?.toLowerCase())}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 text-center dark:text-white">
-                      {s.testedAt
-                        ? new Date(s.testedAt).toLocaleDateString("vi-VN")
-                        : ""}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs font-bold text-blue-800 dark:text-blue-200 uppercase">
+                      {t("studentNameHeader")}
+                    </th>
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs font-bold text-blue-800 dark:text-blue-200 uppercase hidden sm:table-cell">
+                      {t("emailHeader")}
+                    </th>
+                    <th className="px-2 sm:px-4 py-2 text-center text-xs font-bold text-blue-800 dark:text-blue-200 uppercase">
+                      {t("scoreHeader")}
+                    </th>
+                    <th className="px-2 sm:px-4 py-2 text-center text-xs font-bold text-blue-800 dark:text-blue-200 uppercase">
+                      {t("levelHeader")}
+                    </th>
+                    <th className="px-2 sm:px-4 py-2 text-center text-xs font-bold text-blue-800 dark:text-blue-200 uppercase hidden md:table-cell">
+                      {t("dateHeader")}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {stats.recentSurveys.map((s, idx) => (
+                    <tr
+                      key={idx}
+                      className="hover:bg-blue-50 dark:hover:bg-gray-800"
+                    >
+                      <td className="px-2 sm:px-4 py-2 dark:text-white text-sm">
+                        {s.studentName}
+                      </td>
+                      <td className="px-2 sm:px-4 py-2 dark:text-white text-sm hidden sm:table-cell">
+                        {s.email}
+                      </td>
+                      <td className="px-2 sm:px-4 py-2 text-center dark:text-white text-sm">
+                        {s.totalScore}
+                      </td>
+                      <td className="px-2 sm:px-4 py-2 text-center dark:text-white">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-bold ${
+                            s.severityLevel === "SEVERE"
+                              ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+                              : s.severityLevel === "MODERATE"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200"
+                              : s.severityLevel === "MILD"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200"
+                              : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
+                          }`}
+                        >
+                          {t(s.severityLevel?.toLowerCase())}
+                        </span>
+                      </td>
+                      <td className="px-2 sm:px-4 py-2 text-center dark:text-white text-sm hidden md:table-cell">
+                        {s.testedAt
+                          ? new Date(s.testedAt).toLocaleDateString("vi-VN")
+                          : ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
